@@ -9,7 +9,6 @@ from bn254.ecp2 import generator as generator2
 from bn254.big import invmodp, rand
 from bn254.pair import e
 
-
 # --------------- Private key calculation ------------------------------
 
 #recipient side
@@ -30,8 +29,12 @@ R = r * generator1()
 
 #sender side
 
-P = e(K, R) 
+P = e(K, r*V) 
 
+
+P2 = k * v * generator2()
+
+print(P.toBytes(), '\n\n\n', P2)
 
 # --------------- end. --------------------------------------------------
 

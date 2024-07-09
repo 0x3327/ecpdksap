@@ -17,6 +17,13 @@ func GenG1KeyPair() (privKey fr.Element, pubKey bn254.G1Affine, _err error) {
 		return fr.Element{}, bn254.G1Affine{}, fmt.Errorf("error generating private key: %w", err)
 	}
 
+	pubKeyAff, _ := GenG1PubKey(privKey)
+
+	return privKey, pubKeyAff, nil
+}
+
+func GenG1PubKey(privKey fr.Element) (pubKey bn254.G1Affine, _err error) {
+
 	privKeyBigInt := new(big.Int) 
 	privKey.BigInt(privKeyBigInt)
 
@@ -28,7 +35,7 @@ func GenG1KeyPair() (privKey fr.Element, pubKey bn254.G1Affine, _err error) {
 	var pubKeyAff bn254.G1Affine
 	pubKeyAff.FromJacobian(&pubKeyJac)
 
-	return privKey, pubKeyAff, nil
+	return pubKeyAff, nil
 }
 
 func GenG2KeyPair() (privKey fr.Element, pubKey bn254.G2Affine, _err error) {
@@ -37,6 +44,13 @@ func GenG2KeyPair() (privKey fr.Element, pubKey bn254.G2Affine, _err error) {
 	if err != nil {
 		return fr.Element{}, bn254.G2Affine{}, fmt.Errorf("error generating private key: %w", err)
 	}
+
+	pubKeyAff, _ := GenG2PubKey(privKey)
+
+	return privKey, pubKeyAff, nil
+}
+
+func GenG2PubKey (privKey fr.Element) (pubKey bn254.G2Affine, _err error) {
 
 	privKeyBigInt := new(big.Int) 
 	privKey.BigInt(privKeyBigInt)
@@ -49,7 +63,7 @@ func GenG2KeyPair() (privKey fr.Element, pubKey bn254.G2Affine, _err error) {
 	var pubKeyAff bn254.G2Affine
 	pubKeyAff.FromJacobian(&pubKeyJac)
 
-	return privKey, pubKeyAff, nil
+	return pubKeyAff, nil
 }
 
 
