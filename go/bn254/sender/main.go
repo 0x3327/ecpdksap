@@ -4,64 +4,43 @@ import (
 	"ecpdksap-bn254/utils"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
-	"os"
 
 	bn254 "github.com/consensys/gnark-crypto/ecc/bn254"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
 )
 
-func Send() {
+func Send(jsonInputString string) (rr string, rR string, rVTag uint8, rP string) {
 
-	args := os.Args
+	// ------------------------ Unpacking json
 
-	if len(args) != 3 {
-		fmt.Printf("\nERR: 'sender.send' receives json object string (1 arg).\n\n")
-		return
-	}
-
-	jsonInputString := args[2]
 	var senderInputData SenderInputData
 	json.Unmarshal([]byte(jsonInputString), &senderInputData)
-
-	// ------------------------ Generate key pairs ----------------------
-	
-
-
-	// ------------------------ ---------------- ------------------------
-
-	// ------------------------ Stealh Pub. Key computation -------------
 
 	var r fr.Element
 	rBytes, _ := hex.DecodeString(senderInputData.PK_r)
 	r.Unmarshal(rBytes)
-	R, _ := utils.CalcG1PubKey(r)
 
 	var K bn254.G2Affine
-	var V bn254.G1Affine
-
 	KBytes, _ := hex.DecodeString(senderInputData.K)
 	K.Unmarshal(KBytes)
+
+	var V bn254.G1Affine
 	VBytes, _ := hex.DecodeString(senderInputData.V)
 	V.Unmarshal(VBytes)
 
+	// ------------------------ Stealh Pub. Key computation
+	
+	R, _ := utils.CalcG1PubKey(r)
 	P, _ := utils.SenderComputesStealthPubKey(&r, &V, &K);
 
-	fmt.Println("-----: Sender Done! :-----")
+	// ------------------------ Return val. calc.
 
-	fmt.Println("\n- DBG -")
-	fmt.Println("P:", hex.EncodeToString(P.Marshal()))
-	fmt.Println("r:", r)
+	rr = hex.EncodeToString(r.Marshal())
+	rR = hex.EncodeToString(R.Marshal())
+	rVTag = utils.CalculateViewTag(&r, &V)
+	rP = hex.EncodeToString(P.Marshal())
 
-	fmt.Println("\n- Public info -\n")
-	fmt.Println("R:", hex.EncodeToString(R.Marshal()))
-	fmt.Println()
-	vTag := utils.CalculateViewTag(&r, &V)
-	fmt.Println("vTag:", vTag)
-	fmt.Println()
-
-	// ------------------------ ---------------- ------------------------
-
+	return  rr, rR, rVTag, rP
 }
 
 type SenderInputData struct {

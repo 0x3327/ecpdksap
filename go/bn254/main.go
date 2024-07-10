@@ -9,39 +9,33 @@ import (
 
 func main () {
 
-	args := os.Args
-
-	if len(args) == 1 {
-		fmt.Printf("\nERR: no `subcmd` passed!\n\n")
+	if len(os.Args) != 3 {
+		fmt.Println("\nERR: All subcommands (first arg.) receive only one param (second arg.) .\n")
 		return
 	}
 
-	subcmd := args[1];
+	subcmd := os.Args[1];
+	arg := os.Args[2];
 
 	switch subcmd {
 
 		case "send":
-			sender.Send()
+		
+			r, _, _, _ := sender.Send(arg)
+			fmt.Println(r)
+			
 		case "receive-scan":
-			recipient.Scan()
+
+			rP := recipient.Scan(arg)
+			fmt.Println(rP)
+
 		case "receive-scan-using-vtag":
-			recipient.ScanUsingViewTag()
+			rP := recipient.ScanUsingViewTag(arg)
+			fmt.Println(rP)
+			
 
 		default:
 			fmt.Printf("\nERR: only: `send` | `receive-scan` | `receive-scan-using-vtag` subcommands allowed.\n\n")
 			return
 	}
 }
-
-// k, K, _ := utils.GenG2KeyPair()
-// v, V, _ := utils.GenG1KeyPair()
-// fmt.Println("k:", k)
-// fmt.Println("K:", K.Marshal())
-// fmt.Println("v:", v)
-// fmt.Println("V:", V.Marshal())
-// str := hex.EncodeToString(K.Marshal())
-// fmt.Println("K:", str)
-// str = hex.EncodeToString(V.Marshal())
-// fmt.Println("V:", str)
-// // b, _ := hex.DecodeString(str)
-// // fmt.Println(b)
