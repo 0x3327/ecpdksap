@@ -7,39 +7,31 @@ import (
 	"os"
 )
 
-func MainSend (jsonInputString string) {
-
-	fmt.Println(jsonInputString)
-}
-
-
 func main () {
 
 	args := os.Args
 
 	if len(args) == 1 {
-		fmt.Printf("\nERR: no args passed!\n\n")
+		fmt.Printf("\nERR: no `subcmd` passed!\n\n")
 		return
 	}
 
 	subcmd := args[1];
 
-	fmt.Println(args[2])
+	switch subcmd {
 
-	if subcmd != "send" && subcmd != "receive-scan" {
-		fmt.Printf("\nERR: only 'send' and 'receive-scan' subcommands allowed.\n\n")
-		return
-	}
+		case "send":
+			sender.Send()
+		case "receive-scan":
+			recipient.Scan()
+		case "receive-scan-using-vtag":
+			recipient.ScanUsingViewTag()
 
-	if subcmd == "send" {
-		sender.Send()
-	}
-
-	if subcmd == "receive-scan" {
-		recipient.Scan()
+		default:
+			fmt.Printf("\nERR: only: `send` | `receive-scan` | `receive-scan-using-vtag` subcommands allowed.\n\n")
+			return
 	}
 }
-
 
 // k, K, _ := utils.GenG2KeyPair()
 // v, V, _ := utils.GenG1KeyPair()
@@ -47,8 +39,6 @@ func main () {
 // fmt.Println("K:", K.Marshal())
 // fmt.Println("v:", v)
 // fmt.Println("V:", V.Marshal())
-
-
 // str := hex.EncodeToString(K.Marshal())
 // fmt.Println("K:", str)
 // str = hex.EncodeToString(V.Marshal())

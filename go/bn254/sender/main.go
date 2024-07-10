@@ -8,6 +8,7 @@ import (
 	"os"
 
 	bn254 "github.com/consensys/gnark-crypto/ecc/bn254"
+	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
 )
 
 func Send() {
@@ -25,40 +26,46 @@ func Send() {
 
 	// ------------------------ Generate key pairs ----------------------
 	
-	r, R, err := utils.GenG1KeyPair()
-	if err != nil {
-		fmt.Printf("Failed to generate rPrivateKey: %v\n", err)
-		return
-	}
-	fmt.Println("r:", r)
-	fmt.Println("R:", R)
+
 
 	// ------------------------ ---------------- ------------------------
 
 	// ------------------------ Stealh Pub. Key computation -------------
 
+	var r fr.Element
+	rBytes, _ := hex.DecodeString(senderInputData.PK_r)
+	r.Unmarshal(rBytes)
+	R, _ := utils.CalcG1PubKey(r)
+
 	var K bn254.G2Affine
 	var V bn254.G1Affine
 
 	KBytes, _ := hex.DecodeString(senderInputData.K)
-
 	K.Unmarshal(KBytes)
 	VBytes, _ := hex.DecodeString(senderInputData.V)
 	V.Unmarshal(VBytes)
 
-	fmt.Println("jsonInputString:", jsonInputString)
-	fmt.Println("senderInputData:", senderInputData)
-	fmt.Println("K:", K)
-
 	P, _ := utils.SenderComputesStealthPubKey(&r, &V, &K);
 
-	fmt.Println("-----: Sender Done!")
-	fmt.Println("--- Computed P:", P)
+	fmt.Println("-----: Sender Done! :-----")
+
+	fmt.Println("\n- DBG -")
+	fmt.Println("P:", hex.EncodeToString(P.Marshal()))
+	fmt.Println("r:", r)
+
+	fmt.Println("\n- Public info -\n")
+	fmt.Println("R:", hex.EncodeToString(R.Marshal()))
+	fmt.Println()
+	vTag := utils.CalculateViewTag(&r, &V)
+	fmt.Println("vTag:", vTag)
+	fmt.Println()
+
 	// ------------------------ ---------------- ------------------------
 
 }
 
 type SenderInputData struct {
+	PK_r string `json:"r"`
 	K string `json:"K"`
 	V string `json:"V"`
 }
