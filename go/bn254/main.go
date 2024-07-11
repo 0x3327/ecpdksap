@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ecpdksap-bn254/gen_example"
 	"ecpdksap-bn254/recipient"
 	"ecpdksap-bn254/sender"
 	"fmt"
@@ -21,8 +22,8 @@ func main () {
 
 		case "send":
 		
-			r, _, _, _ := sender.Send(arg)
-			fmt.Println(r)
+			r, _, VTag, _ := sender.Send(arg)
+			fmt.Println(r, VTag)
 			
 		case "receive-scan":
 
@@ -32,7 +33,10 @@ func main () {
 		case "receive-scan-using-vtag":
 			rP := recipient.ScanUsingViewTag(arg)
 			fmt.Println(rP)
-			
+
+		case "gen-example":
+			gen_example.GenerateExample()
+
 
 		default:
 			fmt.Printf("\nERR: only: `send` | `receive-scan` | `receive-scan-using-vtag` subcommands allowed.\n\n")

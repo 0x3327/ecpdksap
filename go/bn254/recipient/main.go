@@ -4,6 +4,7 @@ import (
 	"ecpdksap-bn254/utils"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 
 	"github.com/consensys/gnark-crypto/ecc/bn254"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
@@ -67,6 +68,8 @@ func ScanUsingViewTag(jsonInputString string) (rP []string){
 		R.Unmarshal(R_bytes)
 
 		currViewTag := utils.CalculateViewTag(&v, &R);
+		fmt.Println(currViewTag, vTags[idx])
+
 		if currViewTag == vTags[idx] {
 			P, _ := utils.RecipientComputesStealthPubKey(&K, &R, &v);
 			rP = append(rP, hex.EncodeToString(P.Marshal()))
@@ -85,6 +88,6 @@ type RecipientInputData struct {
 type RecipientInputDataWithViewTag struct {
 	PK_k string `json:"k"`
 	PK_v string `json:"v"`
-	ViewTags []uint8 `json:"viewTags"`
+	ViewTags []uint8 `json:"VTags"`
 	Rs []string `json:"Rs"`
 }

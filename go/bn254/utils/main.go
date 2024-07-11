@@ -2,6 +2,7 @@ package utils
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 
@@ -140,4 +141,18 @@ func CalculateViewTag(r *fr.Element, V *bn254.G1Affine) uint8 {
 	viewTag := viewTagBytes[0]
 
 	return viewTag
+}
+
+
+
+func GenRandomRs (len int) (Rs []string, VTags []uint8) {
+
+	for i := 0; i < len; i++ { 
+		r, R, _ := GenG1KeyPair()
+		vTag := CalculateViewTag(&r, &R)
+		Rs = append(Rs, hex.EncodeToString(R.Marshal()))
+		VTags = append(VTags, vTag)
+	}
+
+	return Rs, VTags
 }
