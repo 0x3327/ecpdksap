@@ -11,7 +11,7 @@ import (
 func main () {
 
 	if len(os.Args) != 3 {
-		fmt.Println("\nERR: All subcommands (first arg.) receive only one param (second arg.) .\n")
+		fmt.Println("\nERR: All subcommands (first arg.) receive only one param (second arg.).")
 		return
 	}
 

@@ -279,5 +279,6 @@ func main() {
 	fmt.Println("View Tag:", viewTag)
 
 	testSearchSpeed()
+	testSearchSpeedWithViewTag()
 	// runExperiment()
 }

@@ -23,6 +23,8 @@ func main () {
 	duration = V0_withViewTag(N)
 	fmt.Println("V0 with view tag:: duration:", duration)
 
+	duration = V1(N);
+	fmt.Println("V1 :: duration:", duration)
 
 	fmt.Println("")
 }
@@ -61,6 +63,25 @@ func V0_withViewTag(N int) (duration time.Duration){
 
 	return duration
 }
+
+
+
+func V1(N int) (duration time.Duration){
+
+	K, v, Rs, _ := generalSetup(N)
+
+	startTime := time.Now()
+
+	for _, Rj := range Rs {
+		newR := Rj
+		utils.RecipientComputesStealthPubKey(&K, &newR, &v)
+	}
+
+	duration = time.Since(startTime)
+
+	return duration
+}
+
 
 func generalSetup (N int) (K bn254.G2Affine, v fr.Element, Rs []bn254.G1Affine, vTags []uint8) {
 
