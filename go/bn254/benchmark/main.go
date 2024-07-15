@@ -10,7 +10,7 @@ import (
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
 )
 
-func main () {
+func main() {
 
 	const N = 5000
 
@@ -18,18 +18,18 @@ func main () {
 	var duration time.Duration
 
 	fmt.Println()
-	duration = V0(N);
+	duration = V0(N)
 	fmt.Println("V0 :: duration:", duration)
 	duration = V0_withViewTag(N)
 	fmt.Println("V0 with view tag:: duration:", duration)
 
-	duration = V1(N);
+	duration = V1(N)
 	fmt.Println("V1 :: duration:", duration)
 
 	fmt.Println("")
 }
 
-func V0(N int) (duration time.Duration){
+func V0(N int) (duration time.Duration) {
 
 	K, v, Rs, _ := generalSetup(N)
 
@@ -44,7 +44,7 @@ func V0(N int) (duration time.Duration){
 	return duration
 }
 
-func V0_withViewTag(N int) (duration time.Duration){
+func V0_withViewTag(N int) (duration time.Duration) {
 
 	K, v, Rs, vTags := generalSetup(N)
 
@@ -64,9 +64,7 @@ func V0_withViewTag(N int) (duration time.Duration){
 	return duration
 }
 
-
-
-func V1(N int) (duration time.Duration){
+func V1(N int) (duration time.Duration) {
 
 	K, v, Rs, _ := generalSetup(N)
 
@@ -82,8 +80,7 @@ func V1(N int) (duration time.Duration){
 	return duration
 }
 
-
-func generalSetup (N int) (K bn254.G2Affine, v fr.Element, Rs []bn254.G1Affine, vTags []uint8) {
+func generalSetup(N int) (K bn254.G2Affine, v fr.Element, Rs []bn254.G1Affine, vTags []uint8) {
 
 	_, K, _ = utils.GenG2KeyPair()
 	v, _, _ = utils.GenG1KeyPair()
@@ -91,7 +88,7 @@ func generalSetup (N int) (K bn254.G2Affine, v fr.Element, Rs []bn254.G1Affine, 
 	RsString, vTags := utils.GenRandomRs(N)
 
 	var tempR bn254.G1Affine
-	for i := 0 ; i < N; i++ {
+	for i := 0; i < N; i++ {
 		bytes, _ := hex.DecodeString(RsString[i])
 		tempR.Unmarshal(bytes)
 		Rs = append(Rs, tempR)
