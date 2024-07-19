@@ -4,77 +4,79 @@ import (
 	"ecpdksap-bn254/utils"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
+func GenerateExample(version string) {
 
-func GenerateExample () {
+	if version == "v0"{
 
-	// ------------------------ Generate key pairs ------------------------
+		
+	}
+
+	if version == "v2"{
+
+		k, K := utils.GenSECP256k1G1KeyPair()
+		v, V, _ := utils.GenG1KeyPair()
+		r, R, _ := utils.GenG1KeyPair()
+
+		K_asString :=K.X.String() + "." + K.Y.String()
+		V_asString :=V.X.String() + "." + V.Y.String()
+		R_asString :=R.X.String() + "." + R.Y.String()
+
+		metaInfo := MetaDbg{
+			PK_k: hex.EncodeToString(k.Marshal()),
+			PK_v: hex.EncodeToString(v.Marshal()),
+			PK_r: hex.EncodeToString(r.Marshal()),
 	
-	// ---- Recipient
-	k, K, _ := utils.GenG2KeyPair()
-	v, V, _ := utils.GenG1KeyPair()
+			K: K_asString,
+			V: V_asString,
+			R: R_asString,
+	
+			P_Sender: "TODO",
+			VTag:     "TODO",
+	
+			P_Recipient: "TODO",
 
-	// ---- Sender
-	r, R, _ := utils.GenG1KeyPair()
+			Version: version,
+		}
 
-	// ------------------------ ---------------- ------------------------
+		sendParams := SendParams{
+			PK_r:    metaInfo.PK_r,
+			K:       metaInfo.K,
+			V:       metaInfo.V,
+			Version: version,
+		}
 
-	// ------------------------ Stealh Pub. Key computation -------------
+		Rs, _ := utils.GenRandomRs(10)
+		//add the needed `R` & its tag at the end of total array of `Rs`
+		Rs = append(Rs, metaInfo.R)
 
-	senderP, _ := utils.SenderComputesStealthPubKey(&r, &V, &K)
 
-	recipientP, _ := utils.RecipientComputesStealthPubKey(&K, &R, &v)
+		recipientParams := RecipientParams{
+			PK_k:    metaInfo.PK_k,
+			PK_v:    metaInfo.PK_v,
+			Rs:      Rs,
+			Version: version,
+			WithViewTag: false, // TODO: from arg determine
+		}
 
-	vTag := utils.CalculateViewTag(&r, &V)
+		pathPrefix := "./gen_example/example"
 
-	metaInfo := MetaDbg {
-		PK_k : hex.EncodeToString(k.Marshal()),
-		PK_v : hex.EncodeToString(v.Marshal()),
-		PK_r : hex.EncodeToString(r.Marshal()),
+		file, _ := json.MarshalIndent(metaInfo, "", " ")
+		os.WriteFile(pathPrefix + "/meta-dbg.json", file, 0644)
 
-		K : hex.EncodeToString(K.Marshal()),
-		V : hex.EncodeToString(V.Marshal()),
-		R : hex.EncodeToString(R.Marshal()),
+		file, _ = json.MarshalIndent(sendParams, "", " ")
+		os.WriteFile(pathPrefix + "/inputs/send.json", file, 0644)
 
-		P_Sender: hex.EncodeToString(senderP.Marshal()),
-		VTag: vTag,
+		file, _ = json.MarshalIndent(recipientParams, "", " ")
+		os.WriteFile(pathPrefix + "/inputs/receive.json", file, 0644)
 
-		P_Recipient:  hex.EncodeToString(recipientP.Marshal()),
+		fmt.Println("V2 executed!")
 	}
-	file, _ := json.MarshalIndent(metaInfo, "", " ")
-	os.WriteFile("./cli/ex/meta-dbg.json", file, 0644)
 
-	sendParams := SendParams {
-		PK_r : metaInfo.PK_r,
-		K : metaInfo.K,
-		V : metaInfo.V,
-	}
-	file, _ = json.MarshalIndent(sendParams, "", " ")
-	os.WriteFile("./cli/ex/inputs/send.json", file, 0644)
-
-	Rs, vTags := utils.GenRandomRs(10)
-	//add the needed `R` & its tag at the end of total array of `Rs`
-	Rs = append(Rs, metaInfo.R)
-	vTags = append(vTags, vTag)
-
-	recipientParams := RecipientParams {
-		PK_k : metaInfo.PK_k,
-		PK_v : metaInfo.PK_v,
-		Rs : Rs,
-	}
-	file, _ = json.MarshalIndent(recipientParams, "", " ")
-	os.WriteFile("./cli/ex/inputs/receive.json", file, 0644)
-
-	recipientParamsUsingVTags := RecipientParamsUsingVTags {
-		PK_k : metaInfo.PK_k,
-		PK_v : metaInfo.PK_v,
-		Rs : Rs,
-		VTags:vTags,
-	}
-	file, _ = json.Marshal(recipientParamsUsingVTags)
-	os.WriteFile("./cli/ex/inputs/receive-using-vtag.json", file, 0644)
+	fmt.Println("Generation of example done!")
 }
 
 type MetaDbg struct {
@@ -87,15 +89,19 @@ type MetaDbg struct {
 	R string
 
 	P_Sender string
-	VTag uint8
+	VTag     string
 
 	P_Recipient string
+
+	Version string
 }
 
 type SendParams struct {
 	PK_r string `json:"r"`
-	K string
-	V string
+	K    string
+	V    string
+
+	Version string
 }
 
 type RecipientParams struct {
@@ -103,12 +109,9 @@ type RecipientParams struct {
 	PK_v string `json:"v"`
 
 	Rs []string
+	VTags [] string
+
+	Version string
+	WithViewTag bool
 }
 
-type RecipientParamsUsingVTags struct {
-	PK_k string `json:"k"`
-	PK_v string `json:"v"`
-
-	Rs []string
-	VTags []uint8
-}

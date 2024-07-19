@@ -2,14 +2,28 @@ package utils
 
 import (
 	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"math/big"
+	"strings"
 
 	bn254 "github.com/consensys/gnark-crypto/ecc/bn254"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
+	SECP256K1 "github.com/consensys/gnark-crypto/ecc/secp256k1"
+	SECP256K1_fr "github.com/consensys/gnark-crypto/ecc/secp256k1/fr"
 )
 
+
+func GenSECP256k1G1KeyPair() (privKey SECP256K1_fr.Element, pubKey SECP256K1.G1Affine) {
+
+	privKey.SetRandom()
+
+	var privKey_asBigInt big.Int
+	privKey.BigInt(&privKey_asBigInt)
+
+	pubKey.ScalarMultiplicationBase(&privKey_asBigInt)
+
+	return privKey, pubKey
+}
 
 func GenG1KeyPair() (privKey fr.Element, pubKey bn254.G1Affine, _err error) {
 
@@ -25,7 +39,7 @@ func GenG1KeyPair() (privKey fr.Element, pubKey bn254.G1Affine, _err error) {
 
 func CalcG1PubKey(privKey fr.Element) (pubKey bn254.G1Affine, _err error) {
 
-	privKeyBigInt := new(big.Int) 
+	privKeyBigInt := new(big.Int)
 	privKey.BigInt(privKeyBigInt)
 
 	g1Gen, _, _, _ := bn254.Generators()
@@ -51,9 +65,9 @@ func GenG2KeyPair() (privKey fr.Element, pubKey bn254.G2Affine, _err error) {
 	return privKey, pubKeyAff, nil
 }
 
-func CalcG2PubKey (privKey fr.Element) (pubKey bn254.G2Affine, _err error) {
+func CalcG2PubKey(privKey fr.Element) (pubKey bn254.G2Affine, _err error) {
 
-	privKeyBigInt := new(big.Int) 
+	privKeyBigInt := new(big.Int)
 	privKey.BigInt(privKeyBigInt)
 
 	_, g2Gen, _, _ := bn254.Generators()
@@ -67,14 +81,12 @@ func CalcG2PubKey (privKey fr.Element) (pubKey bn254.G2Affine, _err error) {
 	return pubKeyAff, nil
 }
 
-
 func Hash(input []byte) []byte {
 	hasher := sha256.New()
 	hasher.Write(input)     // Hash the input
 	hash := hasher.Sum(nil) // Finalize the hash and return the result
 	return hash
 }
-
 
 // computeStealthAddress computes the stealth address using pairings - from sender perspective
 func SenderComputesStealthPubKey(r *fr.Element, V *bn254.G1Affine, K *bn254.G2Affine) (bn254.GT, error) {
@@ -96,7 +108,7 @@ func SenderComputesStealthPubKey(r *fr.Element, V *bn254.G1Affine, K *bn254.G2Af
 	if err != nil {
 		return bn254.GT{}, fmt.Errorf("error computing pairing: %w", err)
 	}
-	
+
 	return P, nil
 }
 
@@ -143,16 +155,23 @@ func CalculateViewTag(r *fr.Element, V *bn254.G1Affine) uint8 {
 	return viewTag
 }
 
+func GenRandomRs(len int) (Rs []string, VTags []uint8) {
 
-
-func GenRandomRs (len int) (Rs []string, VTags []uint8) {
-
-	for i := 0; i < len; i++ { 
+	for i := 0; i < len; i++ {
 		r, R, _ := GenG1KeyPair()
 		vTag := CalculateViewTag(&r, &R)
-		Rs = append(Rs, hex.EncodeToString(R.Marshal()))
+		Rs = append(Rs, R.X.String() + "." + R.Y.String())
 		VTags = append(VTags, vTag)
 	}
 
 	return Rs, VTags
+}
+
+
+func UnpackXY (in string ) (X string, Y string) {
+	separatorIdx:=	 strings.IndexByte(in, '.')
+	X = in[:separatorIdx]
+	Y = in[separatorIdx+1:]
+
+	return
 }
