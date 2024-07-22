@@ -5,26 +5,30 @@ import (
 	"ecpdksap-go/recipient"
 	"ecpdksap-go/sender"
 	"encoding/json"
+	"fmt"
 )
 
 func main() {
 
-	sampleSize := "1000000"
+	sampleSize := "50000"
 
-	versions := []string{"v0", "v2"}
+	protocolVersions := []string{"v0", "v2"}
+	viewTagVersions := []string{"none", "v0-1byte", "v0-2bytes", "v1-1byte"}
 
-	for _, version := range versions {
-		sendParams, recipientParams := gen_example.GenerateExample(version, sampleSize)
-		
-		jsonBytes, _ := json.MarshalIndent(sendParams, "", " ")
-		sender.Send(string(jsonBytes))
+	for _, pVersion := range protocolVersions {
 
-		recipientParams.WithViewTag = true
-		jsonBytes, _ = json.MarshalIndent(recipientParams, "", " ")
-		recipient.Scan(string(jsonBytes))
+		sendParams, recipientParams := gen_example.GenerateExample(pVersion, "v0-1byte", sampleSize)
 
-		recipientParams.WithViewTag = false
-		jsonBytes, _ = json.MarshalIndent(recipientParams, "", " ")
-		recipient.Scan(string(jsonBytes))
+		for _, vtVersion := range viewTagVersions {
+
+			fmt.Println("")
+
+			jsonBytes, _ := json.MarshalIndent(sendParams, "", " ")
+			sender.Send(string(jsonBytes))
+
+			recipientParams.ViewTagVersion = vtVersion
+			jsonBytes, _ = json.MarshalIndent(recipientParams, "", " ")
+			recipient.Scan(string(jsonBytes))
+		}
 	}
 }
