@@ -1,10 +1,6 @@
 package recipient
 
 import (
-	ecpdksap_v0 "ecpdksap-go/versions/v0"
-	ecpdksap_v2 "ecpdksap-go/versions/v2"
-
-	"ecpdksap-go/utils"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -15,6 +11,12 @@ import (
 	BN254_fr "github.com/consensys/gnark-crypto/ecc/bn254/fr"
 	SECP256K1 "github.com/consensys/gnark-crypto/ecc/secp256k1"
 	SECP256K1_fr "github.com/consensys/gnark-crypto/ecc/secp256k1/fr"
+
+	ecpdksap_v0 "ecpdksap-go/versions/v0"
+	ecpdksap_v1 "ecpdksap-go/versions/v1"
+	ecpdksap_v2 "ecpdksap-go/versions/v2"
+
+	"ecpdksap-go/utils"
 )
 
 func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []string) {
@@ -28,7 +30,7 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 	var Rs []BN254.G1Affine
 
-	nTotalRuns := 0
+	nFullRuns := 0
 	var duration time.Duration
 
 	var viewTagFcn func (*BN254.G1Affine, uint) (string)
@@ -76,7 +78,6 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 		for i, Rsi := range Rs { 
 			
-
 			vTagCalcStart := time.Now()
 			vR := utils.BN254_MulG1PointandElement(&Rsi, &v)
 			viewTagsUsedAndDontMatch := viewTagFcn != nil && viewTagFcn(&vR, nBytesInViewTag) != recipientInputData.ViewTags[i]
@@ -84,11 +85,44 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 			
 			if viewTagsUsedAndDontMatch { continue }
 
-			nTotalRuns += 1
+			nFullRuns += 1
 			
 			rCalcStart := time.Now()
 
 			P, _ := ecpdksap_v0.RecipientComputesStealthPubKey(&K, &Rsi, &v);
+			rP = append(rP, hex.EncodeToString(P.Marshal()))
+
+			remainingCalcAggregateDuration += time.Since(rCalcStart)
+		} 
+
+		duration = time.Since(startTime)
+
+	} else if recipientInputData.Version == "v1" { 
+
+		var k, v BN254_fr.Element
+		kBytes, _ := hex.DecodeString(recipientInputData.PK_k)
+		k.Unmarshal(kBytes)
+		vBytes, _ := hex.DecodeString(recipientInputData.PK_v)
+		v.Unmarshal(vBytes)
+	
+		K, _ := utils.BN254_CalcG2PubKey(k)
+
+		startTime := time.Now()
+
+		for i, Rsi := range Rs { 
+			
+			vTagCalcStart := time.Now()
+			vR := utils.BN254_MulG1PointandElement(&Rsi, &v)
+			viewTagsUsedAndDontMatch := viewTagFcn != nil && viewTagFcn(&vR, nBytesInViewTag) != recipientInputData.ViewTags[i]
+			viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
+			
+			if viewTagsUsedAndDontMatch { continue }
+
+			nFullRuns += 1
+			
+			rCalcStart := time.Now()
+
+			P := ecpdksap_v1.ViewerComputesStealthPubKey(&K, &Rsi, &v);
 			rP = append(rP, hex.EncodeToString(P.Marshal()))
 
 			remainingCalcAggregateDuration += time.Since(rCalcStart)
@@ -134,7 +168,7 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 			
 			if viewTagsUsedAndDontMatch { continue }
 
-			nTotalRuns += 1
+			nFullRuns += 1
 
 			rCalcStart := time.Now()
 
@@ -160,12 +194,12 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 	sampleSize := time.Duration(len(Rs_string))
 
-	if nTotalRuns != 0 {
-		fmt.Println("----> nTotalRuns: ", nTotalRuns, "avgDuration:", duration / sampleSize)
+	if nFullRuns != 0 {
+		fmt.Println("----> nFullRuns: ", nFullRuns, "avgDuration:", duration / sampleSize)
 		fmt.Println("Phase 0 avg. duration: ", viewTagCalcAggregateDuration / sampleSize)
-		fmt.Println("Phase 1 avg. duration: ", remainingCalcAggregateDuration / time.Duration(nTotalRuns))
+		fmt.Println("Phase 1 avg. duration: ", remainingCalcAggregateDuration / time.Duration(nFullRuns))
 	} else {
-		fmt.Println("----> nTotalRuns: ", nTotalRuns)
+		fmt.Println("----> nFullRuns: ", nFullRuns)
 		fmt.Println("Phase 0 avg. duration: ", viewTagCalcAggregateDuration / sampleSize)
 	}
 	

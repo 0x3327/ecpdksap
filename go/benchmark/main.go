@@ -1,18 +1,19 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"ecpdksap-go/gen_example"
 	"ecpdksap-go/recipient"
 	"ecpdksap-go/sender"
-	"encoding/json"
-	"fmt"
 )
 
 func main() {
 
-	sampleSize := "50000"
+	sampleSize := "5000"
 
-	protocolVersions := []string{"v0", "v2"}
+	protocolVersions := []string{"v0", "v1", "v2"}
 	viewTagVersions := []string{"none", "v0-1byte", "v0-2bytes", "v1-1byte"}
 
 	for _, pVersion := range protocolVersions {

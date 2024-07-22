@@ -1,11 +1,12 @@
 package gen_example
 
 import (
-	"ecpdksap-go/utils"
 	"encoding/hex"
 	"encoding/json"
 	"os"
 	"strconv"
+
+	"ecpdksap-go/utils"
 )
 
 func GenerateExample(version string, viewTagVersion string, sampleSizeStr string) (sendParams SendParams, recipientParams RecipientParams) {
@@ -16,7 +17,7 @@ func GenerateExample(version string, viewTagVersion string, sampleSizeStr string
 	var K_asString string
 	var kBytes []byte
 
-	if version == "v0" {
+	if version == "v0" ||  version == "v1" {
 		k, K, _ := utils.BN254_GenG2KeyPair()
 		K_asString = K.X.String() + "." + K.Y.String()
 		kBytes = k.Marshal()
@@ -85,8 +86,6 @@ func GenerateExample(version string, viewTagVersion string, sampleSizeStr string
 
 	file, _ = json.MarshalIndent(recipientParams, "", " ")
 	os.WriteFile(pathPrefix + "/inputs/receive.json", file, 0644)
-
-	// fmt.Println("Sample data generation for", version, "done!")
 
 	return
 }

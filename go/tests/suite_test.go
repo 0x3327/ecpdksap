@@ -1,10 +1,13 @@
 package main
 
 import (
-	"ecpdksap-go/utils"
-	ecpdksap_v0 "ecpdksap-go/versions/v0"
-	ecpdksap_v2 "ecpdksap-go/versions/v2"
 	"testing"
+
+	ecpdksap_v0 "ecpdksap-go/versions/v0"
+	ecpdksap_v1 "ecpdksap-go/versions/v1"
+	ecpdksap_v2 "ecpdksap-go/versions/v2"
+
+	"ecpdksap-go/utils"
 )
 
 
@@ -21,6 +24,28 @@ func Test_V0(t *testing.T) {
 	
 	if P_Sender != P_Recipient {
 		t.Fatalf(`ERR: sender and recipient calculated different public key !!!`)
+	}
+}
+
+func Test_V1(t *testing.T) {
+
+	k, K, _ := utils.BN254_GenG2KeyPair()
+	v, V, _ := utils.BN254_GenG1KeyPair()
+
+	r, R, _ := utils.BN254_GenG1KeyPair()
+
+	P_Sender, _ := ecpdksap_v1.SenderComputesStealthPubKey(&r, &V, &K)
+
+	P_Recipient := ecpdksap_v1.RecipientComputesStealthPubKey(&k, &v, &R)
+	
+	P_Viewer := ecpdksap_v1.ViewerComputesStealthPubKey(&K, &R, &v)
+
+	if P_Sender != P_Recipient {
+		t.Fatalf(`ERR: sender and recipient calculated different public key !!!`)
+	}
+
+	if P_Viewer != P_Recipient {
+		t.Fatalf(`ERR: viewer calculated different public key than sender and recipient !!!`)
 	}
 }
 

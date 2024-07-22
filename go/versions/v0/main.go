@@ -1,12 +1,13 @@
-package v2
+package v0
 
 import (
-	"ecpdksap-go/utils"
 	"fmt"
 	"math/big"
 
 	"github.com/consensys/gnark-crypto/ecc/bn254"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
+
+	"ecpdksap-go/utils"
 )
 
 // computeStealthAddress computes the stealth address using pairings - from sender perspective
@@ -35,7 +36,6 @@ func SenderComputesStealthPubKey(r *fr.Element, V *bn254.G1Affine, K *bn254.G2Af
 
 // computes the stealth public key using pairings - from recipient perspective
 func RecipientComputesStealthPubKey(K *bn254.G2Affine, R *bn254.G1Affine, v *fr.Element) (bn254.GT, error) {
-	// Convert vPrivateKey to big.Int for cyclotomic exponentiation
 	vBigInt := new(big.Int)
 	v.BigInt(vBigInt)
 	// Compute pairing
