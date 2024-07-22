@@ -89,17 +89,22 @@ func BN254_CalcG2PubKey(privKey BN254_fr.Element) (pubKey BN254.G2Affine, _err e
 	return pubKeyAff, nil
 }
 
-func BN254_MulG1PointandElement (pt BN254.G1Affine, el BN254_fr.Element) (res BN254.G1Affine) {
+func BN254_MulG1PointandElement (pt *BN254.G1Affine, el *BN254_fr.Element) (res BN254.G1Affine) {
 
 	var el_asBigInt big.Int
 	el.BigInt(&el_asBigInt)
 
-	return *res.ScalarMultiplication(&pt, &el_asBigInt)
+	return *res.ScalarMultiplication(pt, &el_asBigInt)
 }
 
 func BN254_G1PointToViewTag (pt *BN254.G1Affine, len uint) (viewTag string ) {
 
 	return hex.EncodeToString(BN254_HashG1Point(pt))[:2*len]
+}
+
+func BN254_G1PointXCoordToViewTag (pt *BN254.G1Affine, len uint) (viewTag string ) {
+
+	return pt.X.Text(16)[:2*len]
 }
 
 func BN254_HashG1Point(pt *BN254.G1Affine) []byte {
@@ -124,7 +129,7 @@ func GenRandomRsAndViewTags(len int) (Rs []string, VTags []string) {
 	for i := 0; i < len; i++ {
 		r, R, _ := BN254_GenG1KeyPair()
 
-		tmp := BN254_MulG1PointandElement(R, r)
+		tmp := BN254_MulG1PointandElement(&R, &r)
 		vTag := BN254_G1PointToViewTag(&tmp , 1)
 		Rs = append(Rs, R.X.String() + "." + R.Y.String())
 		

@@ -28,8 +28,28 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 	var Rs []BN254.G1Affine
 
-	vCorrectTagsFound := 0
+	nTotalRuns := 0
 	var duration time.Duration
+
+	var viewTagFcn func (*BN254.G1Affine, uint) (string)
+	nBytesInViewTag := uint(0)
+	if recipientInputData.ViewTagVersion == "none" {
+		//note: default values
+	} else if recipientInputData.ViewTagVersion == "v0-1byte" {
+		viewTagFcn = utils.BN254_G1PointToViewTag
+		nBytesInViewTag = 1
+
+	} else if recipientInputData.ViewTagVersion == "v0-2bytes" {
+		viewTagFcn = utils.BN254_G1PointToViewTag
+		nBytesInViewTag = 2
+
+	} else if recipientInputData.ViewTagVersion == "v1-1byte" {
+		viewTagFcn = utils.BN254_G1PointXCoordToViewTag
+		nBytesInViewTag = 1
+	}
+
+	var viewTagCalcAggregateDuration time.Duration
+	var remainingCalcAggregateDuration time.Duration
 
 	for i := 0; i < len(Rs_string); i++ {
 		
@@ -54,28 +74,25 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 		startTime := time.Now()
 
-		if recipientInputData.WithViewTag == false { 
-	
-			for _, Rsi := range Rs { 
-
-				P, _ := ecpdksap_v0.RecipientComputesStealthPubKey(&K, &Rsi, &v);
-				rP = append(rP, hex.EncodeToString(P.Marshal()))
-			} 
+		for i, Rsi := range Rs { 
 			
-		} else {
 
-			for i, Rsi := range Rs { 
-				
-				vR := utils.BN254_MulG1PointandElement(Rsi, v)
+			vTagCalcStart := time.Now()
+			vR := utils.BN254_MulG1PointandElement(&Rsi, &v)
+			viewTagsUsedAndDontMatch := viewTagFcn != nil && viewTagFcn(&vR, nBytesInViewTag) != recipientInputData.ViewTags[i]
+			viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
+			
+			if viewTagsUsedAndDontMatch { continue }
 
-				if utils.BN254_G1PointToViewTag(&vR, 1) != recipientInputData.ViewTags[i] { continue }
+			nTotalRuns += 1
+			
+			rCalcStart := time.Now()
 
-				vCorrectTagsFound += 1
+			P, _ := ecpdksap_v0.RecipientComputesStealthPubKey(&K, &Rsi, &v);
+			rP = append(rP, hex.EncodeToString(P.Marshal()))
 
-				P, _ := ecpdksap_v0.RecipientComputesStealthPubKey(&K, &Rsi, &v);
-				rP = append(rP, hex.EncodeToString(P.Marshal()))
-			} 
-		}
+			remainingCalcAggregateDuration += time.Since(rCalcStart)
+		} 
 
 		duration = time.Since(startTime)
 
@@ -108,61 +125,50 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 		startTime := time.Now()
 
+		for i, Rsi := range Rs { 
 
-		if recipientInputData.WithViewTag == false {
+			vTagCalcStart := time.Now()
+			vR.ScalarMultiplication(&Rsi, &v_asBigInt)
+			viewTagsUsedAndDontMatch := viewTagFcn != nil && viewTagFcn(&vR, nBytesInViewTag) != recipientInputData.ViewTags[i]
+			viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
+			
+			if viewTagsUsedAndDontMatch { continue }
 
-			for _, Rsi := range Rs { 
+			nTotalRuns += 1
 
-				vR.ScalarMultiplication(&Rsi, &v_asBigInt)
+			rCalcStart := time.Now()
 
-				S, _ := BN254.Pair([]BN254.G1Affine{vR}, []BN254.G2Affine{G2_BN254})
-				b_asBigInt := ecpdksap_v2.Compute_b(&S)
+			S, _ := BN254.Pair([]BN254.G1Affine{vR}, []BN254.G2Affine{G2_BN254})
+			b = ecpdksap_v2.Compute_b_asElement(&S)
+			
+			kb.Mul(&k, &b)
 
-				b.SetBigInt(&b_asBigInt)
-				kb.Mul(&k, &b)
+			P = utils.SECP256k1_MulG1PointandElement(&K, &b)
 
-				P.ScalarMultiplication(&K, &b_asBigInt)
+			rP = append(rP, hex.EncodeToString(S.Marshal()))
 
-				rAddr = append(rAddr, ecpdksap_v2.ComputeEthAddress(&P))
-				privKeys = append(privKeys, "0x" + kb.Text(16))
-			}
-		
-		} else {
+			rAddr = append(rAddr, ecpdksap_v2.ComputeEthAddress(&P))
+			privKeys = append(privKeys, "0x" + kb.Text(16))
 
-			for i, Rsi := range Rs { 
-
-				vR.ScalarMultiplication(&Rsi, &v_asBigInt)
-
-				if utils.BN254_G1PointToViewTag(&vR, 1) != recipientInputData.ViewTags[i] { continue }
-
-				vCorrectTagsFound += 1
-
-				S, _ := BN254.Pair([]BN254.G1Affine{vR}, []BN254.G2Affine{G2_BN254})
-				b = ecpdksap_v2.Compute_b_asElement(&S)
-				
-				kb.Mul(&k, &b)
-
-				P = utils.SECP256k1_MulG1PointandElement(&K, &b)
-
-				rP = append(rP, hex.EncodeToString(S.Marshal()))
-
-				rAddr = append(rAddr, ecpdksap_v2.ComputeEthAddress(&P))
-				privKeys = append(privKeys, "0x" + kb.Text(16))
-			}
-
+			remainingCalcAggregateDuration += time.Since(rCalcStart)
 		}
 
 		duration = time.Since(startTime)
-
 	}
 
+	fmt.Println("ECPDKSAP ::: version:", recipientInputData.Version, "ViewTagVersion:", recipientInputData.ViewTagVersion, "; time:", duration)
 
-	fmt.Println("ECPDKSAP ::: version:", recipientInputData.Version, "WithViewTag:", recipientInputData.WithViewTag, "; time:", duration)
+	sampleSize := time.Duration(len(Rs_string))
 
-	if vCorrectTagsFound != 0 {
-		fmt.Println("----> vCorrectTagsFound: ", vCorrectTagsFound, "avgDuration:", duration / time.Duration(vCorrectTagsFound))
+	if nTotalRuns != 0 {
+		fmt.Println("----> nTotalRuns: ", nTotalRuns, "avgDuration:", duration / sampleSize)
+		fmt.Println("Phase 0 avg. duration: ", viewTagCalcAggregateDuration / sampleSize)
+		fmt.Println("Phase 1 avg. duration: ", remainingCalcAggregateDuration / time.Duration(nTotalRuns))
+	} else {
+		fmt.Println("----> nTotalRuns: ", nTotalRuns)
+		fmt.Println("Phase 0 avg. duration: ", viewTagCalcAggregateDuration / sampleSize)
 	}
-
+	
 	return
 }
 	
@@ -172,5 +178,5 @@ type RecipientInputData struct {
 	Rs []string `json:"Rs"`
 	Version string 
 	ViewTags [] string
-	WithViewTag bool
+	ViewTagVersion string
 }

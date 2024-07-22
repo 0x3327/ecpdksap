@@ -92,7 +92,7 @@ func SenderComputesEthAddress(b *SECP256K1_fr.Element, K *SECP256K1.G1Affine) (s
 // Computes the shared secred - from recipents's perspective
 func RecipientComputesSharedSecret(v *fr.Element, R *bn254.G1Affine, K2 *SECP256K1.G1Affine) (bn254.GT) {
 
-	productAffine := utils.BN254_MulG1PointandElement(*R, *v)
+	productAffine := utils.BN254_MulG1PointandElement(R, v)
 
 	// Compute pairing
 	_, g2Gen, _, _ := bn254.Generators()

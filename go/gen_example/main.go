@@ -4,12 +4,11 @@ import (
 	"ecpdksap-go/utils"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"os"
 	"strconv"
 )
 
-func GenerateExample(version string, sampleSizeStr string) (sendParams SendParams, recipientParams RecipientParams) {
+func GenerateExample(version string, viewTagVersion string, sampleSizeStr string) (sendParams SendParams, recipientParams RecipientParams) {
 
 	v, V, _ := utils.BN254_GenG1KeyPair()
 	r, R, _ := utils.BN254_GenG1KeyPair()
@@ -32,7 +31,7 @@ func GenerateExample(version string, sampleSizeStr string) (sendParams SendParam
 	V_asString := V.X.String() + "." + V.Y.String()
 	R_asString := R.X.String() + "." + R.Y.String()
 
-	tmp := utils.BN254_MulG1PointandElement(V, r)
+	tmp := utils.BN254_MulG1PointandElement(&V, &r)
 	viewTag := utils.BN254_G1PointToViewTag(&tmp, 1)
 
 	metaInfo := MetaDbg{
@@ -45,6 +44,7 @@ func GenerateExample(version string, sampleSizeStr string) (sendParams SendParam
 		R: R_asString,
 
 		ViewTag:  viewTag,
+		ViewTagVersion: viewTagVersion,
 		Version: version,
 
 		P_Sender: "TODO",
@@ -56,10 +56,11 @@ func GenerateExample(version string, sampleSizeStr string) (sendParams SendParam
 		K:       metaInfo.K,
 		V:       metaInfo.V,
 		Version: version,
+		ViewTagVersion: metaInfo.ViewTagVersion,
 	}
 
 	sampleSize, _ := strconv.Atoi(sampleSizeStr)
-	Rs, viewTags := utils.GenRandomRsAndViewTags(sampleSize)
+	Rs, viewTags := utils.GenRandomRsAndViewTags(sampleSize-1)
 	Rs = append(Rs, metaInfo.R)
 	viewTags = append(viewTags, metaInfo.ViewTag)
 
@@ -69,8 +70,9 @@ func GenerateExample(version string, sampleSizeStr string) (sendParams SendParam
 		PK_v:    metaInfo.PK_v,
 		Rs:      Rs,
 		Version: version,
-		WithViewTag: false, // TODO: from arg determine
 		ViewTags: viewTags,
+		ViewTagVersion: metaInfo.ViewTagVersion,
+
 	}
 
 	pathPrefix := "./gen_example/example"
@@ -84,7 +86,7 @@ func GenerateExample(version string, sampleSizeStr string) (sendParams SendParam
 	file, _ = json.MarshalIndent(recipientParams, "", " ")
 	os.WriteFile(pathPrefix + "/inputs/receive.json", file, 0644)
 
-	fmt.Println("Example generation for", version, "done!")
+	// fmt.Println("Sample data generation for", version, "done!")
 
 	return
 }
@@ -104,6 +106,7 @@ type MetaDbg struct {
 	P_Recipient string
 
 	Version string
+	ViewTagVersion string
 }
 
 type SendParams struct {
@@ -112,6 +115,7 @@ type SendParams struct {
 	V    string
 
 	Version string
+	ViewTagVersion string
 }
 
 type RecipientParams struct {
@@ -122,6 +126,7 @@ type RecipientParams struct {
 	ViewTags [] string
 
 	Version string
-	WithViewTag bool
+
+	ViewTagVersion string
 }
 
