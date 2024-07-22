@@ -1,7 +1,7 @@
 package v2
 
 import (
-	"ecpdksap-bn254/utils"
+	"ecpdksap-go/utils"
 	"fmt"
 	"math/big"
 

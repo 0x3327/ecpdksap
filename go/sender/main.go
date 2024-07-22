@@ -1,12 +1,11 @@
 package sender
 
 import (
-	"ecpdksap-bn254/utils"
-	ecpdksap_v0 "ecpdksap-bn254/versions/v0"
-	ecpdksap_v2 "ecpdksap-bn254/versions/v2"
+	"ecpdksap-go/utils"
+	ecpdksap_v0 "ecpdksap-go/versions/v0"
+	ecpdksap_v2 "ecpdksap-go/versions/v2"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 
 	BN254 "github.com/consensys/gnark-crypto/ecc/bn254"
 	BN254_fr "github.com/consensys/gnark-crypto/ecc/bn254/fr"
@@ -20,8 +19,6 @@ func Send(jsonInputString string) (rr string, rR string, rVTag uint8, rP string)
 
 	var senderInputData SenderInputData
 	json.Unmarshal([]byte(jsonInputString), &senderInputData)
-
-	fmt.Println(jsonInputString, senderInputData.Version)
 
 	if senderInputData.Version == "v0" {
 
@@ -39,7 +36,7 @@ func Send(jsonInputString string) (rr string, rR string, rVTag uint8, rP string)
 
 		// ------------------------ Stealh Pub. Key computation
 
-		R, _ := utils.CalcG1PubKey(r)
+		R, _ := utils.BN254_CalcG1PubKey(r)
 		P, _ := ecpdksap_v0.SenderComputesStealthPubKey(&r, &V, &K)
 
 		// ------------------------ Return val. calc.
@@ -67,15 +64,13 @@ func Send(jsonInputString string) (rr string, rR string, rVTag uint8, rP string)
 		rBytes, _ := hex.DecodeString(senderInputData.PK_r)
 		r.Unmarshal(rBytes)
 
-		GT, _ := ecpdksap_v2.SenderComputesSharedSecret(&r, &V, &K)
+		GT := ecpdksap_v2.SenderComputesSharedSecret(&r, &V, &K)
 
 		b := ecpdksap_v2.Compute_b(&GT)
 		var b_asElement SECP256K1_fr.Element
 		b_asElement.SetBigInt(&b)
 
-		ethAddr := ecpdksap_v2.SenderComputesEthAddress(&b_asElement, &K)
-
-		fmt.Println("V2 executed :: ethAddr:", ethAddr)
+		ecpdksap_v2.SenderComputesEthAddress(&b_asElement, &K)
 	}
 
 	return rr, rR, rVTag, rP

@@ -1,21 +1,21 @@
 package main
 
 import (
-	"ecpdksap-bn254/gen_example"
-	"ecpdksap-bn254/recipient"
-	"ecpdksap-bn254/sender"
-	"ecpdksap-bn254/utils"
-	ecpdksap_v2 "ecpdksap-bn254/versions/v2"
+	"ecpdksap-go/gen_example"
+	"ecpdksap-go/recipient"
+	"ecpdksap-go/sender"
+	"ecpdksap-go/utils"
+	ecpdksap_v2 "ecpdksap-go/versions/v2"
 	"fmt"
 	"os"
 )
 
 func DBG() {
-	privK, pubK := utils.GenSECP256k1G1KeyPair()
+	privK, pubK := utils.SECP256k_Gen1G1KeyPair()
 
 	addr := ecpdksap_v2.ComputeEthAddress(&pubK)
 
-	fmt.Println("privK:", "0x"+privK.Text(16), "\n")
+	fmt.Println("privK:", "0x"+privK.Text(16))
 	fmt.Println("pubK:", pubK.X.Text(16)+"."+pubK.Y.Text(16))
 	fmt.Println("addr:", addr)
 }

@@ -1,7 +1,7 @@
 package gen_example
 
 import (
-	"ecpdksap-bn254/utils"
+	"ecpdksap-go/utils"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -9,20 +9,34 @@ import (
 	"strconv"
 )
 
-func GenerateExample(version string, sampleSizeStr string) {
+func GenerateExample(version string, sampleSizeStr string) (sendParams SendParams, recipientParams RecipientParams) {
 
-	k, K := utils.GenSECP256k1G1KeyPair()
 	v, V, _ := utils.BN254_GenG1KeyPair()
 	r, R, _ := utils.BN254_GenG1KeyPair()
 
-	K_asString := K.X.String() + "." + K.Y.String()
+	var K_asString string
+	var kBytes []byte
+
+	if version == "v0" {
+		k, K, _ := utils.BN254_GenG2KeyPair()
+		K_asString = K.X.String() + "." + K.Y.String()
+		kBytes = k.Marshal()
+	}
+
+	if version == "v2" {
+		k, K := utils.SECP256k_Gen1G1KeyPair()
+		K_asString = K.X.String() + "." + K.Y.String()
+		kBytes = k.Marshal()
+	}
+
 	V_asString := V.X.String() + "." + V.Y.String()
 	R_asString := R.X.String() + "." + R.Y.String()
 
-	viewTag := utils.BN254_G1PointToViewTag(utils.BN254_MulG1PointandElement(V, r), 1)
+	tmp := utils.BN254_MulG1PointandElement(V, r)
+	viewTag := utils.BN254_G1PointToViewTag(&tmp, 1)
 
 	metaInfo := MetaDbg{
-		PK_k: hex.EncodeToString(k.Marshal()),
+		PK_k: hex.EncodeToString(kBytes),
 		PK_v: hex.EncodeToString(v.Marshal()),
 		PK_r: hex.EncodeToString(r.Marshal()),
 
@@ -30,15 +44,14 @@ func GenerateExample(version string, sampleSizeStr string) {
 		V: V_asString,
 		R: R_asString,
 
-		P_Sender: "TODO",
 		ViewTag:  viewTag,
-
-		P_Recipient: "TODO",
-
 		Version: version,
+
+		P_Sender: "TODO",
+		P_Recipient: "TODO",
 	}
 
-	sendParams := SendParams{
+	sendParams = SendParams{
 		PK_r:    metaInfo.PK_r,
 		K:       metaInfo.K,
 		V:       metaInfo.V,
@@ -51,7 +64,7 @@ func GenerateExample(version string, sampleSizeStr string) {
 	viewTags = append(viewTags, metaInfo.ViewTag)
 
 
-	recipientParams := RecipientParams{
+	recipientParams = RecipientParams{
 		PK_k:    metaInfo.PK_k,
 		PK_v:    metaInfo.PK_v,
 		Rs:      Rs,
@@ -72,6 +85,8 @@ func GenerateExample(version string, sampleSizeStr string) {
 	os.WriteFile(pathPrefix + "/inputs/receive.json", file, 0644)
 
 	fmt.Println("Example generation for", version, "done!")
+
+	return
 }
 
 type MetaDbg struct {
