@@ -117,6 +117,23 @@ func BN254_HashG1Point(pt *BN254.G1Affine) []byte {
 	return hash
 }
 
+func ComputeViewTag(viewTagVersion string, pt *BN254.G1Affine) (viewTag string) {
+
+	if viewTagVersion == "none" {
+		viewTag = ""
+	} else if viewTagVersion == "v0-1byte" {
+		viewTag = BN254_G1PointToViewTag(pt, 1)
+
+	} else if viewTagVersion == "v0-2bytes" {
+		viewTag = BN254_G1PointToViewTag(pt, 2)
+
+	} else if viewTagVersion == "v1-1byte" {
+		viewTag = BN254_G1PointXCoordToViewTag(pt, 1)
+	}
+
+	return viewTag
+}
+
 func Hash(input []byte) []byte {
 	hasher := sha256.New()
 	hasher.Write(input)     // Hash the input

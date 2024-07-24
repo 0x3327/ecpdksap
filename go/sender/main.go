@@ -16,7 +16,7 @@ import (
 	"ecpdksap-go/utils"
 )
 
-func Send(jsonInputString string) (rr string, rR string, rVTag uint8, rP string) {
+func Send(jsonInputString string) (rr string, rR string, rVTag string, rP string) {
 
 	// ------------------------ Unpacking json
 
@@ -30,12 +30,13 @@ func Send(jsonInputString string) (rr string, rR string, rVTag uint8, rP string)
 		r.Unmarshal(rBytes)
 
 		var K BN254.G2Affine
-		KBytes, _ := hex.DecodeString(senderInputData.K)
-		K.Unmarshal(KBytes)
+		Kx, Ky := utils.UnpackXY(senderInputData.K)
+		K.X.SetString(Kx, Ky)
 
 		var V BN254.G1Affine
-		VBytes, _ := hex.DecodeString(senderInputData.V)
-		V.Unmarshal(VBytes)
+		Vx, Vy := utils.UnpackXY(senderInputData.V)
+		V.X.SetString(Vx)
+		V.Y.SetString(Vy)
 
 		// ------------------------ Stealh Pub. Key computation
 
@@ -46,7 +47,7 @@ func Send(jsonInputString string) (rr string, rR string, rVTag uint8, rP string)
 
 		rr = hex.EncodeToString(r.Marshal())
 		rR = hex.EncodeToString(R.Marshal())
-		rVTag = ecpdksap_v0.CalculateViewTag(&r, &V)
+		rVTag = utils.ComputeViewTag(senderInputData.ViewTagVersion, &V)
 		rP = hex.EncodeToString(P.Marshal())
 
 	} else if senderInputData.Version == "v1" {
@@ -56,12 +57,13 @@ func Send(jsonInputString string) (rr string, rR string, rVTag uint8, rP string)
 		r.Unmarshal(rBytes)
 
 		var K BN254.G2Affine
-		KBytes, _ := hex.DecodeString(senderInputData.K)
-		K.Unmarshal(KBytes)
+		Kx, Ky := utils.UnpackXY(senderInputData.K)
+		K.X.SetString(Kx, Ky)
 
 		var V BN254.G1Affine
-		VBytes, _ := hex.DecodeString(senderInputData.V)
-		V.Unmarshal(VBytes)
+		Vx, Vy := utils.UnpackXY(senderInputData.V)
+		V.X.SetString(Vx)
+		V.Y.SetString(Vy)
 
 		// ------------------------ Stealh Pub. Key computation
 
@@ -72,7 +74,7 @@ func Send(jsonInputString string) (rr string, rR string, rVTag uint8, rP string)
 
 		rr = hex.EncodeToString(r.Marshal())
 		rR = hex.EncodeToString(R.Marshal())
-		rVTag = ecpdksap_v1.CalculateViewTag(&r, &V)
+		rVTag = utils.ComputeViewTag(senderInputData.ViewTagVersion, &V)
 		rP = hex.EncodeToString(P.Marshal())
 
 	} else if senderInputData.Version == "v2" {
@@ -98,6 +100,9 @@ func Send(jsonInputString string) (rr string, rR string, rVTag uint8, rP string)
 		b_asElement.SetBigInt(&b)
 
 		ecpdksap_v2.SenderComputesEthAddress(&b_asElement, &K)
+
+		tmp := utils.BN254_MulG1PointandElement(&V, &r)
+		rVTag = utils.ComputeViewTag(senderInputData.ViewTagVersion, &tmp)
 	}
 
 	return rr, rR, rVTag, rP
@@ -108,4 +113,5 @@ type SenderInputData struct {
 	K       string `json:"K"`
 	V       string `json:"V"`
 	Version string
+	ViewTagVersion string
 }

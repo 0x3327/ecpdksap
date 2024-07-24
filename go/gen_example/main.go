@@ -32,8 +32,10 @@ func GenerateExample(version string, viewTagVersion string, sampleSizeStr string
 	V_asString := V.X.String() + "." + V.Y.String()
 	R_asString := R.X.String() + "." + R.Y.String()
 
+	var viewTag string
+
 	tmp := utils.BN254_MulG1PointandElement(&V, &r)
-	viewTag := utils.BN254_G1PointToViewTag(&tmp, 1)
+	viewTag = utils.ComputeViewTag(viewTagVersion, &tmp)
 
 	metaInfo := MetaDbg{
 		PK_k: hex.EncodeToString(kBytes),
