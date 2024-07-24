@@ -18,18 +18,19 @@ func main() {
 
 	for _, pVersion := range protocolVersions {
 
-		sendParams, recipientParams := gen_example.GenerateExample(pVersion, "v0-1byte", sampleSize)
-
 		for _, vtVersion := range viewTagVersions {
 
 			fmt.Println("")
 
+			sendParams, recipientParams := gen_example.GenerateExample(pVersion, vtVersion, sampleSize)
+			
 			jsonBytes, _ := json.MarshalIndent(sendParams, "", " ")
 			sender.Send(string(jsonBytes))
 
-			recipientParams.ViewTagVersion = vtVersion
 			jsonBytes, _ = json.MarshalIndent(recipientParams, "", " ")
 			recipient.Scan(string(jsonBytes))
+
+			fmt.Println("")
 		}
 	}
 }
