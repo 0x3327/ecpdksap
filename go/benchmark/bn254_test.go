@@ -18,9 +18,12 @@ import (
 
 func Benchmark_BN254(b *testing.B) {
 
-	_Benchmark_BN254(b, 1000, 10)
-
-	// Benchmark_BN254(100_000, 10)
+	_Benchmark_BN254(b, 10, 10)
+	// _Benchmark_BN254(b, 5_000, 10)
+	// _Benchmark_BN254(b, 20_000, 10)
+	// _Benchmark_BN254(b, 40_000, 10)
+	// _Benchmark_BN254(b, 80_000, 10)
+	// _Benchmark_BN254(b, 100_000, 10)
 }
 
 func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {

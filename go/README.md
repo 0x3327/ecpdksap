@@ -1,4 +1,12 @@
-## Example inputs / cmds
+## Benchmark
+
+From `./benchmark` run:
+
+```
+go test -v . -bench=. -benchtime=1x
+```
+
+## Example CLI inputs / cmds
 
 ### Generation of example
 
