@@ -16,7 +16,7 @@ import (
 	"ecpdksap-go/utils"
 )
 
-func Benchmark_BN254 (b *testing.B) {
+func Benchmark_BN254(b *testing.B) {
 
 	_Benchmark_BN254(b, 1000, 10)
 
@@ -24,7 +24,7 @@ func Benchmark_BN254 (b *testing.B) {
 }
 
 
-func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
+func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 	fmt.Println("Benchmark_BN254 ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions)
 	fmt.Println()
@@ -32,8 +32,6 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
     durations := map[string]time.Duration{}
 
 	for i := 0; i < nRepetitions; i++ {
-
-		fmt.Println("nRepetitions:", nRepetitions)
 
 		g1, _, _, g2Aff := BN254.Generators()
 
@@ -86,7 +84,7 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 
 		//protocol: V0 and viewTag: none
 
-		startTime := time.Now()
+		b.ResetTimer()
 
 		for _, Rsi_asArray := range RsAff_asArr { 
 					
@@ -95,12 +93,12 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			P_v0.CyclotomicExp(pairingResult, v_asBigInt)
 		}
 
-		durations["v0.none"] += time.Since(startTime)
+		durations["v0.none"] += b.Elapsed()
 
 		//protocol: V0 and viewTag: V0-1byte
 		viewTags[len(viewTags)-1] = utils.BN254_G1JacPointToViewTag(&rV, 1)
 
-		startTime = time.Now()
+		b.ResetTimer()
 
 		for i, Rsi_asArray := range RsAff_asArr { 
 
@@ -113,12 +111,12 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			P_v0.CyclotomicExp(pairingResult, v_asBigInt)
 		}
 
-		durations["v0.v0-1byte"] += time.Since(startTime)
+		durations["v0.v0-1byte"] += b.Elapsed()
 
 		//protocol: V0 and viewTag: V0-2bytes
 		viewTags[len(viewTags)-1] = utils.BN254_G1JacPointToViewTag(&rV, 2)
 
-		startTime = time.Now()
+		b.ResetTimer()
 
 		for i, Rsi_asArray := range RsAff_asArr { 
 	
@@ -131,12 +129,12 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			P_v0.CyclotomicExp(pairingResult, v_asBigInt)
 		}
 	
-		durations["v0.v0-2bytes"] += time.Since(startTime)
+		durations["v0.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V0 and viewTag: V1-1byte
 		viewTags[len(viewTags)-1] = utils.BN254_G1JacPointXCoordToViewTag(&rV, 1)
 
-		startTime = time.Now()
+		b.ResetTimer()
 
 		for i, Rsi_asArray := range RsAff_asArr { 
 	
@@ -149,7 +147,7 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			P_v0.CyclotomicExp(pairingResult, v_asBigInt)
 		}
 	
-		durations["v0.v1-1byte"] += time.Since(startTime)
+		durations["v0.v1-1byte"] += b.Elapsed()
 
 		//protocol: V1 -------------------
 
@@ -161,7 +159,7 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 		K_asArray := []BN254.G2Affine{K_G2BN254}
 
 		//protocol: V1 and viewTag: none
-		startTime = time.Now()
+		b.ResetTimer()
 
 		for _, Rsi_asJac := range Rs { 
 				
@@ -176,12 +174,12 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			BN254.Pair([]BN254.G1Affine{*tmpAff.FromJacobian(&tmp)}, K_asArray)
 		} 
 
-		durations["v1.none"] += time.Since(startTime)
+		durations["v1.none"] += b.Elapsed()
 
 		//protocol: V1 and viewTag: V0-1byte
 		viewTags[len(viewTags)-1] = utils.BN254_G1JacPointToViewTag(&rV, 1)
 
-		startTime = time.Now()
+		b.ResetTimer()
 
 		for i, Rsi_asJac := range Rs { 
 			
@@ -198,12 +196,12 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			BN254.Pair([]BN254.G1Affine{*tmpAff.FromJacobian(&tmp)}, K_asArray)
 		} 
 
-		durations["v1.v0-1byte"] += time.Since(startTime)
+		durations["v1.v0-1byte"] += b.Elapsed()
 
 		//protocol: V1 and viewTag: V0-2bytes
 		viewTags[len(viewTags)-1] = utils.BN254_G1JacPointToViewTag(&rV, 2)
 
-		startTime = time.Now()
+		b.ResetTimer()
 
 		for i, Rsi_asJac := range Rs { 
 			
@@ -220,12 +218,12 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			BN254.Pair([]BN254.G1Affine{*tmpAff.FromJacobian(&tmp)}, K_asArray)
 		} 
 
-		durations["v1.v0-2bytes"] += time.Since(startTime)
+		durations["v1.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V1 and viewTag: V1-1byte
 		viewTags[len(viewTags)-1] = utils.BN254_G1JacPointXCoordToViewTag(&rV, 1)
 		
-		startTime = time.Now()
+		b.ResetTimer()
 		
 		for i, Rsi_asJac := range Rs { 
 			
@@ -242,7 +240,7 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			BN254.Pair([]BN254.G1Affine{*tmpAff.FromJacobian(&tmp)}, K_asArray)
 		} 
 
-		durations["v1.v1-1byte"] += time.Since(startTime)
+		durations["v1.v1-1byte"] += b.Elapsed()
 
 		//protocol V2 --------------------
 
@@ -256,7 +254,7 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 		var Pv2_asJac SECP256K1.G1Jac
 		//protocol: V2 and viewTag: none
 
-		startTime = time.Now()
+		b.ResetTimer()
 
 		for _, Rsi_asJac := range Rs { 
 
@@ -271,12 +269,12 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			utils.SECP256k1_MulG1JacPointandElement(&K_SECP256k1_Jac, &b)
 		}
 
-		durations["v2.none"] += time.Since(startTime)
+		durations["v2.none"] += b.Elapsed()
 
 		//protocol: V2 and viewTag: v0-1byte
 		viewTags[len(viewTags)-1] = utils.BN254_G1JacPointToViewTag(&rV, 1)
 
-		startTime = time.Now()
+		b.ResetTimer()
 
 		for _, Rsi_asJac := range Rs { 
 
@@ -290,12 +288,12 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			Pv2_asJac.ScalarMultiplication(&K_SECP256k1_Jac, &b)
 		}
 
-		durations["v2.v0-1byte"] += time.Since(startTime)
+		durations["v2.v0-1byte"] += b.Elapsed()
 
 		//protocol: V2 and viewTag: v0-2bytes
 		viewTags[len(viewTags)-1] = utils.BN254_G1JacPointToViewTag(&rV, 2)
 
-		startTime = time.Now()
+		b.ResetTimer()
 
 		for _, Rsi_asJac := range Rs { 
 
@@ -309,12 +307,12 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			Pv2_asJac.ScalarMultiplication(&K_SECP256k1_Jac, &b)
 		}
 
-		durations["v2.v0-2bytes"] += time.Since(startTime)
+		durations["v2.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V2 and viewTag: v1-1byte
 		viewTags[len(viewTags)-1] = utils.BN254_G1JacPointXCoordToViewTag(&rV, 1)
 
-		startTime = time.Now()
+		b.ResetTimer()
 
 		for _, Rsi_asJac := range Rs { 
 
@@ -328,7 +326,7 @@ func _Benchmark_BN254 (b *testing.B, sampleSize int, nRepetitions int) {
 			Pv2_asJac.ScalarMultiplication(&K_SECP256k1_Jac, &b)
 		}
 
-		durations["v2.v1-1byte"] += time.Since(startTime)
+		durations["v2.v1-1byte"] += b.Elapsed()
 	}
 
 	protocolVersions := []string {
