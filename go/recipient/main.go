@@ -73,36 +73,37 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 	
 		K, _ := utils.BN254_CalcG2PubKey(k)
 
-		startTime := time.Now()
-
 		vBigInt := new(big.Int)
 		v.BigInt(vBigInt)
 
-		for _, Rsi := range Rs { 
-			
-			// vTagCalcStart := time.Now()
-			// vR := utils.BN254_MulG1PointandElement(&Rsi, &v)
-			// viewTagsUsedAndDontMatch := viewTagFcn != nil && viewTagFcn(&vR, nBytesInViewTag) != recipientInputData.ViewTags[i]
-			// viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
-			
-			// if viewTagsUsedAndDontMatch { continue }
+		var P BN254.GT
 
-			// nFullRuns += 1
+		startTime := time.Now()
+
+		for i, Rsi := range Rs { 
 			
-			// rCalcStart := time.Now()
+			vTagCalcStart := time.Now()
 
+			if viewTagFcn != nil {
+				vR := utils.BN254_MulG1PointandElement(&Rsi, &v)
 
-			// Compute pairing
+				calculatedViewTag := viewTagFcn(&vR, nBytesInViewTag)
+
+				viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
+
+				if calculatedViewTag != recipientInputData.ViewTags[i][:2*nBytesInViewTag] { continue }
+			}
+			
+			nFullRuns += 1
+
 			pairingResult, _ := BN254.Pair([]BN254.G1Affine{Rsi}, []BN254.G2Affine{K})
 			
-		
-			// Compute cyclotomic exponentiation
-			var P BN254.GT
+			rCalcStart := time.Now()
 			P.CyclotomicExp(pairingResult, vBigInt)
 
 			// P, _ := ecpdksap_v0.RecipientComputesStealthPubKey(&K, &Rsi, &v);
 
-			// remainingCalcAggregateDuration += time.Since(rCalcStart)
+			remainingCalcAggregateDuration += time.Since(rCalcStart)
 
 			rP = append(rP, hex.EncodeToString(P.Marshal()))
 		} 
@@ -124,11 +125,16 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 		for i, Rsi := range Rs { 
 			
 			vTagCalcStart := time.Now()
-			vR := utils.BN254_MulG1PointandElement(&Rsi, &v)
-			viewTagsUsedAndDontMatch := viewTagFcn != nil && viewTagFcn(&vR, nBytesInViewTag) != recipientInputData.ViewTags[i]
-			viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
-			
-			if viewTagsUsedAndDontMatch { continue }
+
+			if viewTagFcn != nil {
+				vR := utils.BN254_MulG1PointandElement(&Rsi, &v)
+
+				calculatedViewTag := viewTagFcn(&vR, nBytesInViewTag)
+
+				viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
+
+				if calculatedViewTag != recipientInputData.ViewTags[i][:2*nBytesInViewTag] { continue }
+			}
 
 			nFullRuns += 1
 			
@@ -175,11 +181,17 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 		for i, Rsi := range Rs { 
 
 			vTagCalcStart := time.Now()
-			vR.ScalarMultiplication(&Rsi, &v_asBigInt)
-			viewTagsUsedAndDontMatch := viewTagFcn != nil && viewTagFcn(&vR, nBytesInViewTag) != recipientInputData.ViewTags[i]
-			viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
-			
-			if viewTagsUsedAndDontMatch { continue }
+
+			vR = utils.BN254_MulG1PointandElement(&Rsi, &v)
+
+			if viewTagFcn != nil {
+
+				calculatedViewTag := viewTagFcn(&vR, nBytesInViewTag)
+
+				viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
+
+				if calculatedViewTag != recipientInputData.ViewTags[i][:2*nBytesInViewTag] { continue }
+			}
 
 			nFullRuns += 1
 

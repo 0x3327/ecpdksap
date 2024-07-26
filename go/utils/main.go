@@ -147,7 +147,7 @@ func GenRandomRsAndViewTags(len int) (Rs []string, VTags []string) {
 		r, R, _ := BN254_GenG1KeyPair()
 
 		tmp := BN254_MulG1PointandElement(&R, &r)
-		vTag := BN254_G1PointToViewTag(&tmp , 1)
+		vTag := BN254_G1PointToViewTag(&tmp , 2)
 		Rs = append(Rs, R.X.String() + "." + R.Y.String())
 		
 		VTags = append(VTags, vTag)
