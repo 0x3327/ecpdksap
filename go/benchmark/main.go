@@ -9,7 +9,7 @@ import (
 	"ecpdksap-go/sender"
 )
 
-func main() {
+func Benchmark_ThroughCLI() {
 
 	sampleSize := "5000"
 
