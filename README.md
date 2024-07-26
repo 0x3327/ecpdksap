@@ -1,6 +1,6 @@
-# Reference implementations of ECPDKSAP protocol
+# Reference implementations of ECPDKSAP protocols
 
-Currently there exist only [`go/bn254`](./go/bn254/) implementation.
+Currently there exist only [`go`](./go) implementations.
 
 ## Protocol Overview
 
