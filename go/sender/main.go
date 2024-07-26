@@ -109,9 +109,9 @@ func Send(jsonInputString string) (rr string, rR string, rVTag string, rP string
 }
 
 type SenderInputData struct {
-	PK_r    string `json:"r"`
-	K       string `json:"K"`
-	V       string `json:"V"`
-	Version string
+	PK_r           string `json:"r"`
+	K              string `json:"K"`
+	V              string `json:"V"`
+	Version        string
 	ViewTagVersion string
 }

@@ -23,13 +23,12 @@ func Benchmark_BN254(b *testing.B) {
 	// Benchmark_BN254(100_000, 10)
 }
 
-
 func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 	fmt.Println("Benchmark_BN254 ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions)
 	fmt.Println()
 
-    durations := map[string]time.Duration{}
+	durations := map[string]time.Duration{}
 
 	for i := 0; i < nRepetitions; i++ {
 
@@ -47,8 +46,8 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 		var P_v0 BN254.GT
 
 		//random data generation
-		var Rs [] BN254.G1Jac
-		var RsAff_asArr [][] BN254.G1Affine
+		var Rs []BN254.G1Jac
+		var RsAff_asArr [][]BN254.G1Affine
 		for i := 0; i < sampleSize; i++ {
 			var ri BN254_fr.Element
 			ri.SetRandom()
@@ -57,7 +56,7 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 			var Ri BN254.G1Jac
 			Ri.ScalarMultiplication(&g1, &ri_asBigInt)
 			Rs = append(Rs, Ri)
-			
+
 			ri.BigInt(&r_asBigInt)
 
 			var Ri_asAff BN254.G1Affine
@@ -86,8 +85,8 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b.ResetTimer()
 
-		for _, Rsi_asArray := range RsAff_asArr { 
-					
+		for _, Rsi_asArray := range RsAff_asArr {
+
 			pairingResult, _ := BN254.Pair(Rsi_asArray, K_G2BN254_asArray)
 
 			P_v0.CyclotomicExp(pairingResult, v_asBigInt)
@@ -100,12 +99,12 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b.ResetTimer()
 
-		for i, Rsi_asArray := range RsAff_asArr { 
+		for i, Rsi_asArray := range RsAff_asArr {
 
 			if utils.BN254_G1JacPointToViewTag(vR_asJac.ScalarMultiplication(&Rs[i], v_asBigInt), 1) != viewTags[i][:2] {
 				continue
 			}
-					
+
 			pairingResult, _ := BN254.Pair(Rsi_asArray, K_G2BN254_asArray)
 
 			P_v0.CyclotomicExp(pairingResult, v_asBigInt)
@@ -118,17 +117,17 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b.ResetTimer()
 
-		for i, Rsi_asArray := range RsAff_asArr { 
-	
+		for i, Rsi_asArray := range RsAff_asArr {
+
 			if utils.BN254_G1JacPointToViewTag(vR_asJac.ScalarMultiplication(&Rs[i], v_asBigInt), 2) != viewTags[i] {
 				continue
 			}
-					
+
 			pairingResult, _ := BN254.Pair(Rsi_asArray, K_G2BN254_asArray)
-	
+
 			P_v0.CyclotomicExp(pairingResult, v_asBigInt)
 		}
-	
+
 		durations["v0.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V0 and viewTag: V1-1byte
@@ -136,17 +135,17 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b.ResetTimer()
 
-		for i, Rsi_asArray := range RsAff_asArr { 
-	
+		for i, Rsi_asArray := range RsAff_asArr {
+
 			if utils.BN254_G1JacPointXCoordToViewTag(vR_asJac.ScalarMultiplication(&Rs[i], v_asBigInt), 1) != viewTags[i][:2] {
 				continue
 			}
-					
+
 			pairingResult, _ := BN254.Pair(Rsi_asArray, K_G2BN254_asArray)
-	
+
 			P_v0.CyclotomicExp(pairingResult, v_asBigInt)
 		}
-	
+
 		durations["v0.v1-1byte"] += b.Elapsed()
 
 		//protocol: V1 -------------------
@@ -161,8 +160,8 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 		//protocol: V1 and viewTag: none
 		b.ResetTimer()
 
-		for _, Rsi_asJac := range Rs { 
-				
+		for _, Rsi_asJac := range Rs {
+
 			vR_asJac.ScalarMultiplication(&Rsi_asJac, v_asBigInt)
 
 			hash_asBytes := utils.BN254_HashG1JacPoint(&vR_asJac)
@@ -170,9 +169,9 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 			hash.BigInt(&hash_asBigInt)
 
 			tmp.ScalarMultiplication(&g1, &hash_asBigInt)
-			
+
 			BN254.Pair([]BN254.G1Affine{*tmpAff.FromJacobian(&tmp)}, K_asArray)
-		} 
+		}
 
 		durations["v1.none"] += b.Elapsed()
 
@@ -181,20 +180,22 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b.ResetTimer()
 
-		for i, Rsi_asJac := range Rs { 
-			
+		for i, Rsi_asJac := range Rs {
+
 			vR_asJac.ScalarMultiplication(&Rsi_asJac, v_asBigInt)
-			
-			if utils.BN254_G1JacPointToViewTag(&vR_asJac, 1) != viewTags[i][:2] { continue }
+
+			if utils.BN254_G1JacPointToViewTag(&vR_asJac, 1) != viewTags[i][:2] {
+				continue
+			}
 
 			hash_asBytes := utils.BN254_HashG1JacPoint(&vR_asJac)
 			hash.SetBytes(hash_asBytes)
 			hash.BigInt(&hash_asBigInt)
 
 			tmp.ScalarMultiplication(&g1, &hash_asBigInt)
-			
+
 			BN254.Pair([]BN254.G1Affine{*tmpAff.FromJacobian(&tmp)}, K_asArray)
-		} 
+		}
 
 		durations["v1.v0-1byte"] += b.Elapsed()
 
@@ -203,42 +204,46 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b.ResetTimer()
 
-		for i, Rsi_asJac := range Rs { 
-			
+		for i, Rsi_asJac := range Rs {
+
 			vR_asJac.ScalarMultiplication(&Rsi_asJac, v_asBigInt)
-			
-			if utils.BN254_G1JacPointToViewTag(&vR_asJac, 2) != viewTags[i] { continue }
+
+			if utils.BN254_G1JacPointToViewTag(&vR_asJac, 2) != viewTags[i] {
+				continue
+			}
 
 			hash_asBytes := utils.BN254_HashG1JacPoint(&vR_asJac)
 			hash.SetBytes(hash_asBytes)
 			hash.BigInt(&hash_asBigInt)
 
 			tmp.ScalarMultiplication(&g1, &hash_asBigInt)
-			
+
 			BN254.Pair([]BN254.G1Affine{*tmpAff.FromJacobian(&tmp)}, K_asArray)
-		} 
+		}
 
 		durations["v1.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V1 and viewTag: V1-1byte
 		viewTags[len(viewTags)-1] = utils.BN254_G1JacPointXCoordToViewTag(&rV, 1)
-		
+
 		b.ResetTimer()
-		
-		for i, Rsi_asJac := range Rs { 
-			
+
+		for i, Rsi_asJac := range Rs {
+
 			vR_asJac.ScalarMultiplication(&Rsi_asJac, v_asBigInt)
-			
-			if utils.BN254_G1JacPointXCoordToViewTag(&vR_asJac, 1) != viewTags[i][:2] { continue }
+
+			if utils.BN254_G1JacPointXCoordToViewTag(&vR_asJac, 1) != viewTags[i][:2] {
+				continue
+			}
 
 			hash_asBytes := utils.BN254_HashG1JacPoint(&vR_asJac)
 			hash.SetBytes(hash_asBytes)
 			hash.BigInt(&hash_asBigInt)
 
 			tmp.ScalarMultiplication(&g1, &hash_asBigInt)
-			
+
 			BN254.Pair([]BN254.G1Affine{*tmpAff.FromJacobian(&tmp)}, K_asArray)
-		} 
+		}
 
 		durations["v1.v1-1byte"] += b.Elapsed()
 
@@ -256,7 +261,7 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b.ResetTimer()
 
-		for _, Rsi_asJac := range Rs { 
+		for _, Rsi_asJac := range Rs {
 
 			vR_asJac.ScalarMultiplication(&Rsi_asJac, v_asBigInt)
 
@@ -276,11 +281,13 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b.ResetTimer()
 
-		for _, Rsi_asJac := range Rs { 
+		for _, Rsi_asJac := range Rs {
 
 			vR_asJac.ScalarMultiplication(&Rsi_asJac, v_asBigInt)
 
-			if utils.BN254_G1JacPointToViewTag(&vR_asJac, 1) != viewTags[i][:2] { continue }
+			if utils.BN254_G1JacPointToViewTag(&vR_asJac, 1) != viewTags[i][:2] {
+				continue
+			}
 
 			S, _ := BN254.Pair([]BN254.G1Affine{*vR.FromJacobian(&vR_asJac)}, g2Aff_asArray)
 			b := ecpdksap_v2.Compute_b(&S)
@@ -295,11 +302,13 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b.ResetTimer()
 
-		for _, Rsi_asJac := range Rs { 
+		for _, Rsi_asJac := range Rs {
 
 			vR_asJac.ScalarMultiplication(&Rsi_asJac, v_asBigInt)
 
-			if utils.BN254_G1JacPointToViewTag(&vR_asJac, 2) != viewTags[i] { continue }
+			if utils.BN254_G1JacPointToViewTag(&vR_asJac, 2) != viewTags[i] {
+				continue
+			}
 
 			S, _ := BN254.Pair([]BN254.G1Affine{*vR.FromJacobian(&vR_asJac)}, g2Aff_asArray)
 			b := ecpdksap_v2.Compute_b(&S)
@@ -314,11 +323,13 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b.ResetTimer()
 
-		for _, Rsi_asJac := range Rs { 
+		for _, Rsi_asJac := range Rs {
 
 			vR_asJac.ScalarMultiplication(&Rsi_asJac, v_asBigInt)
 
-			if utils.BN254_G1JacPointXCoordToViewTag(&vR_asJac, 1) != viewTags[i][:2] { continue }
+			if utils.BN254_G1JacPointXCoordToViewTag(&vR_asJac, 1) != viewTags[i][:2] {
+				continue
+			}
 
 			S, _ := BN254.Pair([]BN254.G1Affine{*vR.FromJacobian(&vR_asJac)}, g2Aff_asArray)
 			b := ecpdksap_v2.Compute_b(&S)
@@ -329,18 +340,17 @@ func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 		durations["v2.v1-1byte"] += b.Elapsed()
 	}
 
-	protocolVersions := []string {
+	protocolVersions := []string{
 		"v0.none", "v0.v0-1byte", "v0.v0-2bytes", "v0.v1-1byte",
 		"v1.none", "v1.v0-1byte", "v1.v0-2bytes", "v1.v1-1byte",
 		"v2.none", "v2.v0-1byte", "v2.v0-2bytes", "v2.v1-1byte",
 	}
 
 	for _, pVersion := range protocolVersions {
-		fmt.Println("version:", pVersion, "duration:", durations[pVersion] / time.Duration(nRepetitions))
+		fmt.Println("version:", pVersion, "duration:", durations[pVersion]/time.Duration(nRepetitions))
 		fmt.Println()
 	}
 
 	fmt.Println()
 	fmt.Println()
 }
-

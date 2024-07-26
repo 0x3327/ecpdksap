@@ -24,7 +24,7 @@ func Benchmark_ThroughCLI(b *testing.B) {
 			fmt.Println("")
 
 			sendParams, recipientParams := gen_example.GenerateExample(pVersion, vtVersion, sampleSize)
-			
+
 			jsonBytes, _ := json.MarshalIndent(sendParams, "", " ")
 			sender.Send(string(jsonBytes))
 

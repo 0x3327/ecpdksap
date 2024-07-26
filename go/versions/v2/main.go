@@ -15,7 +15,7 @@ import (
 )
 
 // Computes the shared secret - from sender's perspective
-func SenderComputesSharedSecret(r *fr.Element, V *bn254.G1Affine, K *SECP256K1.G1Affine) (bn254.GT) {
+func SenderComputesSharedSecret(r *fr.Element, V *bn254.G1Affine, K *SECP256K1.G1Affine) bn254.GT {
 
 	rBigInt := new(big.Int)
 	r.BigInt(rBigInt)
@@ -60,7 +60,6 @@ func Compute_b(pubKey *bn254.GT) (b big.Int) {
 	return
 }
 
-
 func Compute_b_asElement(pubKey *bn254.GT) (b SECP256K1_fr.Element) {
 
 	var res bn254.E2
@@ -70,14 +69,14 @@ func Compute_b_asElement(pubKey *bn254.GT) (b SECP256K1_fr.Element) {
 	res.Add(&res, &pubKey.C1.B1)
 
 	b = SECP256K1_fr.Element(res.A0)
-	b2 :=SECP256K1_fr.Element(res.A1)
-	
-	b.Add(&b,  &b2)
+	b2 := SECP256K1_fr.Element(res.A1)
+
+	b.Add(&b, &b2)
 
 	return
 }
 
-func SenderComputesEthAddress(b *SECP256K1_fr.Element, K *SECP256K1.G1Affine) (string) {
+func SenderComputesEthAddress(b *SECP256K1_fr.Element, K *SECP256K1.G1Affine) string {
 
 	var b_asBigInt big.Int
 	b.BigInt(&b_asBigInt)
@@ -88,9 +87,8 @@ func SenderComputesEthAddress(b *SECP256K1_fr.Element, K *SECP256K1.G1Affine) (s
 	return ComputeEthAddress(&P)
 }
 
-
 // Computes the shared secred - from recipents's perspective
-func RecipientComputesSharedSecret(v *fr.Element, R *bn254.G1Affine, K2 *SECP256K1.G1Affine) (bn254.GT) {
+func RecipientComputesSharedSecret(v *fr.Element, R *bn254.G1Affine, K2 *SECP256K1.G1Affine) bn254.GT {
 
 	productAffine := utils.BN254_MulG1PointandElement(R, v)
 
@@ -111,7 +109,7 @@ func RecipientComputesSharedSecret(v *fr.Element, R *bn254.G1Affine, K2 *SECP256
 	return P
 }
 
-func ComputeEthAddress(P *SECP256K1.G1Affine) (addr string){
+func ComputeEthAddress(P *SECP256K1.G1Affine) (addr string) {
 
 	Px_Bytes := P.X.Bytes()
 	Py_Bytes := P.Y.Bytes()
@@ -122,6 +120,6 @@ func ComputeEthAddress(P *SECP256K1.G1Affine) (addr string){
 	buf := hash.Sum(nil)
 
 	totalLen := len(buf)
-	addr = "0x"+ hex.EncodeToString(buf[totalLen-20:])
+	addr = "0x" + hex.EncodeToString(buf[totalLen-20:])
 	return
 }
