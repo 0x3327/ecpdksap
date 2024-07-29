@@ -3,7 +3,9 @@
 From `./benchmark` run:
 
 ```
-go test -v . -bench=. -benchtime=1x
+go test . -bench=<Benchmark-Name> -benchtime=1x -timeout 2000m i.e:
+
+go test . -bench=Benchmark_BLS24_315 -benchtime=1x -timeout 2000m
 ```
 
 ## Example CLI inputs / cmds
@@ -11,7 +13,7 @@ go test -v . -bench=. -benchtime=1x
 ### Generation of example
 
 ```
-go run . gen-example <version: v0 | v2> <sample-size: 1...1000>
+go run . gen-example <version: v0 | v1 | v2> <sample-size: 1...1000>
 ```
 
 ### Send
@@ -20,7 +22,7 @@ go run . gen-example <version: v0 | v2> <sample-size: 1...1000>
 export SEND_EXAMPLE_INPUT=$(cat ./gen_example/example/inputs/send.json) && go run . send $SEND_EXAMPLE_INPUT
 ```
 
-### Receive (without using View Tag)
+### Receive
 
 ```
 export RECEIVE_EXAMPLE_INPUT=$(cat ./gen_example/example/inputs/receive.json) && go run . receive-scan $RECEIVE_EXAMPLE_INPUT

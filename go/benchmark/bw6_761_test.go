@@ -353,7 +353,6 @@ func _Benchmark_BW6_761(b *testing.B, sampleSize int, nRepetitions int) {
 	fmt.Println()
 }
 
-
 func _BW6_761_GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
 	g1, _, _, _ := EC.Generators()
 
@@ -381,14 +380,14 @@ func _BW6_761_G1AffPointToViewTag(pt *EC.G1Affine, len uint) (viewTag string) {
 	return _BW6_761_HashG1AffPoint(pt).Text(16)[:2*len]
 }
 
-func _BW6_761_G1AffPointToViewTagByte1(pt *EC.G1Affine) (uint8) {
+func _BW6_761_G1AffPointToViewTagByte1(pt *EC.G1Affine) uint8 {
 	hasher := sha256.New()
 	compressed := pt.Bytes()
 	hash := hasher.Sum(compressed[:])
 	return hash[0]
 }
 
-func _BW6_761_G1AffPointToViewTagByte2(pt *EC.G1Affine) (uint16) {
+func _BW6_761_G1AffPointToViewTagByte2(pt *EC.G1Affine) uint16 {
 	hasher := sha256.New()
 	hash := hasher.Sum(pt.Marshal())
 	return binary.BigEndian.Uint16(hash[0:2])
@@ -399,11 +398,11 @@ func _BW6_761_G1AffPointXCoordToViewTag(pt *EC.G1Affine, len uint) (viewTag stri
 	return pt.X.Text(16)[:2*len]
 }
 
-func _BW6_761_G1AffPointXCoordToViewTagByte1(pt *EC.G1Affine) (uint8) {
-	return 	pt.X.Bytes()[0]
+func _BW6_761_G1AffPointXCoordToViewTagByte1(pt *EC.G1Affine) uint8 {
+	return pt.X.Bytes()[0]
 }
 
-func _BW6_761_HashG1AffPoint(pt *EC.G1Affine) (*big.Int) {
+func _BW6_761_HashG1AffPoint(pt *EC.G1Affine) *big.Int {
 	hasher := sha256.New()
 	tmp := pt.X.Bytes()
 	hasher.Write(tmp[:])
@@ -420,4 +419,3 @@ func _BW6_761_HashG1AffPoint(pt *EC.G1Affine) (*big.Int) {
 
 	return hash_asBigInt
 }
-

@@ -353,7 +353,6 @@ func _Benchmark_BLS24_315(b *testing.B, sampleSize int, nRepetitions int) {
 	fmt.Println()
 }
 
-
 func _BLS24_315_GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
 	g1, _, _, _ := EC.Generators()
 
@@ -381,14 +380,14 @@ func _BLS24_315_G1AffPointToViewTag(pt *EC.G1Affine, len uint) (viewTag string) 
 	return _BLS24_315_HashG1AffPoint(pt).Text(16)[:2*len]
 }
 
-func _BLS24_315_G1AffPointToViewTagByte1(pt *EC.G1Affine) (uint8) {
+func _BLS24_315_G1AffPointToViewTagByte1(pt *EC.G1Affine) uint8 {
 	hasher := sha256.New()
 	compressed := pt.Bytes()
 	hash := hasher.Sum(compressed[:])
 	return hash[0]
 }
 
-func _BLS24_315_G1AffPointToViewTagByte2(pt *EC.G1Affine) (uint16) {
+func _BLS24_315_G1AffPointToViewTagByte2(pt *EC.G1Affine) uint16 {
 	hasher := sha256.New()
 	hash := hasher.Sum(pt.Marshal())
 	return binary.BigEndian.Uint16(hash[0:2])
@@ -399,11 +398,11 @@ func _BLS24_315_G1AffPointXCoordToViewTag(pt *EC.G1Affine, len uint) (viewTag st
 	return pt.X.Text(16)[:2*len]
 }
 
-func _BLS24_315_G1AffPointXCoordToViewTagByte1(pt *EC.G1Affine) (uint8) {
-	return 	pt.X.Bytes()[0]
+func _BLS24_315_G1AffPointXCoordToViewTagByte1(pt *EC.G1Affine) uint8 {
+	return pt.X.Bytes()[0]
 }
 
-func _BLS24_315_HashG1AffPoint(pt *EC.G1Affine) (*big.Int) {
+func _BLS24_315_HashG1AffPoint(pt *EC.G1Affine) *big.Int {
 	hasher := sha256.New()
 	tmp := pt.X.Bytes()
 	hasher.Write(tmp[:])
@@ -420,4 +419,3 @@ func _BLS24_315_HashG1AffPoint(pt *EC.G1Affine) (*big.Int) {
 
 	return hash_asBigInt
 }
-
