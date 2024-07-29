@@ -40,7 +40,7 @@ func SenderComputesStealthPubKey(r *BN254_fr.Element, V *BN254.G1Affine, K *BN25
 }
 
 // computes the stealth public key using pairings - from recipient perspective
-func RecipientComputesStealthPubKey(k *BN254_fr.Element, v *BN254_fr.Element, R *BN254.G1Affine) (BN254.GT) {
+func RecipientComputesStealthPubKey(k *BN254_fr.Element, v *BN254_fr.Element, R *BN254.G1Affine) BN254.GT {
 
 	vBigInt := new(big.Int)
 	v.BigInt(vBigInt)
@@ -51,14 +51,14 @@ func RecipientComputesStealthPubKey(k *BN254_fr.Element, v *BN254_fr.Element, R 
 	hash_asBytes := utils.BN254_HashG1Point(&vR_product)
 	var hash BN254_fr.Element
 	hash.SetBytes(hash_asBytes)
-	
+
 	var privKey BN254_fr.Element
 	privKey.Mul(&hash, k)
 	var privKey_asBigInt big.Int
 	privKey.BigInt(&privKey_asBigInt)
 
 	_, _, g1Aff, g2Aff := BN254.Generators()
-	
+
 	pairingResult, _ := BN254.Pair([]BN254.G1Affine{g1Aff}, []BN254.G2Affine{g2Aff})
 
 	var P BN254.GT
@@ -67,7 +67,7 @@ func RecipientComputesStealthPubKey(k *BN254_fr.Element, v *BN254_fr.Element, R 
 	return P
 }
 
-func ViewerComputesStealthPubKey(K *BN254.G2Affine, R *BN254.G1Affine, v *BN254_fr.Element) (BN254.GT) {
+func ViewerComputesStealthPubKey(K *BN254.G2Affine, R *BN254.G1Affine, v *BN254_fr.Element) BN254.GT {
 
 	vBigInt := new(big.Int)
 	v.BigInt(vBigInt)
@@ -83,12 +83,11 @@ func ViewerComputesStealthPubKey(K *BN254.G2Affine, R *BN254.G1Affine, v *BN254_
 
 	var g1Point BN254.G1Affine
 	g1Point.ScalarMultiplicationBase(&hash_asBigInt)
-	
+
 	pairingResult, _ := BN254.Pair([]BN254.G1Affine{g1Point}, []BN254.G2Affine{*K})
 
 	return pairingResult
 }
-
 
 func CalculateViewTag(r *BN254_fr.Element, V *BN254.G1Affine) uint8 {
 	// Convert r to big.Int

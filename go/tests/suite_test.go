@@ -10,7 +10,6 @@ import (
 	"ecpdksap-go/utils"
 )
 
-
 func Test_V0(t *testing.T) {
 
 	_, K, _ := utils.BN254_GenG2KeyPair()
@@ -21,7 +20,7 @@ func Test_V0(t *testing.T) {
 	P_Sender, _ := ecpdksap_v0.SenderComputesStealthPubKey(&r, &V, &K)
 
 	P_Recipient, _ := ecpdksap_v0.RecipientComputesStealthPubKey(&K, &R, &v)
-	
+
 	if P_Sender != P_Recipient {
 		t.Fatalf(`ERR: sender and recipient calculated different public key !!!`)
 	}
@@ -37,7 +36,7 @@ func Test_V1(t *testing.T) {
 	P_Sender, _ := ecpdksap_v1.SenderComputesStealthPubKey(&r, &V, &K)
 
 	P_Recipient := ecpdksap_v1.RecipientComputesStealthPubKey(&k, &v, &R)
-	
+
 	P_Viewer := ecpdksap_v1.ViewerComputesStealthPubKey(&K, &R, &v)
 
 	if P_Sender != P_Recipient {
@@ -59,7 +58,7 @@ func Test_V2(t *testing.T) {
 	S_Sender := ecpdksap_v2.SenderComputesSharedSecret(&r, &V, &K)
 
 	S_Recipient := ecpdksap_v2.RecipientComputesSharedSecret(&v, &R, &K)
-	
+
 	if S_Sender != S_Recipient {
 		t.Fatalf(`ERR: sender and recipient calculated different secret !!!`)
 	}

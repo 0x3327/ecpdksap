@@ -7,11 +7,12 @@ import (
 	"ecpdksap-go/gen_example"
 	"ecpdksap-go/recipient"
 	"ecpdksap-go/sender"
+	"testing"
 )
 
-func main() {
+func Benchmark_ThroughCLI(b *testing.B) {
 
-	sampleSize := "5000"
+	sampleSize := "1000"
 
 	protocolVersions := []string{"v0", "v1", "v2"}
 	viewTagVersions := []string{"none", "v0-1byte", "v0-2bytes", "v1-1byte"}
@@ -23,7 +24,7 @@ func main() {
 			fmt.Println("")
 
 			sendParams, recipientParams := gen_example.GenerateExample(pVersion, vtVersion, sampleSize)
-			
+
 			jsonBytes, _ := json.MarshalIndent(sendParams, "", " ")
 			sender.Send(string(jsonBytes))
 

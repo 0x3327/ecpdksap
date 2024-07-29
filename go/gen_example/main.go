@@ -17,7 +17,7 @@ func GenerateExample(version string, viewTagVersion string, sampleSizeStr string
 	var K_asString string
 	var kBytes []byte
 
-	if version == "v0" ||  version == "v1" {
+	if version == "v0" || version == "v1" {
 		k, K, _ := utils.BN254_GenG2KeyPair()
 		K_asString = K.X.String() + "." + K.Y.String()
 		kBytes = k.Marshal()
@@ -46,48 +46,46 @@ func GenerateExample(version string, viewTagVersion string, sampleSizeStr string
 		V: V_asString,
 		R: R_asString,
 
-		ViewTag:  viewTag,
+		ViewTag:        viewTag,
 		ViewTagVersion: viewTagVersion,
-		Version: version,
+		Version:        version,
 
-		P_Sender: "TODO",
+		P_Sender:    "TODO",
 		P_Recipient: "TODO",
 	}
 
 	sendParams = SendParams{
-		PK_r:    metaInfo.PK_r,
-		K:       metaInfo.K,
-		V:       metaInfo.V,
-		Version: version,
+		PK_r:           metaInfo.PK_r,
+		K:              metaInfo.K,
+		V:              metaInfo.V,
+		Version:        version,
 		ViewTagVersion: metaInfo.ViewTagVersion,
 	}
 
 	sampleSize, _ := strconv.Atoi(sampleSizeStr)
-	Rs, viewTags := utils.GenRandomRsAndViewTags(sampleSize-1)
+	Rs, viewTags := utils.GenRandomRsAndViewTags(sampleSize - 1)
 	Rs = append(Rs, metaInfo.R)
 	viewTags = append(viewTags, metaInfo.ViewTag)
 
-
 	recipientParams = RecipientParams{
-		PK_k:    metaInfo.PK_k,
-		PK_v:    metaInfo.PK_v,
-		Rs:      Rs,
-		Version: version,
-		ViewTags: viewTags,
+		PK_k:           metaInfo.PK_k,
+		PK_v:           metaInfo.PK_v,
+		Rs:             Rs,
+		Version:        version,
+		ViewTags:       viewTags,
 		ViewTagVersion: metaInfo.ViewTagVersion,
-
 	}
 
 	pathPrefix := "./gen_example/example"
 
 	file, _ := json.MarshalIndent(metaInfo, "", " ")
-	os.WriteFile(pathPrefix + "/meta-dbg.json", file, 0644)
+	os.WriteFile(pathPrefix+"/meta-dbg.json", file, 0644)
 
 	file, _ = json.MarshalIndent(sendParams, "", " ")
-	os.WriteFile(pathPrefix + "/inputs/send.json", file, 0644)
+	os.WriteFile(pathPrefix+"/inputs/send.json", file, 0644)
 
 	file, _ = json.MarshalIndent(recipientParams, "", " ")
-	os.WriteFile(pathPrefix + "/inputs/receive.json", file, 0644)
+	os.WriteFile(pathPrefix+"/inputs/receive.json", file, 0644)
 
 	return
 }
@@ -102,11 +100,11 @@ type MetaDbg struct {
 	R string
 
 	P_Sender string
-	ViewTag     string
+	ViewTag  string
 
 	P_Recipient string
 
-	Version string
+	Version        string
 	ViewTagVersion string
 }
 
@@ -115,7 +113,7 @@ type SendParams struct {
 	K    string
 	V    string
 
-	Version string
+	Version        string
 	ViewTagVersion string
 }
 
@@ -123,11 +121,10 @@ type RecipientParams struct {
 	PK_k string `json:"k"`
 	PK_v string `json:"v"`
 
-	Rs []string
-	ViewTags [] string
+	Rs       []string
+	ViewTags []string
 
 	Version string
 
 	ViewTagVersion string
 }
-

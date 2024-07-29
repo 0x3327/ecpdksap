@@ -13,7 +13,15 @@ import (
 	SECP256K1_fr "github.com/consensys/gnark-crypto/ecc/secp256k1/fr"
 )
 
-func SECP256k1_MulG1PointandElement (pt *SECP256K1.G1Affine, el *SECP256K1_fr.Element) (res SECP256K1.G1Affine) {
+func SECP256k1_MulG1PointandElement(pt *SECP256K1.G1Affine, el *SECP256K1_fr.Element) (res SECP256K1.G1Affine) {
+
+	var el_asBigInt big.Int
+	el.BigInt(&el_asBigInt)
+
+	return *res.ScalarMultiplication(pt, &el_asBigInt)
+}
+
+func SECP256k1_MulG1JacPointandElement(pt *SECP256K1.G1Jac, el *SECP256K1_fr.Element) (res SECP256K1.G1Jac) {
 
 	var el_asBigInt big.Int
 	el.BigInt(&el_asBigInt)
@@ -89,7 +97,7 @@ func BN254_CalcG2PubKey(privKey BN254_fr.Element) (pubKey BN254.G2Affine, _err e
 	return pubKeyAff, nil
 }
 
-func BN254_MulG1PointandElement (pt *BN254.G1Affine, el *BN254_fr.Element) (res BN254.G1Affine) {
+func BN254_MulG1PointandElement(pt *BN254.G1Affine, el *BN254_fr.Element) (res BN254.G1Affine) {
 
 	var el_asBigInt big.Int
 	el.BigInt(&el_asBigInt)
@@ -97,12 +105,21 @@ func BN254_MulG1PointandElement (pt *BN254.G1Affine, el *BN254_fr.Element) (res 
 	return *res.ScalarMultiplication(pt, &el_asBigInt)
 }
 
-func BN254_G1PointToViewTag (pt *BN254.G1Affine, len uint) (viewTag string ) {
+func BN254_G1PointToViewTag(pt *BN254.G1Affine, len uint) (viewTag string) {
 
 	return hex.EncodeToString(BN254_HashG1Point(pt))[:2*len]
 }
 
-func BN254_G1PointXCoordToViewTag (pt *BN254.G1Affine, len uint) (viewTag string ) {
+func BN254_G1JacPointToViewTag(pt *BN254.G1Jac, len uint) (viewTag string) {
+	return hex.EncodeToString(BN254_HashG1JacPoint(pt))[:2*len]
+}
+
+func BN254_G1PointXCoordToViewTag(pt *BN254.G1Affine, len uint) (viewTag string) {
+
+	return pt.X.Text(16)[:2*len]
+}
+
+func BN254_G1JacPointXCoordToViewTag(pt *BN254.G1Jac, len uint) (viewTag string) {
 
 	return pt.X.Text(16)[:2*len]
 }
@@ -110,9 +127,29 @@ func BN254_G1PointXCoordToViewTag (pt *BN254.G1Affine, len uint) (viewTag string
 func BN254_HashG1Point(pt *BN254.G1Affine) []byte {
 	hasher := sha256.New()
 	tmp := pt.X.Bytes()
-	hasher.Write(tmp[:]) 
+	hasher.Write(tmp[:])
 	tmp = pt.Y.Bytes()
-	hasher.Write(tmp[:]) 
+	hasher.Write(tmp[:])
+	hash := hasher.Sum(nil) // Finalize the hash and return the result
+	return hash
+}
+
+func BN254_HashG1JacPoint(pt *BN254.G1Jac) []byte {
+	hasher := sha256.New()
+	// tmp := pt.X.Bytes()
+	// hasher.Write(tmp[:])
+	// tmp = pt.Y.Bytes()
+	// hasher.Write(tmp[:])
+	// tmp = pt.Z.Bytes()
+	// hasher.Write(tmp[:])
+
+	var pt_asAffine BN254.G1Affine
+	bytes := pt_asAffine.FromJacobian(pt).Bytes()
+	hasher.Write(bytes[:])
+
+	// hasher.Write(pt.X.Marshal())
+	// hasher.Write(pt.Y.Marshal())
+	// hasher.Write(pt.Z.Marshal())
 	hash := hasher.Sum(nil) // Finalize the hash and return the result
 	return hash
 }
@@ -134,6 +171,13 @@ func ComputeViewTag(viewTagVersion string, pt *BN254.G1Affine) (viewTag string) 
 	return viewTag
 }
 
+func ComputeViewTagFromJac(viewTagVersion string, pt *BN254.G1Jac) (viewTag string) {
+
+	var ptAff BN254.G1Affine
+	ptAff.FromJacobian(pt)
+	return ComputeViewTag(viewTagVersion, &ptAff)
+}
+
 func Hash(input []byte) []byte {
 	hasher := sha256.New()
 	hasher.Write(input)     // Hash the input
@@ -147,17 +191,17 @@ func GenRandomRsAndViewTags(len int) (Rs []string, VTags []string) {
 		r, R, _ := BN254_GenG1KeyPair()
 
 		tmp := BN254_MulG1PointandElement(&R, &r)
-		vTag := BN254_G1PointToViewTag(&tmp , 2)
-		Rs = append(Rs, R.X.String() + "." + R.Y.String())
-		
+		vTag := BN254_G1PointToViewTag(&tmp, 2)
+		Rs = append(Rs, R.X.String()+"."+R.Y.String())
+
 		VTags = append(VTags, vTag)
 	}
 
 	return Rs, VTags
 }
 
-func UnpackXY (in string ) (X string, Y string) {
-	separatorIdx:=	 strings.IndexByte(in, '.')
+func UnpackXY(in string) (X string, Y string) {
+	separatorIdx := strings.IndexByte(in, '.')
 	X = in[:separatorIdx]
 	Y = in[separatorIdx+1:]
 
