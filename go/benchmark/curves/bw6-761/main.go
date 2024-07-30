@@ -1,4 +1,4 @@
-package main
+package bn254_bench
 
 import (
 	"crypto/sha256"
@@ -9,26 +9,27 @@ import (
 	"testing"
 	"time"
 
-	EC "github.com/consensys/gnark-crypto/ecc/bls12-381"
-	EC_fr "github.com/consensys/gnark-crypto/ecc/bls12-381/fr"
+	EC "github.com/consensys/gnark-crypto/ecc/bw6-761"
+	EC_fr "github.com/consensys/gnark-crypto/ecc/bw6-761/fr"
 
 	SECP256K1 "github.com/consensys/gnark-crypto/ecc/secp256k1"
 
 	"ecpdksap-go/utils"
 )
 
-func Benchmark_BLS12_381(b *testing.B) {
+func Run(b *testing.B) {
 
-	// _Benchmark_BLS12_381(b, 5000, 10)
-	// _Benchmark_BLS12_381(b, 20_000, 10)
-	// _Benchmark_BLS12_381(b, 40_000, 10)
-	_Benchmark_BLS12_381(b, 80_000, 10)
-	// _Benchmark_BLS12_381(b, 100_000, 10)
+	// _Benchmark_BN254(b, 1_000, 10)
+	_Benchmark_BN254(b, 5000, 10)
+	// _Benchmark_BN254(b, 20_000, 10)
+	// _Benchmark_BN254(b, 40_000, 10)
+	// _Benchmark_BN254(b, 80_000, 10)
+	// _Benchmark_BN254(b, 100_000, 10)
 }
 
-func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
+func _Benchmark_BN254(b *testing.B, sampleSize int, nRepetitions int) {
 
-	fmt.Println("Benchmark_BLS12_381 ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions)
+	fmt.Println("Benchmark_BN254 ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions)
 	fmt.Println()
 
 	durations := map[string]time.Duration{}
@@ -38,7 +39,7 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 		g1, _, _, g2Aff := EC.Generators()
 
 		//common for versions: V0, V1, V2
-		_, v_asBigInt, V, _ := BLS12_381GenerateG1KeyPair()
+		_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair()
 
 		var r_asBigInt big.Int
 
@@ -49,7 +50,7 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 		var RsAff_asArr [][]EC.G1Affine
 		for j := 0; j < sampleSize; j++ {
 
-			_, rj_asBigInt, Rj, Rj_asAff := BLS12_381GenerateG1KeyPair()
+			_, rj_asBigInt, Rj, Rj_asAff := _EC_GenerateG1KeyPair()
 
 			Rs = append(Rs, Rj)
 			RsAff_asArr = append(RsAff_asArr, []EC.G1Affine{Rj_asAff})
@@ -77,8 +78,8 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 
 		//protocol V0 -------------------------------------
 
-		_, _, _, K2BLS12_381asAff := BLS12_381GenerateG2KeyPair()
-		K2BLS12_381asAffArr := []EC.G2Affine{K2BLS12_381asAff}
+		_, _, _, K2_EC_asAff := _EC_GenerateG2KeyPair()
+		K2_EC_asAffArr := []EC.G2Affine{K2_EC_asAff}
 
 		var vR EC.G1Jac
 		var vR_asAff EC.G1Affine
@@ -89,7 +90,7 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 
 		for _, Rsi_asArray := range RsAff_asArr {
 
-			pairingResult, _ := EC.Pair(Rsi_asArray, K2BLS12_381asAffArr)
+			pairingResult, _ := EC.Pair(Rsi_asArray, K2_EC_asAffArr)
 
 			P_v0.CyclotomicExp(pairingResult, &v_asBigInt)
 		}
@@ -97,17 +98,17 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 		durations["v0.none"] += b.Elapsed()
 
 		//protocol: V0 and viewTag: V0-1byte
-		viewTagsSingleByte[len(viewTags)-1] = BLS12_381G1AffPointToViewTagByte1(&rV_asAff)
+		viewTagsSingleByte[len(viewTags)-1] = _EC_G1AffPointToViewTagByte1(&rV_asAff)
 
 		b.ResetTimer()
 
-		for i, Rsi_asArray := range RsAff_asArr {
+		for i, Rsi_asJac := range Rs {
 
-			if BLS12_381G1AffPointToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rs[i], &v_asBigInt))) != viewTagsSingleByte[i] {
+			if _EC_G1AffPointToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt))) != viewTagsSingleByte[i] {
 				continue
 			}
 
-			pairingResult, _ := EC.Pair(Rsi_asArray, K2BLS12_381asAffArr)
+			pairingResult, _ := EC.Pair(RsAff_asArr[i], K2_EC_asAffArr)
 
 			P_v0.CyclotomicExp(pairingResult, &v_asBigInt)
 		}
@@ -115,17 +116,17 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 		durations["v0.v0-1byte"] += b.Elapsed()
 
 		//protocol: V0 and viewTag: V0-2bytes
-		viewTags[len(viewTags)-1] = BLS12_381G1AffPointToViewTagByte2(&rV_asAff)
+		viewTags[len(viewTags)-1] = _EC_G1AffPointToViewTagByte2(&rV_asAff)
 
 		b.ResetTimer()
 
 		for i, Rsi_asArray := range RsAff_asArr {
 
-			if BLS12_381G1AffPointToViewTagByte2(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rs[i], &v_asBigInt))) != viewTags[i] {
+			if _EC_G1AffPointToViewTagByte2(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rs[i], &v_asBigInt))) != viewTags[i] {
 				continue
 			}
 
-			pairingResult, _ := EC.Pair(Rsi_asArray, K2BLS12_381asAffArr)
+			pairingResult, _ := EC.Pair(Rsi_asArray, K2_EC_asAffArr)
 
 			P_v0.CyclotomicExp(pairingResult, &v_asBigInt)
 		}
@@ -133,17 +134,17 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 		durations["v0.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V0 and viewTag: V1-1byte
-		viewTagsSingleByte[len(viewTags)-1] = BLS12_381G1AffPointXCoordToViewTagByte1(&rV_asAff)
+		viewTagsSingleByte[len(viewTags)-1] = _EC_G1AffPointXCoordToViewTagByte1(&rV_asAff)
 
 		b.ResetTimer()
 
 		for i, RsiAff_asArray := range RsAff_asArr {
 
-			if BLS12_381G1AffPointXCoordToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rs[i], &v_asBigInt))) != viewTagsSingleByte[i] {
+			if _EC_G1AffPointXCoordToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rs[i], &v_asBigInt))) != viewTagsSingleByte[i] {
 				continue
 			}
 
-			pairingResult, _ := EC.Pair(RsiAff_asArray, K2BLS12_381asAffArr)
+			pairingResult, _ := EC.Pair(RsiAff_asArray, K2_EC_asAffArr)
 
 			P_v0.CyclotomicExp(pairingResult, &v_asBigInt)
 		}
@@ -155,7 +156,7 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 		// var P_v1 EC.GT
 		var tmp EC.G1Jac
 		var tmpAff EC.G1Affine
-		K_asArray := K2BLS12_381asAffArr
+		K_asArray := K2_EC_asAffArr
 
 		//protocol: V1 and viewTag: none
 		b.ResetTimer()
@@ -164,7 +165,7 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 
 			vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt))
 
-			hash_asBigInt := BLS12_381HashG1AffPoint(&vR_asAff)
+			hash_asBigInt := _EC_HashG1AffPoint(&vR_asAff)
 
 			tmp.ScalarMultiplication(&g1, hash_asBigInt)
 
@@ -174,7 +175,7 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 		durations["v1.none"] += b.Elapsed()
 
 		//protocol: V1 and viewTag: V0-1byte
-		viewTagsSingleByte[len(viewTags)-1] = BLS12_381G1AffPointToViewTagByte1(&rV_asAff)
+		viewTagsSingleByte[len(viewTags)-1] = _EC_G1AffPointToViewTagByte1(&rV_asAff)
 
 		b.ResetTimer()
 
@@ -182,11 +183,11 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 
 			vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt)
 
-			if BLS12_381G1AffPointToViewTagByte1(vR_asAff.FromJacobian(&vR)) != viewTagsSingleByte[i] {
+			if _EC_G1AffPointToViewTagByte1(vR_asAff.FromJacobian(&vR)) != viewTagsSingleByte[i] {
 				continue
 			}
 
-			hash_asBigInt := BLS12_381HashG1AffPoint(&vR_asAff)
+			hash_asBigInt := _EC_HashG1AffPoint(&vR_asAff)
 
 			tmp.ScalarMultiplication(&g1, hash_asBigInt)
 
@@ -196,7 +197,7 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 		durations["v1.v0-1byte"] += b.Elapsed()
 
 		//protocol: V1 and viewTag: V0-2bytes
-		viewTags[len(viewTags)-1] = BLS12_381G1AffPointToViewTagByte2(&rV_asAff)
+		viewTags[len(viewTags)-1] = _EC_G1AffPointToViewTagByte2(&rV_asAff)
 
 		b.ResetTimer()
 
@@ -204,11 +205,11 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 
 			vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt)
 
-			if BLS12_381G1AffPointToViewTagByte2(vR_asAff.FromJacobian(&vR)) != viewTags[i] {
+			if _EC_G1AffPointToViewTagByte2(vR_asAff.FromJacobian(&vR)) != viewTags[i] {
 				continue
 			}
 
-			hash_asBigInt := BLS12_381HashG1AffPoint(&vR_asAff)
+			hash_asBigInt := _EC_HashG1AffPoint(&vR_asAff)
 
 			tmp.ScalarMultiplication(&g1, hash_asBigInt)
 
@@ -218,7 +219,7 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 		durations["v1.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V1 and viewTag: V1-1byte
-		viewTagsSingleByte[len(viewTags)-1] = BLS12_381G1AffPointXCoordToViewTagByte1(&rV_asAff)
+		viewTagsSingleByte[len(viewTags)-1] = _EC_G1AffPointXCoordToViewTagByte1(&rV_asAff)
 
 		b.ResetTimer()
 
@@ -226,11 +227,11 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 
 			vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt)
 
-			if BLS12_381G1AffPointXCoordToViewTagByte1(&vR_asAff) != viewTagsSingleByte[i] {
+			if _EC_G1AffPointXCoordToViewTagByte1(&vR_asAff) != viewTagsSingleByte[i] {
 				continue
 			}
 
-			hash_asBigInt := BLS12_381HashG1AffPoint(&vR_asAff)
+			hash_asBigInt := _EC_HashG1AffPoint(&vR_asAff)
 
 			tmp.ScalarMultiplication(&g1, hash_asBigInt)
 
@@ -251,88 +252,71 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 
 		b_asBigInt := new(big.Int)
 
+		K_SECP256k1_JacPtr := &K_SECP256k1_Jac
+
 		//protocol: V2 and viewTag: none
 		b.ResetTimer()
 
 		for _, Rsi_asJac := range Rs {
 
-			vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt)
+			S, _ := EC.Pair([]EC.G1Affine{*vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt))}, g2Aff_asArray)
 
-			S, _ := EC.Pair([]EC.G1Affine{*vR_asAff.FromJacobian(&vR)}, g2Aff_asArray)
-
-			//compute `b`
-			S.C0.B0.A0.BigInt(b_asBigInt)
-
-			Pv2_asJac.ScalarMultiplication(&K_SECP256k1_Jac, b_asBigInt)
+			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.B0.A0.BigInt(b_asBigInt))
 		}
+		
 
 		durations["v2.none"] += b.Elapsed()
 
 		//protocol: V2 and viewTag: v0-1byte
-		viewTagsSingleByte[len(viewTags)-1] = BLS12_381G1AffPointToViewTagByte1(&rV_asAff)
+		viewTagsSingleByte[len(viewTags)-1] = _EC_G1AffPointToViewTagByte1(&rV_asAff)
 
 		b.ResetTimer()
 
-		for _, Rsi_asJac := range Rs {
+		for i, Rsi_asJac := range Rs {
 
-			vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt)
-
-			if BLS12_381G1AffPointToViewTagByte1(&vR_asAff) != viewTagsSingleByte[i] {
+			if _EC_G1AffPointToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt))) != viewTagsSingleByte[i] {
 				continue
 			}
 
-			S, _ := EC.Pair([]EC.G1Affine{*vR_asAff.FromJacobian(&vR)}, g2Aff_asArray)
+			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
 
-			//compute `b`
-			S.C0.B0.A0.BigInt(b_asBigInt)
-
-			Pv2_asJac.ScalarMultiplication(&K_SECP256k1_Jac, b_asBigInt)
+			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.B0.A0.BigInt(b_asBigInt))
 		}
 
 		durations["v2.v0-1byte"] += b.Elapsed()
 
 		//protocol: V2 and viewTag: v0-2bytes
-		viewTags[len(viewTags)-1] = BLS12_381G1AffPointToViewTagByte2(&rV_asAff)
+		viewTags[len(viewTags)-1] = _EC_G1AffPointToViewTagByte2(&rV_asAff)
 
 		b.ResetTimer()
 
-		for _, Rsi_asJac := range Rs {
+		for i, Rsi_asJac := range Rs {
 
-			vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt)
-
-			if BLS12_381G1AffPointToViewTagByte2(&vR_asAff) != viewTags[i] {
+			if _EC_G1AffPointToViewTagByte2(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt))) != viewTags[i] {
 				continue
 			}
 
-			S, _ := EC.Pair([]EC.G1Affine{*vR_asAff.FromJacobian(&vR)}, g2Aff_asArray)
+			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
 
-			//compute `b`
-			S.C0.B0.A0.BigInt(b_asBigInt)
-
-			Pv2_asJac.ScalarMultiplication(&K_SECP256k1_Jac, b_asBigInt)
+			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.B0.A0.BigInt(b_asBigInt))
 		}
 
 		durations["v2.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V2 and viewTag: v1-1byte
-		viewTagsSingleByte[len(viewTags)-1] = BLS12_381G1AffPointXCoordToViewTagByte1(&rV_asAff)
+		viewTagsSingleByte[len(viewTags)-1] = _EC_G1AffPointXCoordToViewTagByte1(&rV_asAff)
 
 		b.ResetTimer()
 
-		for _, Rsi_asJac := range Rs {
+		for i, Rsi_asJac := range Rs {
 
-			vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt)
-
-			if BLS12_381G1AffPointXCoordToViewTagByte1(&vR_asAff) != viewTagsSingleByte[i] {
+			if _EC_G1AffPointXCoordToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rsi_asJac, &v_asBigInt))) != viewTagsSingleByte[i] {
 				continue
 			}
 
-			S, _ := EC.Pair([]EC.G1Affine{*vR_asAff.FromJacobian(&vR)}, g2Aff_asArray)
+			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
 
-			//compute `b`
-			S.C0.B0.A0.BigInt(b_asBigInt)
-
-			Pv2_asJac.ScalarMultiplication(&K_SECP256k1_Jac, b_asBigInt)
+			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.B0.A0.BigInt(b_asBigInt))
 		}
 
 		durations["v2.v1-1byte"] += b.Elapsed()
@@ -353,7 +337,7 @@ func _Benchmark_BLS12_381(b *testing.B, sampleSize int, nRepetitions int) {
 	fmt.Println()
 }
 
-func BLS12_381GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
+func _EC_GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
 	g1, _, _, _ := EC.Generators()
 
 	privKey.SetRandom()
@@ -364,7 +348,7 @@ func BLS12_381GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.I
 	return
 }
 
-func BLS12_381GenerateG2KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G2Jac, pubKeyAff EC.G2Affine) {
+func _EC_GenerateG2KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G2Jac, pubKeyAff EC.G2Affine) {
 	_, g2, _, _ := EC.Generators()
 
 	privKey.SetRandom()
@@ -375,34 +359,35 @@ func BLS12_381GenerateG2KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.I
 	return
 }
 
-func BLS12_381G1AffPointToViewTag(pt *EC.G1Affine, len uint) (viewTag string) {
+func _EC_G1AffPointToViewTag(pt *EC.G1Affine, len uint) (viewTag string) {
 
-	return BLS12_381HashG1AffPoint(pt).Text(16)[:2*len]
+	return _EC_HashG1AffPoint(pt).Text(16)[:2*len]
 }
 
-func BLS12_381G1AffPointToViewTagByte1(pt *EC.G1Affine) uint8 {
+func _EC_G1AffPointToViewTagByte1(pt *EC.G1Affine) uint8 {
 	hasher := sha256.New()
 	compressed := pt.Bytes()
 	hash := hasher.Sum(compressed[:])
 	return hash[0]
 }
 
-func BLS12_381G1AffPointToViewTagByte2(pt *EC.G1Affine) uint16 {
+func _EC_G1AffPointToViewTagByte2(pt *EC.G1Affine) uint16 {
 	hasher := sha256.New()
-	hash := hasher.Sum(pt.Marshal())
+	compressed := pt.Bytes()
+	hash := hasher.Sum(compressed[:])
 	return binary.BigEndian.Uint16(hash[0:2])
 }
 
-func BLS12_381G1AffPointXCoordToViewTag(pt *EC.G1Affine, len uint) (viewTag string) {
+func _EC_G1AffPointXCoordToViewTag(pt *EC.G1Affine, len uint) (viewTag string) {
 
 	return pt.X.Text(16)[:2*len]
 }
 
-func BLS12_381G1AffPointXCoordToViewTagByte1(pt *EC.G1Affine) uint8 {
+func _EC_G1AffPointXCoordToViewTagByte1(pt *EC.G1Affine) uint8 {
 	return pt.X.Bytes()[0]
 }
 
-func BLS12_381HashG1AffPoint(pt *EC.G1Affine) *big.Int {
+func _EC_HashG1AffPoint(pt *EC.G1Affine) *big.Int {
 	hasher := sha256.New()
 	tmp := pt.X.Bytes()
 	hasher.Write(tmp[:])
