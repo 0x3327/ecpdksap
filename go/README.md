@@ -4,9 +4,11 @@ From `./benchmark` run:
 
 ```
 go test . -bench=<Specific-Benchmark> -benchmem -benchtime=1x -timeout 2000m > log_results.txt
+```
 
 i.e:
 
+```
 go test . -bench=Benchmark_Curves_100 -benchmem -benchtime=1x -timeout 2000m > log_results.txt
 ```
 
