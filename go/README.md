@@ -3,9 +3,11 @@
 From `./benchmark` run:
 
 ```
-go test . -bench=<Benchmark-Name> -benchtime=1x -timeout 2000m i.e:
+go test . -bench=<Specific-Benchmark> -benchmem -benchtime=1x -timeout 2000m > log_results.txt
 
-go test . -bench=Benchmark_BLS24_315 -benchtime=1x -timeout 2000m
+i.e:
+
+go test . -bench=Benchmark_Curves_100 -benchmem -benchtime=1x -timeout 2000m > log_results.txt
 ```
 
 ## Example CLI inputs / cmds
