@@ -1,0 +1,198 @@
+$color0: rgba(81, 255, 95, 0.929);
+$color1: rgba(50, 50, 50, 0.683);
+$color2: rgb(236, 236, 236);
+$color3: rgb(187, 187, 187);
+
+div {
+  overflow-x: hidden;
+}
+
+html {
+  background-color: black;
+  height: 100%;
+  color: rgb(58, 58, 58);
+}
+
+.Header {
+  display: flex;
+  justify-content: space-between;
+  color: white;
+}
+
+.Label {
+  font-weight: bold;
+}
+
+.Highlight {
+  color: $color0;
+  z-index: 100;
+}
+
+.Contrast {
+  color: white;
+}
+
+.Entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  .Label {
+    flex: 1;
+    color: $color2;
+  }
+  .Value {
+    flex: 3;
+  }
+}
+
+button {
+  height: 30px;
+  padding: 5px;
+  vertical-align: middle;
+  margin: auto 0;
+  background-color: transparent;
+  color: $color3;
+  border: 1px solid transparent;
+  border-bottom: 1px solid white;
+  width: 130px;
+
+  &:hover {
+    border-bottom: 1px solid $color0;
+    color: $color0;
+    cursor: pointer;
+  }
+}
+
+.BackgroundImage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -100;
+  background: url("bg.jpg");
+  background-size: cover;
+  filter: grayscale(100%) invert(100%);
+  opacity: 0.8;
+}
+
+.Navbar {
+  position: absolute;
+  display: flex;
+  font-size: 40px;
+  text-align: center;
+  width: 50%;
+  left: 25%;
+  justify-content: center;
+  h1 {
+    text-align: center;
+  }
+}
+
+.SenderSide {
+  position: absolute;
+  height: 80% !important;
+  width: 45%;
+  left: 3%;
+  top: 20%;
+  bottom: 0;
+}
+
+.RecipientSide {
+  position: absolute;
+  height: 80% !important;
+  width: 45%;
+  right: 3%;
+  top: 20%;
+  bottom: 0;
+}
+
+.MetaPublicKeys {
+  color: $color3;
+  background-color: $color1;
+  margin-top: 20px;
+}
+
+.MetaIdsWrapper {
+  display: flex;
+  // background-color: $color0;
+  .MetaId {
+    padding: 20px;
+    &:hover {
+      background-color: $color3;
+      cursor: pointer;
+      color: black;
+      opacity: 0.8;
+    }
+    border-bottom: 2px solid transparent;
+    color: white;
+    opacity: 0.7;
+  }
+
+  .SelectedMetaId {
+    // background-color: rgba(255, 255, 255, 0.765);
+    // color: rgb(0, 0, 0);
+    opacity: 1;
+    border-bottom: 2px solid white;
+  }
+}
+
+.SenderInfo {
+  .Body {
+    background-color: $color1;
+    color: $color3;
+  }
+}
+
+.StealthInfo {
+  .Body {
+    background-color: $color1;
+    color: $color3;
+  }
+}
+
+.DiscoveredStealthInfo {
+  overflow-y: scroll;
+  max-height: 200px;
+  .Row {
+    color: black !important;
+    margin-top: 10px;
+    background-color: white;
+    .Label {
+      color: black !important;
+    }
+  }
+}
+
+.TxList {
+  position: absolute;
+
+  top: 70%;
+  width: 60%;
+  left: 20%;
+
+  .Header {
+    border-bottom: 1px solid white;
+  }
+
+  .Table {
+    .Row {
+      display: flex;
+      justify-content: space-around;
+      color: white;
+      text-align: center !important;
+
+      .Entry {
+        width: 300px;
+        text-align: center !important;
+        overflow-x: hidden;
+      }
+    }
+
+    .Head {
+      .Entry {
+        border-bottom: 1px solid white;
+      }
+    }
+  }
+}
