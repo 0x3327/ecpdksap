@@ -76,6 +76,18 @@ func Compute_b_asElement(pubKey *bn254.GT) (b SECP256K1_fr.Element) {
 	return
 }
 
+func SenderComputesPubKey(b *SECP256K1_fr.Element, K *SECP256K1.G1Affine) string {
+
+	var b_asBigInt big.Int
+	b.BigInt(&b_asBigInt)
+
+	var P SECP256K1.G1Affine
+	P.ScalarMultiplication(K, &b_asBigInt)
+
+	return P.String()
+}
+
+
 func SenderComputesEthAddress(b *SECP256K1_fr.Element, K *SECP256K1.G1Affine) string {
 
 	var b_asBigInt big.Int

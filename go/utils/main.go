@@ -106,7 +106,6 @@ func BN254_MulG1PointandElement(pt *BN254.G1Affine, el *BN254_fr.Element) (res B
 }
 
 func BN254_G1PointToViewTag(pt *BN254.G1Affine, len uint) (viewTag string) {
-
 	return hex.EncodeToString(BN254_HashG1Point(pt))[:2*len]
 }
 
@@ -168,6 +167,8 @@ func ComputeViewTag(viewTagVersion string, pt *BN254.G1Affine) (viewTag string) 
 		viewTag = BN254_G1PointXCoordToViewTag(pt, 1)
 	}
 
+	fmt.Println("viewTag", viewTag)
+	fmt.Println("viewTagVersion", viewTagVersion)
 	return viewTag
 }
 

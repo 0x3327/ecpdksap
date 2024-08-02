@@ -1,6 +1,6 @@
 const go = new Go();
 
-WebAssembly.instantiateStreaming(fetch("test-sap.wasm"), go.importObject).then(
+WebAssembly.instantiateStreaming(fetch("ecpdksap.wasm"), go.importObject).then(
   (result) => {
     console.log({ x: go.argv });
     go.argv.push("send");

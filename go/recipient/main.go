@@ -22,8 +22,12 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 	// ------------------------ Unpacking json
 
+	fmt.Println(jsonInputString)
+
 	var recipientInputData RecipientInputData
 	json.Unmarshal([]byte(jsonInputString), &recipientInputData)
+
+	fmt.Println("recipientInputData", recipientInputData)
 
 	Rs_string := recipientInputData.Rs
 
@@ -173,11 +177,10 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 		var V BN254.G1Affine
 		V.ScalarMultiplicationBase(&v_asBigInt)
 
-		_, _, _, G2_BN254 := BN254.Generators()
 
 		var vR BN254.G1Affine
 		var b SECP256K1_fr.Element
-		var P SECP256K1.G1Affine
+		// var P SECP256K1.G1Affine
 		var kb SECP256K1_fr.Element
 
 		startTime := time.Now()
@@ -188,11 +191,16 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 			vR = utils.BN254_MulG1PointandElement(&Rsi, &v)
 
+			fmt.Println("vR", vR)
+
 			if viewTagFcn != nil {
 
-				calculatedViewTag := viewTagFcn(&vR, nBytesInViewTag)
+				calculatedViewTag := utils.ComputeViewTag(recipientInputData.ViewTagVersion, &vR)//   viewTagFcn(&vR, nBytesInViewTag)
 
 				viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
+
+				fmt.Println("calculatedViewTag", calculatedViewTag)
+				fmt.Println("expected: ", recipientInputData.ViewTags[i][:2*nBytesInViewTag])
 
 				if calculatedViewTag != recipientInputData.ViewTags[i][:2*nBytesInViewTag] {
 					continue
@@ -203,18 +211,25 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 			rCalcStart := time.Now()
 
-			S, _ := BN254.Pair([]BN254.G1Affine{vR}, []BN254.G2Affine{G2_BN254})
+			S := ecpdksap_v2.RecipientComputesSharedSecret(&v, &Rsi, &K)
+
 			b = ecpdksap_v2.Compute_b_asElement(&S)
+
+			_, G1 := SECP256K1.Generators()
 
 			kb.Mul(&k, &b)
 
-			P = utils.SECP256k1_MulG1PointandElement(&K, &b)
+			var P SECP256K1.G1Affine
+
+			P.ScalarMultiplication(&G1, kb.BigInt(new (big.Int)))
 
 			remainingCalcAggregateDuration += time.Since(rCalcStart)
 
 			rP = append(rP, hex.EncodeToString(S.Marshal()))
 
+			// rAddr = append(rAddr, ecpdksap_v2.ComputeEthAddress(&P))
 			rAddr = append(rAddr, ecpdksap_v2.ComputeEthAddress(&P))
+
 			privKeys = append(privKeys, "0x"+kb.Text(16))
 
 		}

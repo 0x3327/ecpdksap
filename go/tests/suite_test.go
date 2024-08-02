@@ -1,7 +1,11 @@
 package main
 
 import (
+	"math/big"
 	"testing"
+
+	SECP256K1 "github.com/consensys/gnark-crypto/ecc/secp256k1"
+	SECP256K1_fr "github.com/consensys/gnark-crypto/ecc/secp256k1/fr"
 
 	ecpdksap_v0 "ecpdksap-go/versions/v0"
 	ecpdksap_v1 "ecpdksap-go/versions/v1"
@@ -50,7 +54,7 @@ func Test_V1(t *testing.T) {
 
 func Test_V2(t *testing.T) {
 
-	_, K := utils.SECP256k_Gen1G1KeyPair()
+	k, K := utils.SECP256k_Gen1G1KeyPair()
 	v, V, _ := utils.BN254_GenG1KeyPair()
 
 	r, R, _ := utils.BN254_GenG1KeyPair()
@@ -63,10 +67,25 @@ func Test_V2(t *testing.T) {
 		t.Fatalf(`ERR: sender and recipient calculated different secret !!!`)
 	}
 
-	b_Sender := ecpdksap_v2.Compute_b(&S_Sender)
-	b_Recipient := ecpdksap_v2.Compute_b(&S_Recipient)
+	b_Sender := ecpdksap_v2.Compute_b_asElement(&S_Sender)
+	b_Recipient := ecpdksap_v2.Compute_b_asElement(&S_Recipient)
 
 	if b_Sender.String() != b_Recipient.String() {
 		t.Fatalf(`ERR: sender and recipient calculated different 'b' !!!`)
 	}
+
+	ethAddr_Sender := ecpdksap_v2.SenderComputesEthAddress(&b_Sender, &K)
+
+	var P SECP256K1.G1Affine
+
+	_, G1 := SECP256K1.Generators()
+	var kb SECP256K1_fr.Element
+	kb.Mul(&k, &b_Recipient)
+	P.ScalarMultiplication(&G1, kb.BigInt(new (big.Int)))
+	ethAddr_Recipient := ecpdksap_v2.ComputeEthAddress(&P)
+
+	if ethAddr_Sender!= ethAddr_Recipient {
+		t.Fatalf(`ERR: sender and recipient calculated different ETH addr !!!`)
+	}
+
 }
