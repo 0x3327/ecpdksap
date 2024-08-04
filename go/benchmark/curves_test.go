@@ -15,6 +15,10 @@ func Benchmark_BN254_5000(b *testing.B) {
 	bn254.Run(b, 5_000, 10, true)
 }
 
+func Benchmark_BN254_100000(b *testing.B) {
+	bn254.Run(b, 100_000, 10, true)
+}
+
 func Benchmark_Curves_100(b *testing.B) {
 	_Benchmark_Curves(b, 100, 10)
 }

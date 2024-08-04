@@ -1,6 +1,7 @@
 package bn254_bench
 
 import (
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
@@ -10,7 +11,12 @@ import (
 	"time"
 
 	EC "github.com/consensys/gnark-crypto/ecc/bn254"
+	"github.com/consensys/gnark-crypto/ecc/bn254/fp"
 	EC_fr "github.com/consensys/gnark-crypto/ecc/bn254/fr"
+
+	"ecpdksap-go/utils"
+
+	SECP256K1 "github.com/consensys/gnark-crypto/ecc/secp256k1"
 )
 
 func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
@@ -22,7 +28,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 	for iReps := 0; iReps < nRepetitions; iReps++ {
 
-		// g1, _, _, g2Aff := EC.Generators()
+		g1, _, _, g2Aff := EC.Generators()
 
 		//common for versions: V0, V1, V2
 		_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair()
@@ -39,8 +45,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 		var rs []big.Int
 
-		var viewTagsTwoBytes []uint16
-		var viewTagsSingleByte []uint8
+		var a, bx fp.Element
 
 		var combinedMeta []*_CombinedMeta
 
@@ -61,8 +66,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 			//note: all tag elements will be overwritten by each protocol & tag's version
 
-			viewTagsTwoBytes = append(viewTagsTwoBytes, uint16(rand.Uint32()%65536))
-			viewTagsSingleByte = append(viewTagsSingleByte, uint8(rand.Uint32()%256))
 
 			cm := new(_CombinedMeta)
 			cm.Rj = new(EC.G1Jac)
@@ -70,6 +73,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 			cm.Rj_asAffArr = []EC.G1Affine{Rj_asAff}
 			cm.ViewTagTwoBytes = uint16(rand.Uint32() % 65536)
 			cm.ViewTagSingleByte = uint8(rand.Uint32() % 256)
+			cm.ViewTagSecondByte = uint8(rand.Uint32() % 256)
 
 			combinedMeta = append(combinedMeta, cm)
 		}
@@ -88,6 +92,14 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		var vR EC.G1Jac
 		var vR_asAff EC.G1Affine
 
+		vR.ScalarMultiplication(&Rs[len(Rs)-1], &v_asBigInt)
+
+		fmt.Println("----->", rV.Equal(&vR))
+		fmt.Println("MyFromJacobian2", rV.MyFromJacobian3() == vR.MyFromJacobian3())
+		fmt.Println("MyFromJacobian2", rV.MyFromJacobian3(), vR.MyFromJacobian3())
+		// pZSquare.Square(&p.Z)
+		// aZSquare.Square(&q.Z)
+
 		//protocol: V0 and viewTag: none
 		if !justViewTags {
 
@@ -104,151 +116,172 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		}
 		//protocol: V0 and viewTag: V0-1byte
 
-		viewTagsSingleByte[len(viewTagsTwoBytes)-1] = _EC_G1AffPointToViewTagByte1(&rV_asAff)
 
-		hasher := sha256.New()
+		hasher := sha1.New()
+
+		// precomputedLines := [][2][66]EC.LineEvaluationAff {EC.PrecomputeLines(K2_EC_asAffArr[0])}
+		// precomputedLines := EC.PrecomputeLines(K2_EC_asAffArr[0])
+		precomputedLines_asArr := [][2][66]EC.LineEvaluationAff {EC.PrecomputeLines(K2_EC_asAffArr[0])}
+
+		// precomputedLinesPtr := &precomputedLines
+
+		e := P_v0.MyE(v_asBigIntPtr)
+
+		var Rjs []*EC.G1Jac
+
+		for _, cm := range combinedMeta {
+			Rjs = append(Rjs, cm.Rj)
+		}
 
 		b.ResetTimer()
 
-		for _, cm := range combinedMeta {
+		vRs := vR.BatchScalarMultiplicationUsingFixedS(&Rjs, v_asBigIntPtr)
+
+		for i, cm := range combinedMeta {
 
 			hasher.Reset()
 
-			compressed := (vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))).Bytes()
+			preimage := vRs[i].MyFromJacobian3()
+			compressed := preimage.Bytes()
 
 			if hasher.Sum(compressed[:])[0] != cm.ViewTagSingleByte {
 				continue
 			}
 
-			pairingResult, _ := EC.Pair(cm.Rj_asAffArr, K2_EC_asAffArr)
+			pairingResult, _ := EC.PairFixedQ(cm.Rj_asAffArr, precomputedLines_asArr)
 
-			P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
+			P_v0.MyCyclotomicExp(pairingResult, e)
 		}
 
 		durations["v0.v0-1byte"] += b.Elapsed()
 
 
-		// //protocol: V0 and viewTag: V0-2bytes
-		// viewTagsTwoBytes[len(viewTagsTwoBytes)-1] = _EC_G1AffPointToViewTagByte2(&rV_asAff)
+		//protocol: V0 and viewTag: V0-2bytes
 
-		// b.ResetTimer()
+		b.ResetTimer()
 
-		// for _, cm := range combinedMeta {
+		vRs = vR.BatchScalarMultiplicationUsingFixedS(&Rjs, v_asBigIntPtr)
 
-		// 	if _EC_G1AffPointToViewTagByte2(vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))) != cm.ViewTagTwoBytes {
-		// 		continue
-		// 	}
+		for i, cm := range combinedMeta {
 
-		// 	pairingResult, _ := EC.Pair(cm.Rj_asAffArr, K2_EC_asAffArr)
+			hasher.Reset()
 
-		// 	P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
-		// }
+			preimage := vRs[i].MyFromJacobian3()
+			compressed := preimage.Bytes()
 
-		// durations["v0.v0-2bytes"] += b.Elapsed()
+			vTag := hasher.Sum(compressed[:])
+
+			if vTag[0] != cm.ViewTagSingleByte || vTag[1] != cm.ViewTagSecondByte {
+				continue
+			}
+
+			pairingResult, _ := EC.PairFixedQ(cm.Rj_asAffArr, precomputedLines_asArr)
+
+			P_v0.MyCyclotomicExp(pairingResult, e)
+		}
+
+		durations["v0.v0-2bytes"] += b.Elapsed()
 
 		// //protocol: V0 and viewTag: V1-1byte
-		// viewTagsSingleByte[len(viewTagsSingleByte)-1] = _EC_G1AffPointXCoordToViewTagByte1(&rV_asAff)
 
-		// b.ResetTimer()
+		b.ResetTimer()
 
-		// for _, cm := range combinedMeta {
+		vRs = vR.BatchScalarMultiplicationUsingFixedS(&Rjs, v_asBigIntPtr)
+		
+		for i, vrs := range vRs {
 
-		// 	if _EC_G1AffPointXCoordToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))) != cm.ViewTagSingleByte {
-		// 		continue
-		// 	}
+			if vR_asAff.X.Mul(&vrs.X, bx.Square(a.Inverse(&vrs.Z))).Bytes()[0] == combinedMeta[i].ViewTagSingleByte {
 
-		// 	pairingResult, _ := EC.Pair(cm.Rj_asAffArr, K2_EC_asAffArr)
+				pairingResult, _ := EC.PairFixedQ(combinedMeta[i].Rj_asAffArr, precomputedLines_asArr)
 
-		// 	P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
-		// }
+				P_v0.MyCyclotomicExp(pairingResult, e)
+			}
+		}
 
-		// durations["v0.v1-1byte"] += b.Elapsed()
+		durations["v0.v1-1byte"] += b.Elapsed()
 
-		// //protocol: V1 -------------------
+		//protocol: V1 -------------------
 
-		// // var P_v1 EC.GT
-		// var tmp EC.G1Jac
-		// var tmpAff EC.G1Affine
-		// K_asArray := K2_EC_asAffArr
+		// var P_v1 EC.GT
+		var tmp EC.G1Jac
+		var tmpAff EC.G1Affine
+		K_asArray := K2_EC_asAffArr
 
-		// //protocol: V1 and viewTag: none
-		// if !justViewTags {
-		// 	b.ResetTimer()
+		//protocol: V1 and viewTag: none
+		if !justViewTags {
+			b.ResetTimer()
 
-		// 	for _, Rsi_asJac := range Rs {
+			for _, Rsi_asJac := range Rs {
 
-		// 		tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rsi_asJac, v_asBigIntPtr))))
+				tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(vR_asAff.FromJacobian(vR.ScalarMultiplication(&Rsi_asJac, v_asBigIntPtr))))
 
-		// 		EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(&tmp)}, K_asArray)
-		// 	}
+				EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(&tmp)}, K_asArray)
+			}
 
-		// 	durations["v1.none"] += b.Elapsed()
-		// }
-		// //protocol: V1 and viewTag: V0-1byte
-		// viewTagsSingleByte[len(viewTagsSingleByte)-1] = _EC_G1AffPointToViewTagByte1(&rV_asAff)
+			durations["v1.none"] += b.Elapsed()
+		}
+		//protocol: V1 and viewTag: V0-1byte
 
-		// b.ResetTimer()
+		b.ResetTimer()
 
-		// for _, cm := range combinedMeta {
+		for _, cm := range combinedMeta {
 
-		// 	if _EC_G1AffPointToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))) != cm.ViewTagSingleByte {
-		// 		continue
-		// 	}
+			if _EC_G1AffPointToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))) != cm.ViewTagSingleByte {
+				continue
+			}
 
-		// 	EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, K_asArray)
-		// }
+			EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, K_asArray)
+		}
 
-		// durations["v1.v0-1byte"] += b.Elapsed()
+		durations["v1.v0-1byte"] += b.Elapsed()
 
-		// //protocol: V1 and viewTag: V0-2bytes
-		// viewTagsTwoBytes[len(viewTagsTwoBytes)-1] = _EC_G1AffPointToViewTagByte2(&rV_asAff)
+		//protocol: V1 and viewTag: V0-2bytes
 
-		// b.ResetTimer()
+		b.ResetTimer()
 
-		// for _, cm := range combinedMeta {
+		for _, cm := range combinedMeta {
 
-		// 	if _EC_G1AffPointToViewTagByte2(vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))) != cm.ViewTagTwoBytes {
-		// 		continue
-		// 	}
+			if _EC_G1AffPointToViewTagByte2(vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))) != cm.ViewTagTwoBytes {
+				continue
+			}
 
-		// 	EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, K_asArray)
-		// }
+			EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, K_asArray)
+		}
 
-		// durations["v1.v0-2bytes"] += b.Elapsed()
+		durations["v1.v0-2bytes"] += b.Elapsed()
 
-		// //protocol: V1 and viewTag: V1-1byte
-		// viewTagsSingleByte[len(viewTagsSingleByte)-1] = _EC_G1AffPointXCoordToViewTagByte1(&rV_asAff)
+		//protocol: V1 and viewTag: V1-1byte
 
-		// b.ResetTimer()
+		b.ResetTimer()
 
-		// for _, cm := range combinedMeta {
+		for _, cm := range combinedMeta {
 
-		// 	if _EC_G1AffPointXCoordToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))) != cm.ViewTagSingleByte {
-		// 		continue
-		// 	}
+			if _EC_G1AffPointXCoordToViewTagByte1(vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))) != cm.ViewTagSingleByte {
+				continue
+			}
 
-		// 	EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, K_asArray)
-		// }
+			EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, K_asArray)
+		}
 
-		// durations["v1.v1-1byte"] += b.Elapsed()
+		durations["v1.v1-1byte"] += b.Elapsed()
 
 		// //protocol V2 --------------------
 
-		// _, K_SECP256k1 := utils.SECP256k_Gen1G1KeyPair()
-		// var K_SECP256k1_Jac SECP256K1.G1Jac
-		// K_SECP256k1_Jac.FromAffine(&K_SECP256k1)
+		_, K_SECP256k1 := utils.SECP256k_Gen1G1KeyPair()
+		var K_SECP256k1_Jac SECP256K1.G1Jac
+		K_SECP256k1_Jac.FromAffine(&K_SECP256k1)
 
-		// g2Aff_asArray := []EC.G2Affine{g2Aff}
+		g2Aff_asArray := []EC.G2Affine{g2Aff}
 
-		// var Pv2_asJac SECP256K1.G1Jac
+		var Pv2_asJac SECP256K1.G1Jac
 
-		// b_asBigInt := new(big.Int)
+		b_asBigInt := new(big.Int)
 
-		// K_SECP256k1_JacPtr := &K_SECP256k1_Jac
+		K_SECP256k1_JacPtr := &K_SECP256k1_Jac
 
-		// K_SECP256k1_AffPtr := new(SECP256K1.G1Affine)
-		// K_SECP256k1_AffPtr.FromJacobian(K_SECP256k1_JacPtr)
-		// // var bs []SECP256K1_fr.Element
+		K_SECP256k1_AffPtr := new(SECP256K1.G1Affine)
+		K_SECP256k1_AffPtr.FromJacobian(K_SECP256k1_JacPtr)
+		// var bs []SECP256K1_fr.Element
 
 		// //protocol: V2 and viewTag: none
 		// if !justViewTags {
@@ -271,85 +304,82 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		// }
 
 		// //protocol: V2 and viewTag: v0-1byte
-		// viewTagsSingleByte[len(viewTagsSingleByte)-1] = _EC_G1AffPointToViewTagByte1(&rV_asAff)
 
-		// // bs = []SECP256K1_fr.Element{}
-		// b.ResetTimer()
+		precomputedLines_asArr = [][2][66]EC.LineEvaluationAff {EC.PrecomputeLines(g2Aff_asArray[0])}
 
-		// for _, cm := range combinedMeta {
 
-		// 	hasher.Reset()
+		b.ResetTimer()
 
-		// 	compressed := (vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))).Bytes()
+		vRs = vR.BatchScalarMultiplicationUsingFixedS(&Rjs, v_asBigIntPtr)
+		
+		for i, cm := range combinedMeta {
 
-		// 	if hasher.Sum(compressed[:])[0] == cm.ViewTagSingleByte {
+			hasher.Reset()
 
-		// 		S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
+			compressed := vR_asAff.X.Mul(&vRs[i].X, bx.Square(a.Inverse(&vRs[i].Z))).Bytes()
 
-		// 		// bs = append(bs, SECP256K1_fr.Element(S.C0.B0.A0))
+			if hasher.Sum(compressed[:])[0] == cm.ViewTagSingleByte {
 
-		// 		Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
-		// 	}
-		// }
+				vR_asAff.Y.Mul(&vRs[i].Y, &bx).Mul(&vR_asAff.Y, &a)
 
-		// // SECP256K1.BatchScalarMultiplicationG1(K_SECP256k1_AffPtr, bs)
-		// durations["v2.v0-1byte"] += b.Elapsed()
+				S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedLines_asArr)
 
-		// //protocol: V2 and viewTag: v0-2bytes
-		// viewTagsTwoBytes[len(viewTagsTwoBytes)-1] = _EC_G1AffPointToViewTagByte2(&rV_asAff)
+				Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
+			}
+		}
 
-		// // bs = []SECP256K1_fr.Element{}
+		durations["v2.v0-1byte"] += b.Elapsed()
 
-		// b.ResetTimer()
+		//protocol: V2 and viewTag: v0-2bytes
+		b.ResetTimer()
 
-		// for _, cm := range combinedMeta {
+		vRs = vR.BatchScalarMultiplicationUsingFixedS(&Rjs, v_asBigIntPtr)
 
-		// 	if _EC_G1AffPointToViewTagByte2(vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))) != cm.ViewTagTwoBytes {
-		// 		continue
-		// 	}
+		for i, cm := range combinedMeta {
 
-		// 	S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
+			hasher.Reset()
 
-		// 	// bs = append(bs, SECP256K1_fr.Element(S.C0.B0.A0))
+			compressed := vR_asAff.X.Mul(&vRs[i].X, bx.Square(a.Inverse(&vRs[i].Z))).Bytes()
 
-		// 	Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
-		// }
+			vTag := hasher.Sum(compressed[:])
 
-		// // SECP256K1.BatchScalarMultiplicationG1(K_SECP256k1_AffPtr, bs)
-		// durations["v2.v0-2bytes"] += b.Elapsed()
+			if vTag[0] == cm.ViewTagSingleByte && vTag[1] == cm.ViewTagSecondByte {
+
+				vR_asAff.Y.Mul(&vRs[i].Y, &bx).Mul(&vR_asAff.Y, &a)
+
+				S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedLines_asArr)
+
+				Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
+			}
+		}
+
+		durations["v2.v0-2bytes"] += b.Elapsed()
 
 		// //protocol: V2 and viewTag: v1-1byte
-		// viewTagsSingleByte[len(viewTagsSingleByte)-1] = _EC_G1AffPointXCoordToViewTagByte1(&rV_asAff)
+		b.ResetTimer()
 
-		// // bs = []SECP256K1_fr.Element{}
+		vRs = vR.BatchScalarMultiplicationUsingFixedS(&Rjs, v_asBigIntPtr)
+		
+		for i, vrs := range vRs {
 
-		// b.ResetTimer()
+			if vR_asAff.X.Mul(&vrs.X, bx.Square(a.Inverse(&vrs.Z))).Bytes()[0] == combinedMeta[i].ViewTagSingleByte {
 
-		// for _, cm := range combinedMeta {
+				vR_asAff.Y.Mul(&vrs.Y, &bx).Mul(&vR_asAff.Y, &a)
 
-		// 	if vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr)).Bytes()[0] != cm.ViewTagSingleByte {
-		// 		continue
-		// 	}
+				S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedLines_asArr)
 
-		// 	S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
+				Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
+			}
+		}
 
-		// 	// bs = append(bs, SECP256K1_fr.Element(S.C0.B0.A0))
+		durations["v2.v1-1byte"] += b.Elapsed()
 
-		// 	Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
-		// }
-
-		// // SECP256K1.BatchScalarMultiplicationG1(K_SECP256k1_AffPtr, bs)
-		// durations["v2.v1-1byte"] += b.Elapsed()
 	}
 
-	// protocolVersions := []string{
-	// 	"v0.none", "v0.v0-1byte", "v0.v0-2bytes", "v0.v1-1byte",
-	// 	"v1.none", "v1.v0-1byte", "v1.v0-2bytes", "v1.v1-1byte",
-	// 	"v2.none", "v2.v0-1byte", "v2.v0-2bytes", "v2.v1-1byte",
-	// }
-
 	protocolVersions := []string{
-		 "v0.v0-1byte",
+		"v0.none", "v0.v0-1byte", "v0.v0-2bytes", "v0.v1-1byte",
+		"v1.none", "v1.v0-1byte", "v1.v0-2bytes", "v1.v1-1byte",
+		"v2.none", "v2.v0-1byte", "v2.v0-2bytes", "v2.v1-1byte",
 	}
 
 	for _, pVersion := range protocolVersions {
@@ -413,4 +443,6 @@ type _CombinedMeta struct {
 	Rj_asAffArr       []EC.G1Affine
 	ViewTagTwoBytes   uint16
 	ViewTagSingleByte uint8
+	ViewTagSecondByte   uint8
+
 }
