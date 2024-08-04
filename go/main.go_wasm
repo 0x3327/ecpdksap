@@ -6,6 +6,8 @@ import (
 	"ecpdksap-go/sender"
 	"fmt"
 	"os"
+	"strings"
+	"syscall/js"
 )
 
 func main() {
@@ -21,7 +23,8 @@ func main() {
 			panic(`Subcommand 'gen-send-info' takes no input params!`)
 		}
 		
-		data_generation.GenerateSenderInfo("v2", "") 
+		senderMeta := data_generation.GenerateSenderInfo("v2", "") 
+		js.Global().Set("senderMeta", senderMeta)
 
 
 	case "gen-recipient-info":
@@ -29,19 +32,25 @@ func main() {
 			panic(`Subcommand 'gen-recipient-info' takes no input params!`)
 		}
 		
-		data_generation.GenerateRecipientInfo("v2", "")
+		recipientMeta := data_generation.GenerateRecipientInfo("v2", "")
+		js.Global().Set("recipientMeta", recipientMeta)
 
 	case "send":
 		if len(os.Args) != 3 {
 			panic(`Subcommand 'send' receives all info. as one JSON input string!`)
 		}
-		sender.Send(os.Args[2])
+		_, _, viewTag, pubKey, addr := sender.Send(os.Args[2])
+		js.Global().Set("StealthPubKey", pubKey)
+		js.Global().Set("StealthAddress", addr)
+		js.Global().Set("StealthViewTag", viewTag)
 		
 	case "receive-scan":
 		if len(os.Args) != 3 {
 			panic(`Subcommand 'receive-scan' receives all info. as one JSON input string!`)
 		}
-		recipient.Scan(os.Args[2])
+		_, addrs, privKeys := recipient.Scan(os.Args[2])
+		js.Global().Set("DiscoveredStealthAddrs", strings.Join(addrs, "."))
+		js.Global().Set("DiscoveredStealthPrivKeys", strings.Join(privKeys, "."))
 
 	case "gen-example":
 		if len(os.Args) != 5 {
