@@ -11,6 +11,14 @@ import (
 	bw6_761 "ecpdksap-go/benchmark/curves/bw6-761"
 )
 
+func Benchmark_tables_BN254(b *testing.B) {
+	bn254.Run(b, 5_000, 10, true)
+	bn254.Run(b, 10_000, 10, true)
+	bn254.Run(b, 20_000, 10, true)
+	bn254.Run(b, 40_000, 10, true)
+	bn254.Run(b, 80_000, 10, true)
+}
+
 func Benchmark_BN254_5000(b *testing.B) {
 	bn254.Run(b, 5_000, 10, true)
 }
