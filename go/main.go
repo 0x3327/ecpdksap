@@ -1,14 +1,22 @@
 package main
 
 import (
+	"ecpdksap-go/benchmark"
 	"ecpdksap-go/gen_example"
 	"ecpdksap-go/recipient"
 	"ecpdksap-go/sender"
 	"fmt"
 	"os"
+	"testing"
 )
 
 func main() {
+	b := new (testing.B)
+	b.StartTimer()
+	benchmark.Benchmark_BN254_V2_V0_1byte_Combined(b, 100_000)
+}
+
+func main2() {
 
 	subcmd := os.Args[1]
 
