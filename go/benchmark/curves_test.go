@@ -23,6 +23,10 @@ func Benchmark_BN254_5000(b *testing.B) {
 	bn254.Run(b, 5_000, 10, true)
 }
 
+func Benchmark_BN254_1000000(b *testing.B) {
+	bn254.Run(b, 1_000_000, 5, true)
+}
+
 func Benchmark_BN254_1000(b *testing.B) {
 	bn254.Run(b, 1000, 1, true)
 }
