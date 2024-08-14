@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	EC "github.com/consensys/gnark-crypto/ecc/bw6-633"
-	EC_fr "github.com/consensys/gnark-crypto/ecc/bw6-633/fr"
+	EC "github.com/consensys/gnark-crypto/ecc/bw6-761"
+	EC_fr "github.com/consensys/gnark-crypto/ecc/bw6-761/fr"
 
 	SECP256K1 "github.com/consensys/gnark-crypto/ecc/secp256k1"
 
@@ -19,7 +19,7 @@ import (
 
 func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
-	fmt.Println("Running `bw6-633` Benchmark  ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions)
+	fmt.Println("Running `bw6-761` Benchmark  ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions)
 	fmt.Println()
 
 	durations := map[string]time.Duration{}
@@ -43,9 +43,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 		var rs []big.Int
 
-		var viewTagsTwoBytes []uint16
-		var viewTagsSingleByte []uint8
-
 		var combinedMeta []*_CombinedMeta
 
 		for j := 0; j < sampleSize; j++ {
@@ -62,11 +59,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 			//note: store the last priv. key for R
 			r_asBigInt = rj_asBigInt
 			rs = append(rs, r_asBigInt)
-
-			//note: all tag elements will be overwritten by each protocol & tag's version
-
-			viewTagsTwoBytes = append(viewTagsTwoBytes, uint16(rand.Uint32()%65536))
-			viewTagsSingleByte = append(viewTagsSingleByte, uint8(rand.Uint32()%256))
 
 			cm := new(_CombinedMeta)
 			cm.Rj = new(EC.G1Jac)
@@ -92,6 +84,8 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		var vR EC.G1Jac
 		var vR_asAff EC.G1Affine
 
+		hasher := sha256.New()
+
 		//protocol: V0 and viewTag: none
 		if !justViewTags {
 
@@ -106,12 +100,8 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 			durations["v0.none"] += b.Elapsed()
 		}
+
 		//protocol: V0 and viewTag: V0-1byte
-
-		viewTagsSingleByte[len(viewTagsTwoBytes)-1] = _EC_G1AffPointToViewTagByte1(&rV_asAff)
-
-		hasher := sha256.New()
-
 		b.ResetTimer()
 
 		for _, cm := range combinedMeta {
@@ -132,8 +122,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		durations["v0.v0-1byte"] += b.Elapsed()
 
 		//protocol: V0 and viewTag: V0-2bytes
-		viewTagsTwoBytes[len(viewTagsTwoBytes)-1] = _EC_G1AffPointToViewTagByte2(&rV_asAff)
-
 		b.ResetTimer()
 
 		for _, cm := range combinedMeta {
@@ -150,8 +138,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		durations["v0.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V0 and viewTag: V1-1byte
-		viewTagsSingleByte[len(viewTagsSingleByte)-1] = _EC_G1AffPointXCoordToViewTagByte1(&rV_asAff)
-
 		b.ResetTimer()
 
 		for _, cm := range combinedMeta {
@@ -188,8 +174,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 			durations["v1.none"] += b.Elapsed()
 		}
 		//protocol: V1 and viewTag: V0-1byte
-		viewTagsSingleByte[len(viewTagsSingleByte)-1] = _EC_G1AffPointToViewTagByte1(&rV_asAff)
-
 		b.ResetTimer()
 
 		for _, cm := range combinedMeta {
@@ -204,8 +188,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		durations["v1.v0-1byte"] += b.Elapsed()
 
 		//protocol: V1 and viewTag: V0-2bytes
-		viewTagsTwoBytes[len(viewTagsTwoBytes)-1] = _EC_G1AffPointToViewTagByte2(&rV_asAff)
-
 		b.ResetTimer()
 
 		for _, cm := range combinedMeta {
@@ -220,7 +202,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		durations["v1.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V1 and viewTag: V1-1byte
-		viewTagsSingleByte[len(viewTagsSingleByte)-1] = _EC_G1AffPointXCoordToViewTagByte1(&rV_asAff)
 
 		b.ResetTimer()
 
@@ -251,12 +232,9 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 		K_SECP256k1_AffPtr := new(SECP256K1.G1Affine)
 		K_SECP256k1_AffPtr.FromJacobian(K_SECP256k1_JacPtr)
-		// var bs []SECP256K1_fr.Element
 
 		//protocol: V2 and viewTag: none
 		if !justViewTags {
-
-			// bs = []SECP256K1_fr.Element{}
 
 			b.ResetTimer()
 
@@ -264,19 +242,13 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 				S, _ := EC.Pair([]EC.G1Affine{*vR_asAff.FromJacobian(vR.ScalarMultiplication(cm.Rj, v_asBigIntPtr))}, g2Aff_asArray)
 
-				// bs = append(bs, SECP256K1_fr.Element(S.C0.B0.A0))
-
 				Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.B0.A0.BigInt(b_asBigInt))
 			}
 
-			// SECP256K1.BatchScalarMultiplicationG1(K_SECP256k1_AffPtr, bs)
 			durations["v2.none"] += b.Elapsed()
 		}
 
 		//protocol: V2 and viewTag: v0-1byte
-		viewTagsSingleByte[len(viewTagsSingleByte)-1] = _EC_G1AffPointToViewTagByte1(&rV_asAff)
-
-		// bs = []SECP256K1_fr.Element{}
 		b.ResetTimer()
 
 		for _, cm := range combinedMeta {
@@ -289,20 +261,13 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 				S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
 
-				// bs = append(bs, SECP256K1_fr.Element(S.C0.B0.A0))
-
 				Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.B0.A0.BigInt(b_asBigInt))
 			}
 		}
 
-		// SECP256K1.BatchScalarMultiplicationG1(K_SECP256k1_AffPtr, bs)
 		durations["v2.v0-1byte"] += b.Elapsed()
 
 		//protocol: V2 and viewTag: v0-2bytes
-		viewTagsTwoBytes[len(viewTagsTwoBytes)-1] = _EC_G1AffPointToViewTagByte2(&rV_asAff)
-
-		// bs = []SECP256K1_fr.Element{}
-
 		b.ResetTimer()
 
 		for _, cm := range combinedMeta {
@@ -313,19 +278,12 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
 
-			// bs = append(bs, SECP256K1_fr.Element(S.C0.B0.A0))
-
 			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.B0.A0.BigInt(b_asBigInt))
 		}
 
-		// SECP256K1.BatchScalarMultiplicationG1(K_SECP256k1_AffPtr, bs)
 		durations["v2.v0-2bytes"] += b.Elapsed()
 
 		//protocol: V2 and viewTag: v1-1byte
-		viewTagsSingleByte[len(viewTagsSingleByte)-1] = _EC_G1AffPointXCoordToViewTagByte1(&rV_asAff)
-
-		// bs = []SECP256K1_fr.Element{}
-
 		b.ResetTimer()
 
 		for _, cm := range combinedMeta {
@@ -336,12 +294,9 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
 
-			// bs = append(bs, SECP256K1_fr.Element(S.C0.B0.A0))
-
 			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.B0.A0.BigInt(b_asBigInt))
 		}
 
-		// SECP256K1.BatchScalarMultiplicationG1(K_SECP256k1_AffPtr, bs)
 		durations["v2.v1-1byte"] += b.Elapsed()
 	}
 

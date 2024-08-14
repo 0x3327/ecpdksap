@@ -23,3 +23,5 @@ docs/
 
 # Dotenv file
 .env
+*.prof
+*.test

@@ -11,12 +11,28 @@ import (
 	bw6_761 "ecpdksap-go/benchmark/curves/bw6-761"
 )
 
+func Benchmark_tables_BN254(b *testing.B) {
+	bn254.Run(b, 5_000, 10, true)
+	bn254.Run(b, 10_000, 10, true)
+	bn254.Run(b, 20_000, 10, true)
+	bn254.Run(b, 40_000, 10, true)
+	bn254.Run(b, 80_000, 10, true)
+}
+
 func Benchmark_BN254_5000(b *testing.B) {
 	bn254.Run(b, 5_000, 10, true)
 }
 
-func Benchmark_Curves_100(b *testing.B) {
-	_Benchmark_Curves(b, 100, 10)
+func Benchmark_BN254_1000000(b *testing.B) {
+	bn254.Run(b, 1_000_000, 5, true)
+}
+
+func Benchmark_BN254_1000(b *testing.B) {
+	bn254.Run(b, 1000, 1, true)
+}
+
+func Benchmark_Curves_10(b *testing.B) {
+	_Benchmark_Curves(b, 10, 3)
 }
 
 func Benchmark_Curves_80000(b *testing.B) {
