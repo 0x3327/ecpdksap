@@ -260,7 +260,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 			hash := hasher.Sum(compressed[:])
 
-			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte{
+			if hash[0] != cm.ViewTagSingleByte {
 				continue
 			}
 
