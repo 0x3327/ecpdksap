@@ -1,3 +1,3 @@
 set -e
 
-GOAMD64=v4 go build -o builds/ecpdksap-latest
+GOAMD64=v4 go build -o builds/ecpdksap-ll-latest

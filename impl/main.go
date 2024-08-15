@@ -7,16 +7,10 @@ import (
 	"ecpdksap-go/sender"
 	"fmt"
 	"os"
-	"testing"
 )
 
-func main() {
-	b := new (testing.B)
-	b.StartTimer()
-	benchmark.Benchmark_BN254_V2_V0_1byte_Combined(b, 100_000)
-}
 
-func main2() {
+func main() {
 
 	if len(os.Args) == 1 {
 		panic(`No subcommand passed - 'send' | 'receive-scan' | 'gen-example' | 'bench' subcommands allowed!`)

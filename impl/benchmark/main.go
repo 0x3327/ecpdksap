@@ -52,9 +52,7 @@ func Benchmark_BN254_V2_V0_1byte_Combined(b *testing.B, sampleSize int) {
 
 	neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix := EC.PrecomputationForFixedScalarMultiplication(v_asBigIntPtr)
 	var table [15]EC.G1Jac
-
 	var a_El, b_El *EC_fp.Element
-
 	var b_asBigInt big.Int
 
 	b.ResetTimer()
