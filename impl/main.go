@@ -11,6 +11,10 @@ import (
 
 func main() {
 
+	if len(os.Args) == 1 {
+		panic(`No subcommand passed - 'send' | 'receive-scan' | 'gen-example' | 'bench' subcommands allowed!`)
+	}
+
 	subcmd := os.Args[1]
 
 	switch subcmd {
@@ -40,7 +44,7 @@ func main() {
 		benchmark.RunAll()
 
 	default:
-		fmt.Printf("\nERR: Only: 'send' | 'receive-scan' | 'gen-example' subcommands allowed.\n\n")
+		fmt.Printf("\nERR: Only: 'send' | 'receive-scan' | 'gen-example' | 'bench' subcommands allowed.\n\n")
 		return
 	}
 }
