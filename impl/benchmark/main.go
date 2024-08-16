@@ -1,6 +1,7 @@
 package benchmark
 
 import (
+	"fmt"
 	"testing"
 
 	bls12_377 "ecpdksap-go/benchmark/curves/bls12-377"
@@ -22,7 +23,12 @@ func RunAll () {
 }
 
 func _Benchmark_tables_BN254(b *testing.B) {
-	bn254.Run(b, 5_000, 10, true)
+	
+	for i := 0; i < 1301; i++ {
+
+		fmt.Println("Seed:", i)
+		bn254.Run(b, 5_000, 10, true, int64(i))
+	}
 	// bn254.Run(b, 10_000, 10, true)
 	// bn254.Run(b, 20_000, 10, true)
 	// bn254.Run(b, 40_000, 10, true)
@@ -38,7 +44,7 @@ func _Benchmark_Curves(b *testing.B, sampleSize int, nRepetitions int) {
 	bls12_377.Run(b, sampleSize, nRepetitions, true)
 	bls12_381.Run(b, sampleSize, nRepetitions, true)
 	bls24_315.Run(b, sampleSize, nRepetitions, true)
-	bn254.Run(b, sampleSize, nRepetitions, true)
+	bn254.Run(b, sampleSize, nRepetitions, true, int64(1))
 	bw6_633.Run(b, sampleSize, nRepetitions, true)
 	bw6_761.Run(b, sampleSize, nRepetitions, true)
 }

@@ -1,0 +1,1569 @@
+Seed: 0
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 319.353404ms
+
+version: v0.v0-2bytes duration: 294.93422ms
+
+version: v0.v1-1byte duration: 317.592675ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 310.647654ms
+
+version: v1.v0-2bytes duration: 296.929104ms
+
+version: v1.v1-1byte duration: 312.25632ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.699762ms
+
+version: v2.v0-2bytes duration: 297.815083ms
+
+version: v2.v1-1byte duration: 310.342287ms
+
+
+
+Seed: 1
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 318.446229ms
+
+version: v0.v0-2bytes duration: 296.668295ms
+
+version: v0.v1-1byte duration: 325.62625ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 311.554354ms
+
+version: v1.v0-2bytes duration: 296.158891ms
+
+version: v1.v1-1byte duration: 311.945479ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.802628ms
+
+version: v2.v0-2bytes duration: 296.131566ms
+
+version: v2.v1-1byte duration: 311.153891ms
+
+
+
+Seed: 2
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 316.961979ms
+
+version: v0.v0-2bytes duration: 294.676275ms
+
+version: v0.v1-1byte duration: 320.665708ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 310.70392ms
+
+version: v1.v0-2bytes duration: 297.137962ms
+
+version: v1.v1-1byte duration: 309.354937ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 310.715016ms
+
+version: v2.v0-2bytes duration: 294.173416ms
+
+version: v2.v1-1byte duration: 308.983483ms
+
+
+
+Seed: 3
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 316.80047ms
+
+version: v0.v0-2bytes duration: 293.716041ms
+
+version: v0.v1-1byte duration: 318.053491ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.672979ms
+
+version: v1.v0-2bytes duration: 293.807233ms
+
+version: v1.v1-1byte duration: 307.670012ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 308.9453ms
+
+version: v2.v0-2bytes duration: 293.705225ms
+
+version: v2.v1-1byte duration: 307.822337ms
+
+
+
+Seed: 4
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 316.18775ms
+
+version: v0.v0-2bytes duration: 295.14582ms
+
+version: v0.v1-1byte duration: 318.427058ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 309.110225ms
+
+version: v1.v0-2bytes duration: 294.776683ms
+
+version: v1.v1-1byte duration: 312.222833ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 312.290358ms
+
+version: v2.v0-2bytes duration: 295.510291ms
+
+version: v2.v1-1byte duration: 308.976854ms
+
+
+
+Seed: 5
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 319.65542ms
+
+version: v0.v0-2bytes duration: 296.843695ms
+
+version: v0.v1-1byte duration: 315.034025ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 308.850971ms
+
+version: v1.v0-2bytes duration: 294.508033ms
+
+version: v1.v1-1byte duration: 307.439583ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 308.046779ms
+
+version: v2.v0-2bytes duration: 295.551154ms
+
+version: v2.v1-1byte duration: 308.673412ms
+
+
+
+Seed: 6
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 320.462854ms
+
+version: v0.v0-2bytes duration: 297.612233ms
+
+version: v0.v1-1byte duration: 323.517804ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 311.839045ms
+
+version: v1.v0-2bytes duration: 297.535504ms
+
+version: v1.v1-1byte duration: 312.402337ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 312.975129ms
+
+version: v2.v0-2bytes duration: 297.913616ms
+
+version: v2.v1-1byte duration: 311.817904ms
+
+
+
+Seed: 7
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 316.163312ms
+
+version: v0.v0-2bytes duration: 294.531858ms
+
+version: v0.v1-1byte duration: 316.204358ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 309.268849ms
+
+version: v1.v0-2bytes duration: 294.829729ms
+
+version: v1.v1-1byte duration: 307.163183ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 312.723916ms
+
+version: v2.v0-2bytes duration: 300.09037ms
+
+version: v2.v1-1byte duration: 308.428345ms
+
+
+
+Seed: 8
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 319.972304ms
+
+version: v0.v0-2bytes duration: 297.449258ms
+
+version: v0.v1-1byte duration: 316.609799ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.575895ms
+
+version: v1.v0-2bytes duration: 296.641504ms
+
+version: v1.v1-1byte duration: 308.821816ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.699116ms
+
+version: v2.v0-2bytes duration: 299.537299ms
+
+version: v2.v1-1byte duration: 312.036012ms
+
+
+
+Seed: 9
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 315.516054ms
+
+version: v0.v0-2bytes duration: 298.333062ms
+
+version: v0.v1-1byte duration: 320.13097ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.764849ms
+
+version: v1.v0-2bytes duration: 300.931204ms
+
+version: v1.v1-1byte duration: 316.445754ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 309.6243ms
+
+version: v2.v0-2bytes duration: 296.61317ms
+
+version: v2.v1-1byte duration: 308.555012ms
+
+
+
+Seed: 10
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 319.772475ms
+
+version: v0.v0-2bytes duration: 300.185379ms
+
+version: v0.v1-1byte duration: 320.141308ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 313.547683ms
+
+version: v1.v0-2bytes duration: 298.311212ms
+
+version: v1.v1-1byte duration: 312.734145ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 314.273958ms
+
+version: v2.v0-2bytes duration: 297.780883ms
+
+version: v2.v1-1byte duration: 312.25867ms
+
+
+
+Seed: 11
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 314.743496ms
+
+version: v0.v0-2bytes duration: 296.39022ms
+
+version: v0.v1-1byte duration: 320.458566ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 311.70625ms
+
+version: v1.v0-2bytes duration: 299.022483ms
+
+version: v1.v1-1byte duration: 312.007737ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 309.050429ms
+
+version: v2.v0-2bytes duration: 297.08455ms
+
+version: v2.v1-1byte duration: 307.776545ms
+
+
+
+Seed: 12
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 323.172487ms
+
+version: v0.v0-2bytes duration: 299.256908ms
+
+version: v0.v1-1byte duration: 319.929929ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.867466ms
+
+version: v1.v0-2bytes duration: 298.376833ms
+
+version: v1.v1-1byte duration: 315.55455ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 315.360808ms
+
+version: v2.v0-2bytes duration: 298.753979ms
+
+version: v2.v1-1byte duration: 315.972483ms
+
+
+
+Seed: 13
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 326.769041ms
+
+version: v0.v0-2bytes duration: 299.958129ms
+
+version: v0.v1-1byte duration: 326.98715ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 313.623641ms
+
+version: v1.v0-2bytes duration: 296.56637ms
+
+version: v1.v1-1byte duration: 310.6466ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 316.097587ms
+
+version: v2.v0-2bytes duration: 296.735525ms
+
+version: v2.v1-1byte duration: 314.149337ms
+
+
+
+Seed: 14
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 319.617966ms
+
+version: v0.v0-2bytes duration: 304.111212ms
+
+version: v0.v1-1byte duration: 317.042729ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 314.360174ms
+
+version: v1.v0-2bytes duration: 298.626525ms
+
+version: v1.v1-1byte duration: 313.106979ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 316.292291ms
+
+version: v2.v0-2bytes duration: 295.896633ms
+
+version: v2.v1-1byte duration: 309.899971ms
+
+
+
+Seed: 15
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 320.367108ms
+
+version: v0.v0-2bytes duration: 299.122533ms
+
+version: v0.v1-1byte duration: 324.601962ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 311.569337ms
+
+version: v1.v0-2bytes duration: 300.711645ms
+
+version: v1.v1-1byte duration: 314.004495ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 312.899733ms
+
+version: v2.v0-2bytes duration: 294.84895ms
+
+version: v2.v1-1byte duration: 309.289733ms
+
+
+
+Seed: 16
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 317.025187ms
+
+version: v0.v0-2bytes duration: 298.228924ms
+
+version: v0.v1-1byte duration: 319.692754ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 310.285583ms
+
+version: v1.v0-2bytes duration: 310.3894ms
+
+version: v1.v1-1byte duration: 316.161987ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 309.736162ms
+
+version: v2.v0-2bytes duration: 298.478437ms
+
+version: v2.v1-1byte duration: 310.324458ms
+
+
+
+Seed: 17
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 318.563191ms
+
+version: v0.v0-2bytes duration: 296.929891ms
+
+version: v0.v1-1byte duration: 317.565154ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 315.040804ms
+
+version: v1.v0-2bytes duration: 297.710295ms
+
+version: v1.v1-1byte duration: 310.936029ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.162566ms
+
+version: v2.v0-2bytes duration: 296.431112ms
+
+version: v2.v1-1byte duration: 310.180845ms
+
+
+
+Seed: 18
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 318.450291ms
+
+version: v0.v0-2bytes duration: 295.586662ms
+
+version: v0.v1-1byte duration: 315.107466ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 309.667633ms
+
+version: v1.v0-2bytes duration: 295.563245ms
+
+version: v1.v1-1byte duration: 311.432895ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.89715ms
+
+version: v2.v0-2bytes duration: 294.745049ms
+
+version: v2.v1-1byte duration: 311.100658ms
+
+
+
+Seed: 19
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 328.204625ms
+
+version: v0.v0-2bytes duration: 297.897041ms
+
+version: v0.v1-1byte duration: 323.069829ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 313.339646ms
+
+version: v1.v0-2bytes duration: 299.825275ms
+
+version: v1.v1-1byte duration: 314.603516ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 313.304379ms
+
+version: v2.v0-2bytes duration: 297.701454ms
+
+version: v2.v1-1byte duration: 314.547121ms
+
+
+
+Seed: 20
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 350.441387ms
+
+version: v0.v0-2bytes duration: 311.936154ms
+
+version: v0.v1-1byte duration: 329.462562ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 314.354749ms
+
+version: v1.v0-2bytes duration: 302.152508ms
+
+version: v1.v1-1byte duration: 323.437487ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 324.307325ms
+
+version: v2.v0-2bytes duration: 308.459391ms
+
+version: v2.v1-1byte duration: 321.834591ms
+
+
+
+Seed: 21
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 328.947612ms
+
+version: v0.v0-2bytes duration: 302.133533ms
+
+version: v0.v1-1byte duration: 320.160104ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 313.761492ms
+
+version: v1.v0-2bytes duration: 298.635058ms
+
+version: v1.v1-1byte duration: 312.234054ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 312.954295ms
+
+version: v2.v0-2bytes duration: 298.30695ms
+
+version: v2.v1-1byte duration: 311.694704ms
+
+
+
+Seed: 22
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 314.891504ms
+
+version: v0.v0-2bytes duration: 296.149449ms
+
+version: v0.v1-1byte duration: 315.440254ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 308.121137ms
+
+version: v1.v0-2bytes duration: 294.638579ms
+
+version: v1.v1-1byte duration: 308.54122ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 307.131433ms
+
+version: v2.v0-2bytes duration: 294.44445ms
+
+version: v2.v1-1byte duration: 309.578479ms
+
+
+
+Seed: 23
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 326.287308ms
+
+version: v0.v0-2bytes duration: 299.799416ms
+
+version: v0.v1-1byte duration: 319.934012ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 317.541049ms
+
+version: v1.v0-2bytes duration: 298.43575ms
+
+version: v1.v1-1byte duration: 318.673454ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 314.79135ms
+
+version: v2.v0-2bytes duration: 298.614666ms
+
+version: v2.v1-1byte duration: 314.878437ms
+
+
+
+Seed: 24
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 322.717112ms
+
+version: v0.v0-2bytes duration: 301.624824ms
+
+version: v0.v1-1byte duration: 326.388129ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 317.930829ms
+
+version: v1.v0-2bytes duration: 301.751575ms
+
+version: v1.v1-1byte duration: 314.698058ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 318.621804ms
+
+version: v2.v0-2bytes duration: 297.883804ms
+
+version: v2.v1-1byte duration: 312.123425ms
+
+
+
+Seed: 25
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 315.692208ms
+
+version: v0.v0-2bytes duration: 296.872828ms
+
+version: v0.v1-1byte duration: 316.343229ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 309.271629ms
+
+version: v1.v0-2bytes duration: 299.17025ms
+
+version: v1.v1-1byte duration: 313.710058ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 310.379128ms
+
+version: v2.v0-2bytes duration: 299.0651ms
+
+version: v2.v1-1byte duration: 313.123245ms
+
+
+
+Seed: 26
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 318.917262ms
+
+version: v0.v0-2bytes duration: 299.26732ms
+
+version: v0.v1-1byte duration: 313.978362ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 309.85817ms
+
+version: v1.v0-2bytes duration: 298.093804ms
+
+version: v1.v1-1byte duration: 306.665395ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 313.220704ms
+
+version: v2.v0-2bytes duration: 297.218804ms
+
+version: v2.v1-1byte duration: 309.426624ms
+
+
+
+Seed: 27
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 319.47597ms
+
+version: v0.v0-2bytes duration: 298.830154ms
+
+version: v0.v1-1byte duration: 321.983641ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 310.208187ms
+
+version: v1.v0-2bytes duration: 301.679312ms
+
+version: v1.v1-1byte duration: 313.275479ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 312.089879ms
+
+version: v2.v0-2bytes duration: 298.692275ms
+
+version: v2.v1-1byte duration: 312.506533ms
+
+
+
+Seed: 28
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 323.464708ms
+
+version: v0.v0-2bytes duration: 296.424737ms
+
+version: v0.v1-1byte duration: 320.151658ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 311.15127ms
+
+version: v1.v0-2bytes duration: 298.828916ms
+
+version: v1.v1-1byte duration: 313.093466ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 314.420346ms
+
+version: v2.v0-2bytes duration: 297.521816ms
+
+version: v2.v1-1byte duration: 311.453191ms
+
+
+
+Seed: 29
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 322.414554ms
+
+version: v0.v0-2bytes duration: 301.203254ms
+
+version: v0.v1-1byte duration: 319.94755ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 315.017316ms
+
+version: v1.v0-2bytes duration: 297.205412ms
+
+version: v1.v1-1byte duration: 313.742725ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 313.362279ms
+
+version: v2.v0-2bytes duration: 296.857608ms
+
+version: v2.v1-1byte duration: 315.044208ms
+
+
+
+Seed: 30
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 319.891995ms
+
+version: v0.v0-2bytes duration: 298.133145ms
+
+version: v0.v1-1byte duration: 319.502312ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 317.98767ms
+
+version: v1.v0-2bytes duration: 299.412941ms
+
+version: v1.v1-1byte duration: 312.939512ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 314.045491ms
+
+version: v2.v0-2bytes duration: 299.236754ms
+
+version: v2.v1-1byte duration: 311.445275ms
+
+
+
+Seed: 31
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 322.832375ms
+
+version: v0.v0-2bytes duration: 300.525821ms
+
+version: v0.v1-1byte duration: 320.930471ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 314.42892ms
+
+version: v1.v0-2bytes duration: 298.511608ms
+
+version: v1.v1-1byte duration: 315.952158ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.488162ms
+
+version: v2.v0-2bytes duration: 299.754221ms
+
+version: v2.v1-1byte duration: 314.308004ms
+
+
+
+Seed: 32
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 317.310262ms
+
+version: v0.v0-2bytes duration: 300.714025ms
+
+version: v0.v1-1byte duration: 322.327003ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.214762ms
+
+version: v1.v0-2bytes duration: 295.164354ms
+
+version: v1.v1-1byte duration: 314.425216ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 309.556512ms
+
+version: v2.v0-2bytes duration: 297.77522ms
+
+version: v2.v1-1byte duration: 308.963095ms
+
+
+
+Seed: 33
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 320.402345ms
+
+version: v0.v0-2bytes duration: 297.331899ms
+
+version: v0.v1-1byte duration: 318.862279ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 308.687237ms
+
+version: v1.v0-2bytes duration: 297.076545ms
+
+version: v1.v1-1byte duration: 313.722804ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 308.534854ms
+
+version: v2.v0-2bytes duration: 297.464179ms
+
+version: v2.v1-1byte duration: 309.211408ms
+
+
+
+Seed: 34
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 320.577999ms
+
+version: v0.v0-2bytes duration: 296.575875ms
+
+version: v0.v1-1byte duration: 317.581245ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.23052ms
+
+version: v1.v0-2bytes duration: 297.456825ms
+
+version: v1.v1-1byte duration: 310.127062ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 312.283925ms
+
+version: v2.v0-2bytes duration: 298.28885ms
+
+version: v2.v1-1byte duration: 312.304787ms
+
+
+
+Seed: 35
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 322.00345ms
+
+version: v0.v0-2bytes duration: 301.987524ms
+
+version: v0.v1-1byte duration: 321.671558ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 314.05382ms
+
+version: v1.v0-2bytes duration: 297.126312ms
+
+version: v1.v1-1byte duration: 311.269154ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 314.843108ms
+
+version: v2.v0-2bytes duration: 296.703554ms
+
+version: v2.v1-1byte duration: 313.86447ms
+
+
+
+Seed: 36
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 319.432637ms
+
+version: v0.v0-2bytes duration: 296.085179ms
+
+version: v0.v1-1byte duration: 318.041895ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.093354ms
+
+version: v1.v0-2bytes duration: 299.72425ms
+
+version: v1.v1-1byte duration: 309.781937ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 313.395791ms
+
+version: v2.v0-2bytes duration: 297.916379ms
+
+version: v2.v1-1byte duration: 311.859787ms
+
+
+
+Seed: 37
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 318.884745ms
+
+version: v0.v0-2bytes duration: 301.164045ms
+
+version: v0.v1-1byte duration: 325.116579ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 311.6527ms
+
+version: v1.v0-2bytes duration: 297.865945ms
+
+version: v1.v1-1byte duration: 313.47227ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.227391ms
+
+version: v2.v0-2bytes duration: 297.136108ms
+
+version: v2.v1-1byte duration: 311.562324ms
+
+
+
+Seed: 38
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 321.400341ms
+
+version: v0.v0-2bytes duration: 294.991537ms
+
+version: v0.v1-1byte duration: 317.388958ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.10022ms
+
+version: v1.v0-2bytes duration: 295.446991ms
+
+version: v1.v1-1byte duration: 308.975799ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.142941ms
+
+version: v2.v0-2bytes duration: 297.407595ms
+
+version: v2.v1-1byte duration: 313.546066ms
+
+
+
+Seed: 39
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 325.248362ms
+
+version: v0.v0-2bytes duration: 301.28407ms
+
+version: v0.v1-1byte duration: 320.483799ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 313.22457ms
+
+version: v1.v0-2bytes duration: 298.883441ms
+
+version: v1.v1-1byte duration: 312.163395ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 313.163425ms
+
+version: v2.v0-2bytes duration: 300.098479ms
+
+version: v2.v1-1byte duration: 313.363679ms
+
+
+
+Seed: 40
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 320.075625ms
+
+version: v0.v0-2bytes duration: 295.507558ms
+
+version: v0.v1-1byte duration: 325.286629ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.564345ms
+
+version: v1.v0-2bytes duration: 297.859937ms
+
+version: v1.v1-1byte duration: 308.902516ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.722349ms
+
+version: v2.v0-2bytes duration: 295.856379ms
+
+version: v2.v1-1byte duration: 312.517499ms
+
+
+
+Seed: 41
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 317.273258ms
+
+version: v0.v0-2bytes duration: 294.874041ms
+
+version: v0.v1-1byte duration: 320.092254ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.793408ms
+
+version: v1.v0-2bytes duration: 297.257287ms
+
+version: v1.v1-1byte duration: 312.267287ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 313.571408ms
+
+version: v2.v0-2bytes duration: 295.554737ms
+
+version: v2.v1-1byte duration: 309.66045ms
+
+
+
+Seed: 42
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 323.692624ms
+
+version: v0.v0-2bytes duration: 297.393225ms
+
+version: v0.v1-1byte duration: 320.663829ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 319.379491ms
+
+version: v1.v0-2bytes duration: 293.914358ms
+
+version: v1.v1-1byte duration: 310.117866ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 309.752408ms
+
+version: v2.v0-2bytes duration: 297.241074ms
+
+version: v2.v1-1byte duration: 311.632579ms
+
+
+
+Seed: 43
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 322.941275ms
+
+version: v0.v0-2bytes duration: 300.833158ms
+
+version: v0.v1-1byte duration: 322.333112ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 314.129412ms
+
+version: v1.v0-2bytes duration: 297.88582ms
+
+version: v1.v1-1byte duration: 312.719491ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 315.276029ms
+
+version: v2.v0-2bytes duration: 298.376729ms
+
+version: v2.v1-1byte duration: 315.71262ms
+
+
+
+Seed: 44
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 322.9904ms
+
+version: v0.v0-2bytes duration: 301.090837ms
+
+version: v0.v1-1byte duration: 321.369287ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.883212ms
+
+version: v1.v0-2bytes duration: 299.102237ms
+
+version: v1.v1-1byte duration: 311.640604ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 312.983733ms
+
+version: v2.v0-2bytes duration: 301.468233ms
+
+version: v2.v1-1byte duration: 313.975262ms
+
+
+
+Seed: 45
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 314.440912ms
+
+version: v0.v0-2bytes duration: 293.700029ms
+
+version: v0.v1-1byte duration: 322.133245ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 310.510004ms
+
+version: v1.v0-2bytes duration: 299.554166ms
+
+version: v1.v1-1byte duration: 310.188104ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 310.289962ms
+
+version: v2.v0-2bytes duration: 294.308062ms
+
+version: v2.v1-1byte duration: 309.591596ms
+
+
+
+Seed: 46
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 317.9751ms
+
+version: v0.v0-2bytes duration: 299.919849ms
+
+version: v0.v1-1byte duration: 321.912999ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 310.938812ms
+
+version: v1.v0-2bytes duration: 300.979979ms
+
+version: v1.v1-1byte duration: 310.856062ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 313.447754ms
+
+version: v2.v0-2bytes duration: 298.263329ms
+
+version: v2.v1-1byte duration: 310.328733ms
+
+
+
+Seed: 47
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 327.145416ms
+
+version: v0.v0-2bytes duration: 305.253683ms
+
+version: v0.v1-1byte duration: 323.075629ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 317.948137ms
+
+version: v1.v0-2bytes duration: 303.066108ms
+
+version: v1.v1-1byte duration: 320.221933ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 315.816149ms
+
+version: v2.v0-2bytes duration: 299.075383ms
+
+version: v2.v1-1byte duration: 319.534275ms
+
+
+
+Seed: 48
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 326.944299ms
+
+version: v0.v0-2bytes duration: 295.274904ms
+
+version: v0.v1-1byte duration: 317.787049ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 308.521337ms
+
+version: v1.v0-2bytes duration: 295.13217ms
+
+version: v1.v1-1byte duration: 308.111616ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 308.564995ms
+
+version: v2.v0-2bytes duration: 294.819221ms
+
+version: v2.v1-1byte duration: 310.440379ms
+
+
+
+Seed: 49
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 322.741541ms
+
+version: v0.v0-2bytes duration: 304.197454ms
+
+version: v0.v1-1byte duration: 327.795858ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 315.71762ms
+
+version: v1.v0-2bytes duration: 298.8641ms
+
+version: v1.v1-1byte duration: 311.7962ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 313.574783ms
+
+version: v2.v0-2bytes duration: 298.699292ms
+
+version: v2.v1-1byte duration: 314.074183ms
+
+
+
+Seed: 50
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 325.326175ms
+
+version: v0.v0-2bytes duration: 296.058896ms
+
+version: v0.v1-1byte duration: 322.400258ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.318533ms
+
+version: v1.v0-2bytes duration: 296.551775ms
+
+version: v1.v1-1byte duration: 311.369921ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.303708ms
+
+version: v2.v0-2bytes duration: 302.998204ms
+
+version: v2.v1-1byte duration: 310.932683ms
+
+
+
+Seed: 51
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 320.173016ms
+
+version: v0.v0-2bytes duration: 298.722487ms
+
+version: v0.v1-1byte duration: 323.562441ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 318.932004ms
+
+version: v1.v0-2bytes duration: 308.465558ms
+
+version: v1.v1-1byte duration: 314.80792ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 312.615483ms
+
+version: v2.v0-2bytes duration: 298.850129ms
+
+version: v2.v1-1byte duration: 313.595716ms
+
+
+
+Seed: 52
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 320.37097ms
+
+version: v0.v0-2bytes duration: 297.945054ms
+
+version: v0.v1-1byte duration: 322.708237ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 315.438958ms
+
+version: v1.v0-2bytes duration: 307.094345ms
+
+version: v1.v1-1byte duration: 313.202462ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 313.095041ms
+
+version: v2.v0-2bytes duration: 297.952691ms
+
+version: v2.v1-1byte duration: 313.264621ms
+
+
+
+Seed: 53
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 321.418333ms
+
+version: v0.v0-2bytes duration: 304.286912ms
+
+version: v0.v1-1byte duration: 325.77035ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 319.305445ms
+
+version: v1.v0-2bytes duration: 301.945591ms
+
+version: v1.v1-1byte duration: 311.786175ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.226308ms
+
+version: v2.v0-2bytes duration: 299.053291ms
+
+version: v2.v1-1byte duration: 309.972445ms
+
+
+
+Seed: 54
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
