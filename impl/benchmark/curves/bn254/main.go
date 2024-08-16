@@ -2,7 +2,6 @@ package bn254_bench
 
 import (
 	"crypto/sha256"
-	"encoding/binary"
 	"fmt"
 	"math/big"
 	"math/rand"
@@ -23,6 +22,13 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 	fmt.Println("Running `bn254` Benchmark ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions)
 	fmt.Println()
 
+	r := rand.New(rand.NewSource(99))
+
+	bint := new (big.Int)
+	bint.SetUint64((r.Uint64()))
+
+	fmt.Println("bint:", bint)
+
 	durations := map[string]time.Duration{}
 
 	for iReps := 0; iReps < nRepetitions; iReps++ {
@@ -30,7 +36,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		g1, _, _, g2Aff := EC.Generators()
 
 		//common for versions: V0, V1, V2
-		_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair()
+		_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair(r)
 		v_asBigIntPtr := &v_asBigInt
 
 		var r_asBigInt big.Int
@@ -43,36 +49,25 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		b_asBigInt := new (big.Int)
 
 		//random data generation: Rj
-		var Rs []EC.G1Jac
-		var Rs_Ptr []*EC.G1Jac
-		var RsAff_asArr [][]EC.G1Affine
-
-		var rs []big.Int
-
 		var combinedMeta []*_CombinedMeta
 
 		for j := 0; j < sampleSize; j++ {
 
-			_, rj_asBigInt, Rj, Rj_asAff := _EC_GenerateG1KeyPair()
-
-			Rs = append(Rs, Rj)
-			RsAff_asArr = append(RsAff_asArr, []EC.G1Affine{Rj_asAff})
+			_, rj_asBigInt, _, Rj_asAff := _EC_GenerateG1KeyPair(r)
 
 			tmp := new(EC.G1Jac)
 			tmp.FromAffine(&Rj_asAff)
-			Rs_Ptr = append(Rs_Ptr, tmp)
 
 			//note: store the last priv. key for R
 			r_asBigInt = rj_asBigInt
-			rs = append(rs, r_asBigInt)
 
 			cm := new(_CombinedMeta)
 			cm.Rj = new(EC.G1Jac)
 			cm.Rj.FromAffine(&Rj_asAff)
 			cm.Rj_asAffArr = []EC.G1Affine{Rj_asAff}
-			cm.ViewTagTwoBytes = uint16(rand.Uint32() % 65536)
-			cm.ViewTagSingleByte = uint8(rand.Uint32() % 256)
-			cm.ViewTagSecondByte = uint8(rand.Uint32() % 256)
+			cm.ViewTagTwoBytes = uint16(r.Uint32() % 65536)
+			cm.ViewTagSingleByte = uint8(r.Uint32() % 256)
+			cm.ViewTagSecondByte = uint8(r.Uint32() % 256)
 
 			combinedMeta = append(combinedMeta, cm)
 		}
@@ -85,7 +80,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 		//protocol V0 -------------------------------------
 
-		_, _, _, K2_EC_asAff := _EC_GenerateG2KeyPair()
+		_, _, _, K2_EC_asAff := _EC_GenerateG2KeyPair(r)
 		K2_EC_asAffArr := []EC.G2Affine{K2_EC_asAff}
 
 		var vR EC.G1Jac
@@ -96,12 +91,18 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		//protocol: V0 and viewTag: V0-1byte
 		b.ResetTimer()
 
+		nHits := 0
+		nSample := 0
+
 		for _, cm := range combinedMeta {
 
 			hasher.Reset()
 
-			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
+			nSample += 1
 
+			// vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
+
+			vR.ScalarMultiplication(cm.Rj, &v_asBigInt)
 			compressed := vR_asAff.FromJacobian(&vR).Bytes()
 
 			if hasher.Sum(compressed[:])[0] != cm.ViewTagSingleByte {
@@ -111,9 +112,15 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 			pairingResult, _ := EC.Pair(cm.Rj_asAffArr, K2_EC_asAffArr)
 
 			P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
+
+			nHits += 1
 		}
 
 		durations["v0.v0-1byte"] += b.Elapsed()
+
+		fmt.Println("nHits:", nHits, "nSample:", nSample)
+
+		break
 
 		//protocol: V0 and viewTag: V0-2bytes
 		b.ResetTimer()
@@ -336,10 +343,15 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 	fmt.Println()
 }
 
-func _EC_GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
+func _EC_GenerateG1KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
 	g1, _, _, _ := EC.Generators()
 
-	privKey.SetRandom()
+	rnd := r.Int63()
+
+	// fmt.Println(rnd)
+
+	privKey.SetInt64(rnd)
+
 	privKey.BigInt(&privKey_asBigIng)
 	pubKey.ScalarMultiplication(&g1, &privKey_asBigIng)
 	pubKeyAff.FromJacobian(&pubKey)
@@ -347,31 +359,16 @@ func _EC_GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, p
 	return
 }
 
-func _EC_GenerateG2KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G2Jac, pubKeyAff EC.G2Affine) {
+func _EC_GenerateG2KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G2Jac, pubKeyAff EC.G2Affine) {
 	_, g2, _, _ := EC.Generators()
+	
+	privKey.SetInt64(r.Int63())
 
-	privKey.SetRandom()
 	privKey.BigInt(&privKey_asBigIng)
 	pubKey.ScalarMultiplication(&g2, &privKey_asBigIng)
 	pubKeyAff.FromJacobian(&pubKey)
 
 	return
-}
-
-func _EC_G1AffPointToViewTagByte1(pt *EC.G1Affine) uint8 {
-	hasher := sha256.New()
-	compressed := pt.Bytes()
-	return hasher.Sum(compressed[:])[0]
-}
-
-func _EC_G1AffPointToViewTagByte2(pt *EC.G1Affine) uint16 {
-	hasher := sha256.New()
-	compressed := pt.Bytes()
-	return binary.BigEndian.Uint16(hasher.Sum(compressed[:])[0:2])
-}
-
-func _EC_G1AffPointXCoordToViewTagByte1(pt *EC.G1Affine) uint8 {
-	return pt.X.Bytes()[0]
 }
 
 func _EC_HashG1AffPoint(pt *EC.G1Affine) *big.Int {

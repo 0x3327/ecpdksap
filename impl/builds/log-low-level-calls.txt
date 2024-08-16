@@ -1,0 +1,2 @@
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+

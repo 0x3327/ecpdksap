@@ -1,0 +1,30 @@
+Running `bn254` Benchmark ::: sampleSize: 5000 nRepetitions: 10
+
+version: v0.none duration: 0s
+
+version: v0.v0-1byte duration: 319.670208ms
+
+version: v0.v0-2bytes duration: 297.094979ms
+
+version: v0.v1-1byte duration: 318.918012ms
+
+version: v1.none duration: 0s
+
+version: v1.v0-1byte duration: 312.082112ms
+
+version: v1.v0-2bytes duration: 299.414754ms
+
+version: v1.v1-1byte duration: 313.525991ms
+
+version: v2.none duration: 0s
+
+version: v2.v0-1byte duration: 311.134ms
+
+version: v2.v0-2bytes duration: 297.245045ms
+
+version: v2.v1-1byte duration: 310.758375ms
+
+
+
+Running `bn254` Benchmark ::: sampleSize: 10000 nRepetitions: 10
+
