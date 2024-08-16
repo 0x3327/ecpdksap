@@ -23,14 +23,14 @@ func RunAll () {
 
 func _Benchmark_tables_BN254(b *testing.B) {
 	bn254.Run(b, 5_000, 10, true)
-	bn254.Run(b, 10_000, 10, true)
-	bn254.Run(b, 20_000, 10, true)
-	bn254.Run(b, 40_000, 10, true)
-	bn254.Run(b, 80_000, 10, true)
-	bn254.Run(b, 100_000, 10, true)
-	bn254.Run(b, 500_000, 10, true)
-	bn254.Run(b, 1_000_000, 10, true)
-	bn254.Run(b, 5_000_000, 10, true)
+	// bn254.Run(b, 10_000, 10, true)
+	// bn254.Run(b, 20_000, 10, true)
+	// bn254.Run(b, 40_000, 10, true)
+	// bn254.Run(b, 80_000, 10, true)
+	// bn254.Run(b, 100_000, 10, true)
+	// bn254.Run(b, 500_000, 10, true)
+	// bn254.Run(b, 1_000_000, 10, true)
+	// bn254.Run(b, 5_000_000, 10, true)
 }
 
 func _Benchmark_Curves(b *testing.B, sampleSize int, nRepetitions int) {
