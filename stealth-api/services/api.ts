@@ -1,7 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import routeHandlers from '../route-handlers';
-import { StealthService } from './stealth-service';
 import App from '../app';
 
 interface AppConfig {
@@ -56,7 +55,7 @@ class API {
                 console.log(`${this.serverName} server started on ${this.host}:${this.port}`);
                 resolve();
             });
-        })
+        });
     }
 }
 

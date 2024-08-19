@@ -34,7 +34,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
         }
     },
     {
-        method: 'GET',
+        method: 'POST',
         path: '/send',
         handler: (req: Request, res: Response) => {
             const { amount, address } = req.body;
