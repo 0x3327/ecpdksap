@@ -22,16 +22,15 @@ func main() {
 		if len(os.Args) != 2 {
 			panic(`Subcommand 'gen-send-info' takes no input params!`)
 		}
-		
-		senderMeta := data_generation.GenerateSenderInfo("v2", "") 
-		js.Global().Set("senderMeta", senderMeta)
 
+		senderMeta := data_generation.GenerateSenderInfo("v2", "")
+		js.Global().Set("senderMeta", senderMeta)
 
 	case "gen-recipient-info":
 		if len(os.Args) != 2 {
 			panic(`Subcommand 'gen-recipient-info' takes no input params!`)
 		}
-		
+
 		recipientMeta := data_generation.GenerateRecipientInfo("v2", "")
 		js.Global().Set("recipientMeta", recipientMeta)
 
@@ -43,7 +42,7 @@ func main() {
 		js.Global().Set("StealthPubKey", pubKey)
 		js.Global().Set("StealthAddress", addr)
 		js.Global().Set("StealthViewTag", viewTag)
-		
+
 	case "receive-scan":
 		if len(os.Args) != 3 {
 			panic(`Subcommand 'receive-scan' receives all info. as one JSON input string!`)
