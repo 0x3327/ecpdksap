@@ -14,6 +14,8 @@ import (
 
 	SECP256K1 "github.com/consensys/gnark-crypto/ecc/secp256k1"
 
+	ecpdksap_v2 "ecpdksap-go/versions/v2"
+
 	"ecpdksap-go/utils"
 )
 
@@ -249,6 +251,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 		g2Aff_asArray := []EC.G2Affine{g2Aff}
 
 		var Pv2_asJac SECP256K1.G1Jac
+		var Pv2 SECP256K1.G1Affine
 
 		K_SECP256k1_JacPtr := &K_SECP256k1_Jac
 
@@ -326,7 +329,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 
 			S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedQLines)
 
-			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
+			ecpdksap_v2.ComputeEthAddress(Pv2.FromJacobian(Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))))
 		}
 
 		durations["v2.v1-1byte"] += b.Elapsed()
