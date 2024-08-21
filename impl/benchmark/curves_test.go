@@ -24,4 +24,3 @@ func Benchmark_Curves_10(b *testing.B) {
 func Benchmark_Curves_80000(b *testing.B) {
 	_Benchmark_Curves(b, 80_000, 10)
 }
-

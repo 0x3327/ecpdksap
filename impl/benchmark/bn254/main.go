@@ -26,7 +26,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 
 	rndGen := rand.New(rand.NewSource(int64(randomSeed)))
 
-	bint := new (big.Int)
+	bint := new(big.Int)
 	bint.SetUint64((rndGen.Uint64()))
 
 	fmt.Println("bint:", bint)
@@ -48,7 +48,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 		neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix := EC.PrecomputationForFixedScalarMultiplication(v_asBigIntPtr)
 		var table [15]EC.G1Jac
 		var a_El, b_El *EC_fp.Element
-		b_asBigInt := new (big.Int)
+		b_asBigInt := new(big.Int)
 
 		//random data generation: Rj
 		var combinedMeta []*_CombinedMeta
@@ -136,7 +136,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 
 			hash := hasher.Sum(compressed[:])
 
-			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte{
+			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte {
 				continue
 			}
 
@@ -155,7 +155,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
 
 			a_El, b_El = vR_asAff.FromJacobianCoordX(&vR)
-	
+
 			if vR_asAff.X.Bytes()[0] != cm.ViewTagSingleByte {
 				continue
 			}
@@ -212,7 +212,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 
 			hash := hasher.Sum(compressed[:])
 
-			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte{
+			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte {
 				continue
 			}
 
@@ -230,7 +230,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
 
 			a_El, b_El = vR_asAff.FromJacobianCoordX(&vR)
-	
+
 			if vR_asAff.X.Bytes()[0] != cm.ViewTagSingleByte {
 				continue
 			}
@@ -301,7 +301,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 
 			hash := hasher.Sum(compressed[:])
 
-			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte{
+			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte {
 				continue
 			}
 
@@ -320,7 +320,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
 
 			a_El, b_El = vR_asAff.FromJacobianCoordX(&vR)
-	
+
 			if vR_asAff.X.Bytes()[0] != cm.ViewTagSingleByte {
 				continue
 			}
@@ -366,7 +366,7 @@ func _EC_GenerateG1KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigIn
 
 func _EC_GenerateG2KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigInt big.Int, pubKey EC.G2Jac, pubKeyAff EC.G2Affine) {
 	_, g2, _, _ := EC.Generators()
-	
+
 	randBigInt := big.NewInt(r.Int63())
 	randBigInt.Mul(randBigInt, randBigInt).Mul(randBigInt, randBigInt)
 	privKey.SetBigInt(randBigInt)

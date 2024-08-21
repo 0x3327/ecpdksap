@@ -33,7 +33,6 @@ func Benchmark_BN254_V2_V0_1byte_50000(b *testing.B) {
 	fmt.Println("Bench total: ", elapsed)
 }
 
-
 func Benchmark_BN254_V2_V0_1byte_500000(b *testing.B) {
 	_Benchmark_BN254_V2_V0_1byte_ExternalCalls(b, 500_000)
 }
@@ -51,7 +50,7 @@ func _Benchmark_BN254_V2_V0_1byte_ExternalCalls(b *testing.B, sampleSize int) {
 	_, _, _, g2Aff := EC.Generators()
 	g2Aff_asArray := []EC.G2Affine{g2Aff}
 	var Pv2_asJac SECP256K1.G1Jac
-	
+
 	b.ResetTimer()
 	for _, cm := range combinedMeta {
 
@@ -63,7 +62,7 @@ func _Benchmark_BN254_V2_V0_1byte_ExternalCalls(b *testing.B, sampleSize int) {
 
 			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
 
-			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(new (big.Int)))
+			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(new(big.Int)))
 		}
 	}
 
@@ -96,7 +95,7 @@ func _Benchmark_BN254_V2_V0_1byte_ExpandedGnarkCrypto(b *testing.B, sampleSize i
 
 			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
 
-			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(new (big.Int)))
+			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(new(big.Int)))
 		}
 	}
 

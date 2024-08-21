@@ -76,12 +76,12 @@ func RecipientComputesSharedSecret(v *fr.Element, R *bn254.G1Affine, K2 *SECP256
 	neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix := EC.PrecomputationForFixedScalarMultiplication(v.BigInt(new(big.Int)))
 	var table [15]EC.G1Jac
 
-	precomputedQLines := [][2][66]EC.LineEvaluationAff {EC.PrecomputeLines(g2Aff)}
+	precomputedQLines := [][2][66]EC.LineEvaluationAff{EC.PrecomputeLines(g2Aff)}
 
 	var vR, R_asJac EC.G1Jac
 	var vR_asAff EC.G1Affine
 	vR.FixedScalarMultiplication(R_asJac.FromAffine(R), &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
-	
+
 	P, _ := EC.PairFixedQ([]EC.G1Affine{*vR_asAff.FromJacobian(&vR)}, precomputedQLines)
 
 	return P

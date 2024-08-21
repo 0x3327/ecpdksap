@@ -25,16 +25,15 @@ import (
 	"ecpdksap-go/utils"
 )
 
+func RunBench(kind string) {
 
-func RunBench (kind string) {
-
-	b := new (testing.B)
+	b := new(testing.B)
 	b.StartTimer()
 
 	if kind == "only-bn254" {
 
 		// bn254.Run(b, 5_000, 10, true)
-		
+
 		bn254_optimized.Run(b, 5_000, 10, 12312312312312312)
 
 		// 	bn254.Run(b, 10_000, 10, true)
@@ -67,7 +66,6 @@ func _Benchmark_Curves(b *testing.B, sampleSize int, nRepetitions int) {
 	bw6_761.Run(b, sampleSize, nRepetitions, true)
 }
 
-
 func Benchmark_BN254_V2_V0_1byte_Combined(b *testing.B, sampleSize int) {
 
 	hasher := sha256.New()
@@ -77,7 +75,7 @@ func Benchmark_BN254_V2_V0_1byte_Combined(b *testing.B, sampleSize int) {
 	_, _, _, g2Aff := EC.Generators()
 	g2Aff_asArray := []EC.G2Affine{g2Aff}
 	var Pv2_asJac SECP256K1.G1Jac
-	
+
 	b.ResetTimer()
 	for _, cm := range combinedMeta {
 
@@ -89,7 +87,7 @@ func Benchmark_BN254_V2_V0_1byte_Combined(b *testing.B, sampleSize int) {
 
 			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
 
-			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(new (big.Int)))
+			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(new(big.Int)))
 		}
 	}
 
@@ -110,7 +108,7 @@ func Benchmark_BN254_V2_V0_1byte_Combined(b *testing.B, sampleSize int) {
 		a_El, b_El = vR_asAff.FromJacobianCoordX(&vR)
 
 		compressed := (vR_asAff).X.Bytes()
-		
+
 		if hasher.Sum(compressed[:])[0] == cm.ViewTagSingleByte {
 
 			vR_asAff.FromJacobianCoordY(a_El, b_El, &vR)
@@ -124,8 +122,7 @@ func Benchmark_BN254_V2_V0_1byte_Combined(b *testing.B, sampleSize int) {
 	fmt.Println("(_Benchmark_BN254_V2_V0_1byte_ExpandedGnarkCrypto) :: Total time:", b.Elapsed())
 }
 
-
-func _generateData (sampleSize int) (combinedMeta  []*_CombinedMeta, v_asBigIntPtr *big.Int, V_Ptr EC.G1Jac, K_SECP256k1_JacPtr *SECP256K1.G1Jac) {
+func _generateData(sampleSize int) (combinedMeta []*_CombinedMeta, v_asBigIntPtr *big.Int, V_Ptr EC.G1Jac, K_SECP256k1_JacPtr *SECP256K1.G1Jac) {
 	_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair()
 	v_asBigIntPtr = &v_asBigInt
 	V_Ptr = V
