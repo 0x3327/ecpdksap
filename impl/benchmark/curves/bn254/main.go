@@ -17,9 +17,7 @@ import (
 	"ecpdksap-go/utils"
 )
 
-func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, seed int64) {
-
-	r := rand.New(rand.NewSource(seed))
+func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 	fmt.Println("Running `bn254` Benchmark   ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions)
 	fmt.Println()
@@ -31,7 +29,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, seed
 		g1, _, _, g2Aff := EC.Generators()
 
 		//common for versions: V0, V1, V2
-		_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair(r)
+		_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair()
 		v_asBigIntPtr := &v_asBigInt
 
 		var r_asBigInt big.Int
@@ -49,7 +47,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, seed
 
 		for j := 0; j < sampleSize; j++ {
 
-			_, rj_asBigInt, Rj, Rj_asAff := _EC_GenerateG1KeyPair(r)
+			_, rj_asBigInt, Rj, Rj_asAff := _EC_GenerateG1KeyPair()
 
 			Rs = append(Rs, Rj)
 			RsAff_asArr = append(RsAff_asArr, []EC.G1Affine{Rj_asAff})
@@ -66,8 +64,8 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, seed
 			cm.Rj = new(EC.G1Jac)
 			cm.Rj.FromAffine(&Rj_asAff)
 			cm.Rj_asAffArr = []EC.G1Affine{Rj_asAff}
-			cm.ViewTagTwoBytes = uint16(r.Uint32() % 65536)
-			cm.ViewTagSingleByte = uint8(r.Uint32() % 256)
+			cm.ViewTagTwoBytes = uint16(rand.Uint32() % 65536)
+			cm.ViewTagSingleByte = uint8(rand.Uint32() % 256)
 
 			combinedMeta = append(combinedMeta, cm)
 		}
@@ -80,7 +78,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, seed
 
 		//protocol V0 -------------------------------------
 
-		_, _, _, K2_EC_asAff := _EC_GenerateG2KeyPair(r)
+		_, _, _, K2_EC_asAff := _EC_GenerateG2KeyPair()
 		K2_EC_asAffArr := []EC.G2Affine{K2_EC_asAff}
 
 		var vR EC.G1Jac
@@ -318,12 +316,10 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, seed
 }
 
 
-func _EC_GenerateG1KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
+func _EC_GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
 	g1, _, _, _ := EC.Generators()
 
-	rand_BigInt := big.NewInt(r.Int63())
-	rand_BigInt.Mul(rand_BigInt, rand_BigInt).Mul(rand_BigInt, rand_BigInt)
-	privKey.SetBigInt(rand_BigInt)
+	privKey.SetRandom()
 
 	privKey.BigInt(&privKey_asBigIng)
 	pubKey.ScalarMultiplication(&g1, &privKey_asBigIng)
@@ -332,12 +328,10 @@ func _EC_GenerateG1KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigIn
 	return
 }
 
-func _EC_GenerateG2KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G2Jac, pubKeyAff EC.G2Affine) {
+func _EC_GenerateG2KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G2Jac, pubKeyAff EC.G2Affine) {
 	_, g2, _, _ := EC.Generators()
 	
-	rand_BigInt := big.NewInt(r.Int63())
-	rand_BigInt.Mul(rand_BigInt, rand_BigInt).Mul(rand_BigInt, rand_BigInt)
-	privKey.SetBigInt(rand_BigInt)
+	privKey.SetRandom()
 
 	privKey.BigInt(&privKey_asBigIng)
 	pubKey.ScalarMultiplication(&g2, &privKey_asBigIng)
