@@ -5,10 +5,6 @@ import (
 	"testing"
 )
 
-func Benchmark_tables_BN254(b *testing.B) {
-	_Benchmark_tables_BN254(b)
-}
-
 func Benchmark_BN254_5000(b *testing.B) {
 	bn254.Run(b, 5_000, 10, true)
 }

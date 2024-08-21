@@ -23,6 +23,46 @@ import (
 	"ecpdksap-go/utils"
 )
 
+
+func RunBench (kind string) {
+
+	b := new (testing.B)
+	b.StartTimer()
+
+	if kind == "only-bn254" {
+
+		bn254.Run(b, 5_000, 10, true)
+		// 	bn254.Run(b, 10_000, 10, true)
+		// 	bn254.Run(b, 20_000, 10, true)
+		// 	bn254.Run(b, 40_000, 10, true)
+		// 	bn254.Run(b, 80_000, 10, true)
+		// 	bn254.Run(b, 100_000, 10, true)
+		// 	bn254.Run(b, 500_000, 10, true)
+		// 	bn254.Run(b, 1_000_000, 10, true)
+		// 	bn254.Run(b, 5_000_000, 10, true)
+
+	} else if kind == "all-curves" {
+
+		_Benchmark_Curves(b, 5_000, 10)
+		// _Benchmark_Curves(b, 10_000, 10)
+		// _Benchmark_Curves(b, 20_000, 10)
+		// _Benchmark_Curves(b, 40_000, 10)
+		// _Benchmark_Curves(b, 80_000, 10)
+		// _Benchmark_Curves(b, 100_000, 10)
+	}
+}
+
+func _Benchmark_Curves(b *testing.B, sampleSize int, nRepetitions int) {
+
+	bls12_377.Run(b, sampleSize, nRepetitions, true)
+	bls12_381.Run(b, sampleSize, nRepetitions, true)
+	bls24_315.Run(b, sampleSize, nRepetitions, true)
+	bn254.Run(b, sampleSize, nRepetitions, true)
+	bw6_633.Run(b, sampleSize, nRepetitions, true)
+	bw6_761.Run(b, sampleSize, nRepetitions, true)
+}
+
+
 func Benchmark_BN254_V2_V0_1byte_Combined(b *testing.B, sampleSize int) {
 
 	hasher := sha256.New()
@@ -129,7 +169,6 @@ func _generateData (sampleSize int) (combinedMeta  []*_CombinedMeta, v_asBigIntP
 	return
 }
 
-
 func _EC_GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
 	g1, _, _, _ := EC.Generators()
 
@@ -141,43 +180,9 @@ func _EC_GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, p
 	return
 }
 
-
 type _CombinedMeta struct {
 	Rj                *EC.G1Jac
 	Rj_asAffArr       []EC.G1Affine
 	ViewTagTwoBytes   uint16
 	ViewTagSingleByte uint8
-}
-
-
-func RunAll () {
-
-	b := new (testing.B)
-	b.StartTimer()
-	
-	_Benchmark_tables_BN254(b)
-	
-}
-
-func _Benchmark_tables_BN254(b *testing.B) {
-
-	bn254.Run(b, 5_000, 10, true)
-// 	bn254.Run(b, 10_000, 10, true)
-// 	bn254.Run(b, 20_000, 10, true)
-// 	bn254.Run(b, 40_000, 10, true)
-// 	bn254.Run(b, 80_000, 10, true)
-// 	bn254.Run(b, 100_000, 10, true)
-// 	bn254.Run(b, 500_000, 10, true)
-// 	bn254.Run(b, 1_000_000, 10, true)
-// 	bn254.Run(b, 5_000_000, 10, true)
-}
-
-func _Benchmark_Curves(b *testing.B, sampleSize int, nRepetitions int) {
-
-	bls12_377.Run(b, sampleSize, nRepetitions, true)
-	bls12_381.Run(b, sampleSize, nRepetitions, true)
-	bls24_315.Run(b, sampleSize, nRepetitions, true)
-	bn254.Run(b, sampleSize, nRepetitions, true)
-	bw6_633.Run(b, sampleSize, nRepetitions, true)
-	bw6_761.Run(b, sampleSize, nRepetitions, true)
 }

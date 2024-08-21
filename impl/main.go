@@ -39,10 +39,10 @@ func main() {
 		gen_example.GenerateExample(os.Args[2], os.Args[3], os.Args[4])
 
 	case "bench":
-		if len(os.Args) != 2 {
-			panic(`Subcommand 'bench' takes no arguments!`)
+		if len(os.Args) != 3 {
+			panic(`Subcommand 'bench' takes one argument <only-bn254 | all-curves>!`)
 		}
-		benchmark.RunAll()
+		benchmark.RunBench(os.Args[2])
 
 	default:
 		fmt.Printf("\nERR: Only: 'send' | 'receive-scan' | 'gen-example' | 'bench' subcommands allowed.\n\n")
