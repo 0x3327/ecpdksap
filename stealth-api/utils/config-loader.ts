@@ -16,7 +16,7 @@ const configLoader = {
 
         const serverName = process.env.API_SERVER_NAME || 'defaultServerName';
         const host = process.env.API_HOST || '0.0.0.0';
-        const port = process.env.API_PORT || '3000';
+        const port = process.env.API_PORT || '8765';
 
         const config: Config = {
             apiConfig: {
