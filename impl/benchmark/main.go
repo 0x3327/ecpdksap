@@ -20,6 +20,8 @@ import (
 	bw6_633 "ecpdksap-go/benchmark/curves/bw6-633"
 	bw6_761 "ecpdksap-go/benchmark/curves/bw6-761"
 
+	bn254_optimized "ecpdksap-go/benchmark/bn254"
+
 	"ecpdksap-go/utils"
 )
 
@@ -31,7 +33,10 @@ func RunBench (kind string) {
 
 	if kind == "only-bn254" {
 
-		bn254.Run(b, 5_000, 10, true)
+		// bn254.Run(b, 5_000, 10, true)
+		
+		bn254_optimized.Run(b, 5_000, 10, 12312312312312312)
+
 		// 	bn254.Run(b, 10_000, 10, true)
 		// 	bn254.Run(b, 20_000, 10, true)
 		// 	bn254.Run(b, 40_000, 10, true)
@@ -125,29 +130,15 @@ func _generateData (sampleSize int) (combinedMeta  []*_CombinedMeta, v_asBigIntP
 	v_asBigIntPtr = &v_asBigInt
 	V_Ptr = V
 
-	var r_asBigInt big.Int
-
 	//random data generation: Rj
-	var Rs []EC.G1Jac
-	var Rs_Ptr []*EC.G1Jac
-	var RsAff_asArr [][]EC.G1Affine
-
-	var rs []big.Int
-
 	for j := 0; j < sampleSize; j++ {
 
-		_, rj_asBigInt, Rj, Rj_asAff := _EC_GenerateG1KeyPair()
-
-		Rs = append(Rs, Rj)
-		RsAff_asArr = append(RsAff_asArr, []EC.G1Affine{Rj_asAff})
+		_, _, _, Rj_asAff := _EC_GenerateG1KeyPair()
 
 		tmp := new(EC.G1Jac)
 		tmp.FromAffine(&Rj_asAff)
-		Rs_Ptr = append(Rs_Ptr, tmp)
 
 		//note: store the last priv. key for R
-		r_asBigInt = rj_asBigInt
-		rs = append(rs, r_asBigInt)
 
 		cm := new(_CombinedMeta)
 		cm.Rj = new(EC.G1Jac)
@@ -159,7 +150,6 @@ func _generateData (sampleSize int) (combinedMeta  []*_CombinedMeta, v_asBigIntP
 		combinedMeta = append(combinedMeta, cm)
 	}
 
-
 	_, K_SECP256k1 := utils.SECP256k_Gen1G1KeyPair()
 	var K_SECP256k1_Jac SECP256K1.G1Jac
 	K_SECP256k1_Jac.FromAffine(&K_SECP256k1)
@@ -169,12 +159,12 @@ func _generateData (sampleSize int) (combinedMeta  []*_CombinedMeta, v_asBigIntP
 	return
 }
 
-func _EC_GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
+func _EC_GenerateG1KeyPair() (privKey EC_fr.Element, privKey_asBigInt big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
 	g1, _, _, _ := EC.Generators()
 
 	privKey.SetRandom()
-	privKey.BigInt(&privKey_asBigIng)
-	pubKey.ScalarMultiplication(&g1, &privKey_asBigIng)
+	privKey.BigInt(&privKey_asBigInt)
+	pubKey.ScalarMultiplication(&g1, &privKey_asBigInt)
 	pubKeyAff.FromJacobian(&pubKey)
 
 	return

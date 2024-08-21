@@ -17,15 +17,15 @@ import (
 	"ecpdksap-go/utils"
 )
 
-func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
+func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 
 	fmt.Println("Running `bn254` Benchmark ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions)
 	fmt.Println()
 
-	r := rand.New(rand.NewSource(1301))
+	rndGen := rand.New(rand.NewSource(int64(randomSeed)))
 
 	bint := new (big.Int)
-	bint.SetUint64((r.Uint64()))
+	bint.SetUint64((rndGen.Uint64()))
 
 	fmt.Println("bint:", bint)
 
@@ -36,7 +36,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		g1, _, _, g2Aff := EC.Generators()
 
 		//common for versions: V0, V1, V2
-		_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair(r)
+		_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair(rndGen)
 		v_asBigIntPtr := &v_asBigInt
 
 		var r_asBigInt big.Int
@@ -53,7 +53,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 		for j := 0; j < sampleSize; j++ {
 
-			_, rj_asBigInt, _, Rj_asAff := _EC_GenerateG1KeyPair(r)
+			_, rj_asBigInt, _, Rj_asAff := _EC_GenerateG1KeyPair(rndGen)
 
 			tmp := new(EC.G1Jac)
 			tmp.FromAffine(&Rj_asAff)
@@ -65,9 +65,9 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 			cm.Rj = new(EC.G1Jac)
 			cm.Rj.FromAffine(&Rj_asAff)
 			cm.Rj_asAffArr = []EC.G1Affine{Rj_asAff}
-			cm.ViewTagTwoBytes = uint16(r.Uint32() % 65536)
-			cm.ViewTagSingleByte = uint8(r.Uint32() % 256)
-			cm.ViewTagSecondByte = uint8(r.Uint32() % 256)
+			cm.ViewTagTwoBytes = uint16(rndGen.Uint32() % 65536)
+			cm.ViewTagSingleByte = uint8(rndGen.Uint32() % 256)
+			cm.ViewTagSecondByte = uint8(rndGen.Uint32() % 256)
 
 			combinedMeta = append(combinedMeta, cm)
 		}
@@ -80,13 +80,15 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 		//protocol V0 -------------------------------------
 
-		_, _, _, K2_EC_asAff := _EC_GenerateG2KeyPair(r)
+		_, _, _, K2_EC_asAff := _EC_GenerateG2KeyPair(rndGen)
 		K2_EC_asAffArr := []EC.G2Affine{K2_EC_asAff}
 
 		var vR EC.G1Jac
 		var vR_asAff EC.G1Affine
 
 		hasher := sha256.New()
+
+		precomputedQLines := [][2][66]EC.LineEvaluationAff{EC.PrecomputeLines(K2_EC_asAffArr[0])}
 
 		//protocol: V0 and viewTag: V0-1byte
 		b.ResetTimer()
@@ -100,16 +102,15 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 			nSample += 1
 
-			// vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
+			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
 
-			vR.ScalarMultiplication(cm.Rj, &v_asBigInt)
 			compressed := vR_asAff.FromJacobian(&vR).Bytes()
 
 			if hasher.Sum(compressed[:])[0] != cm.ViewTagSingleByte {
 				continue
 			}
 
-			pairingResult, _ := EC.Pair(cm.Rj_asAffArr, K2_EC_asAffArr)
+			pairingResult, _ := EC.PairFixedQ(cm.Rj_asAffArr, precomputedQLines)
 
 			P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
 
@@ -137,7 +138,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 				continue
 			}
 
-			pairingResult, _ := EC.Pair(cm.Rj_asAffArr, K2_EC_asAffArr)
+			pairingResult, _ := EC.PairFixedQ(cm.Rj_asAffArr, precomputedQLines)
 
 			P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
 		}
@@ -159,7 +160,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 			vR_asAff.FromJacobianCoordY(a_El, b_El, &vR)
 
-			pairingResult, _ := EC.Pair(cm.Rj_asAffArr, K2_EC_asAffArr)
+			pairingResult, _ := EC.PairFixedQ(cm.Rj_asAffArr, precomputedQLines)
 
 			P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
 		}
@@ -174,6 +175,9 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 		K_asArray := K2_EC_asAffArr
 
 		//protocol: V1 and viewTag: V0-1byte
+
+		precomputedQLines[0] = EC.PrecomputeLines(K_asArray[0])
+
 		b.ResetTimer()
 
 		for _, cm := range combinedMeta {
@@ -188,7 +192,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 				continue
 			}
 
-			EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, K_asArray)
+			EC.PairFixedQ([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, precomputedQLines)
 		}
 
 		durations["v1.v0-1byte"] += b.Elapsed()
@@ -210,7 +214,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 				continue
 			}
 
-			EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, K_asArray)
+			EC.PairFixedQ([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, precomputedQLines)
 		}
 
 		durations["v1.v0-2bytes"] += b.Elapsed()
@@ -231,7 +235,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 			vR_asAff.FromJacobianCoordY(a_El, b_El, &vR)
 
-			EC.Pair([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, K_asArray)
+			EC.PairFixedQ([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, precomputedQLines)
 		}
 
 		durations["v1.v1-1byte"] += b.Elapsed()
@@ -246,13 +250,15 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 		var Pv2_asJac SECP256K1.G1Jac
 
-
 		K_SECP256k1_JacPtr := &K_SECP256k1_Jac
 
 		K_SECP256k1_AffPtr := new(SECP256K1.G1Affine)
 		K_SECP256k1_AffPtr.FromJacobian(K_SECP256k1_JacPtr)
 
 		//protocol: V2 and viewTag: v0-1byte
+
+		precomputedQLines[0] = EC.PrecomputeLines(g2Aff_asArray[0])
+
 		b.ResetTimer()
 
 		for _, cm := range combinedMeta {
@@ -271,7 +277,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 			if hasher.Sum(compressed[:])[0] == cm.ViewTagSingleByte {
 
-				S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
+				S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedQLines)
 
 				Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
 			}
@@ -296,7 +302,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 				continue
 			}
 
-			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
+			S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedQLines)
 
 			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
 		}
@@ -318,7 +324,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 
 			vR_asAff.FromJacobianCoordY(a_El, b_El, &vR)
 
-			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
+			S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedQLines)
 
 			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
 		}
@@ -341,29 +347,29 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool) {
 	fmt.Println()
 }
 
-func _EC_GenerateG1KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
+func _EC_GenerateG1KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigInt big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
 	g1, _, _, _ := EC.Generators()
 
 	randBigInt := big.NewInt(r.Int63())
 	randBigInt.Mul(randBigInt, randBigInt).Mul(randBigInt, randBigInt)
 	privKey.SetBigInt(randBigInt)
 
-	privKey.BigInt(&privKey_asBigIng)
-	pubKey.ScalarMultiplication(&g1, &privKey_asBigIng)
+	privKey.BigInt(&privKey_asBigInt)
+	pubKey.ScalarMultiplication(&g1, &privKey_asBigInt)
 	pubKeyAff.FromJacobian(&pubKey)
 
 	return
 }
 
-func _EC_GenerateG2KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigIng big.Int, pubKey EC.G2Jac, pubKeyAff EC.G2Affine) {
+func _EC_GenerateG2KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigInt big.Int, pubKey EC.G2Jac, pubKeyAff EC.G2Affine) {
 	_, g2, _, _ := EC.Generators()
 	
 	randBigInt := big.NewInt(r.Int63())
 	randBigInt.Mul(randBigInt, randBigInt).Mul(randBigInt, randBigInt)
 	privKey.SetBigInt(randBigInt)
 
-	privKey.BigInt(&privKey_asBigIng)
-	pubKey.ScalarMultiplication(&g2, &privKey_asBigIng)
+	privKey.BigInt(&privKey_asBigInt)
+	pubKey.ScalarMultiplication(&g2, &privKey_asBigInt)
 	pubKeyAff.FromJacobian(&pubKey)
 
 	return
