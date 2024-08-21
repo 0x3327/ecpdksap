@@ -61,7 +61,7 @@ func _Benchmark_Curves(b *testing.B, sampleSize int, nRepetitions int) {
 	bls12_377.Run(b, sampleSize, nRepetitions, true)
 	bls12_381.Run(b, sampleSize, nRepetitions, true)
 	bls24_315.Run(b, sampleSize, nRepetitions, true)
-	bn254.Run(b, sampleSize, nRepetitions, true)
+	bn254.Run(b, sampleSize, nRepetitions, true, int64(1))
 	bw6_633.Run(b, sampleSize, nRepetitions, true)
 	bw6_761.Run(b, sampleSize, nRepetitions, true)
 }
