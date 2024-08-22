@@ -44,7 +44,6 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             }
 
             try {
-                // app.stealthService?.send(address, amount);
                 sendResponseOK(res, 'Transfer successfull', null)
             } catch (err) {
                 sendResponseBadRequest(res, `Transfer failed: ${(err as Error).message}`, null);
