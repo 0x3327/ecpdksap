@@ -67,7 +67,7 @@ class GoHandler {
                 // console.log("global genSenderInfo", global);
                 const info = JSON.parse((global as any).senderMeta);
                 resolve(info);
-            }).catch(err => reject(err))}) 
+            }).catch(err => reject(err))})
     };
 
     genRecipientInfo() {
@@ -83,9 +83,9 @@ class GoHandler {
                 // console.log("global genSenderInfo", global);
                 const info = JSON.parse((global as any).recipientMeta);
 
-                this._DB.idProccessed += 1;
+                // this._DB.idProccessed += 1;
 
-                this._DB.metaAddrRegistry.push({ id: this._DB.ids[this._DB.idProccessed], ...info});
+                // this._DB.metaAddrRegistry.push({ id: this._DB.ids[this._DB.idProccessed], ...info});
 
                 resolve(info);
             }).catch(err => reject(err))})
@@ -98,10 +98,9 @@ class GoHandler {
                 this.go.importObject
             ).then((result) => {
                 const senderInfo = JSON.parse((globalThis as any).senderMeta);
-                // console.log("info", info);
+
                 recipientInfo.r = senderInfo.r;
-                // console.log("senderInfo", senderInfo);
-                // console.log("info", info);
+                recipientInfo.ViewTagVersion = 'v0-1byte';
                 
                 this.go.argv = ["js", "send", JSON.stringify(recipientInfo)];
 
@@ -134,7 +133,7 @@ class GoHandler {
                 console.log("global StealthPubKey", (globalThis as any).StealthPubKey);
                 console.log("global StealthViewTag", (globalThis as any).StealthViewTag);
                 const Rs = [(globalThis as any).StealthPubKey];
-                // const ViewTags = [(globalThis as any).StealthViewTag];
+                const ViewTags = [(globalThis as any).StealthViewTag];
 
                 this.go.argv = ["js", "receive-scan", JSON.stringify({
                     k: recipientInfo.k,
@@ -142,7 +141,7 @@ class GoHandler {
                     Version: "v2",
                     ViewtagVersion: "v0-1byte",
                     Rs,
-                    ViewTags: ["2c"],
+                    ViewTags,
                 })];
 
                 this.go.run(result.instance);
