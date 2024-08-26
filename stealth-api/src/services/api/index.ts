@@ -1,7 +1,8 @@
 import express, { Express, Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import routeHandlers from '../utils/route-handlers';
-import App from '../src/app';
+import routeHandlers from './route-handlers';
+import App from '../../app';
+import { queryParser } from 'express-query-parser';
 
 interface AppConfig {
     serverName: string;
@@ -20,11 +21,18 @@ class API {
         const { serverName, host, port } = app.config.apiConfig;
         this.app = app;
         this.host = host;
-        this.port = parseInt(port, 10);
+        this.port = port;
         this.serverName = serverName;
 
         this.server = express();
         this.server.use(bodyParser.json());
+        this.server.use(queryParser({
+            parseNull: true,
+            parseUndefined: true,
+            parseBoolean: true,
+            parseNumber: true
+          }));
+
         this.exposeRoutes();
     }
     

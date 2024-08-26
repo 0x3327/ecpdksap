@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import dotenv from 'dotenv';
-import App from '../src/app';
+import App from '../../src/app';
 
 dotenv.config({ path: `.env.development` });
 

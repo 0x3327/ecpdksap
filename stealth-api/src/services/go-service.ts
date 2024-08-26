@@ -57,7 +57,7 @@ class GoHandler {
     genSenderInfo() {
         return new Promise((resolve, reject) => {
             WebAssembly.instantiate(
-                readFileSync(path.join(__dirname, '..', 'public', 'ecpdksap.wasm')),
+                readFileSync(path.join(__dirname, '..', '..', 'public', 'ecpdksap.wasm')),
                 this.go.importObject
             ).then((result) => {
                 this.go.argv = ["js", "gen-send-info"];
@@ -73,7 +73,7 @@ class GoHandler {
     genRecipientInfo() {
         return new Promise((resolve, reject) => {
             WebAssembly.instantiate(
-                readFileSync(path.join(__dirname, '..', 'public', 'ecpdksap.wasm')),
+                readFileSync(path.join(__dirname, '..', '..', 'public', 'ecpdksap.wasm')),
                 this.go.importObject
             ).then((result) => {
                 this.go.argv = ["js", "gen-recipient-info"];
@@ -94,7 +94,7 @@ class GoHandler {
     send() {
         return new Promise((resolve, reject) => {
             WebAssembly.instantiate(
-                readFileSync(path.join(__dirname, '..', 'public', 'ecpdksap.wasm')),
+                readFileSync(path.join(__dirname, '..', '..', 'public', 'ecpdksap.wasm')),
                 this.go.importObject
             ).then((result) => {
                 const recipientInfo = JSON.parse((global as any).recipientMeta);
@@ -130,7 +130,7 @@ class GoHandler {
     receiveScan() {
         return new Promise((resolve, reject) => {
             WebAssembly.instantiate(
-                readFileSync(path.join(__dirname, '..', 'public', 'ecpdksap.wasm')),
+                readFileSync(path.join(__dirname, '..', '..', 'public', 'ecpdksap.wasm')),
                 this.go.importObject
             ).then((result) => {
                 const recipientInfo = JSON.parse((global as any).recipientMeta);

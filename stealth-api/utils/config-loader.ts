@@ -1,14 +1,5 @@
 import dotenv from 'dotenv';
-
-interface ApiConfig {
-    serverName: string;
-    host: string;
-    port: string;
-}
-
-interface Config {
-    apiConfig: ApiConfig;
-}
+import { Config } from '../types';
 
 const configLoader = {
     load(configType: string = 'development'): Config {
@@ -16,7 +7,13 @@ const configLoader = {
 
         const serverName = process.env.API_SERVER_NAME || 'defaultServerName';
         const host = process.env.API_HOST || '0.0.0.0';
-        const port = process.env.API_PORT || '8765';
+        const port = process.env.API_PORT ?  parseInt(process.env.API_PORT) : 8765;
+
+        const dbHost = process.env.DB_HOST || '0.0.0.0';
+        const dbPort = process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306;
+        const dbDatabase = process.env.DB_DATABASE || 'stealthdb';
+        const dbUsername = process.env.DB_USERNAME;
+        const dbPassword = process.env.DB_PASSWORD;
 
         const config: Config = {
             apiConfig: {
@@ -24,6 +21,13 @@ const configLoader = {
                 host,
                 port,
             },
+            dbConfig: {
+                host: dbHost,
+                port: dbPort,
+                database: dbDatabase,
+                username: dbUsername,
+                password: dbPassword,
+            }
         };
 
         return config;
