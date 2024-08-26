@@ -3,6 +3,7 @@ import BlockchainListener from './services/blockchain-listener';
 import GoHandler from './services/go-service';
 import DB from './services/db';
 import { Config } from '../types';
+import { Op } from 'sequelize';
 
 require('../public/wasm_exec.js');
 
@@ -95,6 +96,16 @@ class App {
         //     recipient_stealth_address: '0xabcdef54321',
         //     ephemeral_key: '0x12345.0xabc1232'
         // })
+
+        // Fetch all receipts by given parameters
+        // const res = await this.db.models.receivedTransactions.findAll({
+        //     block_number: {
+        //         [Op.gte]: 1, // block_number >= 1
+        //         [Op.lte]: 4, // block_number <= 4
+        //         amount: 100  // amount == 100
+        //     }
+        // });
+        // console.log(res);
 
 
 
