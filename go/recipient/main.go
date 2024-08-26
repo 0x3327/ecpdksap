@@ -177,7 +177,6 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 		var V BN254.G1Affine
 		V.ScalarMultiplicationBase(&v_asBigInt)
 
-
 		var vR BN254.G1Affine
 		var b SECP256K1_fr.Element
 		// var P SECP256K1.G1Affine
@@ -191,11 +190,9 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 			vR = utils.BN254_MulG1PointandElement(&Rsi, &v)
 
-			fmt.Println("vR", vR)
-
 			if viewTagFcn != nil {
 
-				calculatedViewTag := utils.ComputeViewTag(recipientInputData.ViewTagVersion, &vR)//   viewTagFcn(&vR, nBytesInViewTag)
+				calculatedViewTag := utils.ComputeViewTag(recipientInputData.ViewTagVersion, &vR) //   viewTagFcn(&vR, nBytesInViewTag)
 
 				viewTagCalcAggregateDuration += time.Since(vTagCalcStart)
 
@@ -221,7 +218,7 @@ func Scan(jsonInputString string) (rP []string, rAddr []string, privKeys []strin
 
 			var P SECP256K1.G1Affine
 
-			P.ScalarMultiplication(&G1, kb.BigInt(new (big.Int)))
+			P.ScalarMultiplication(&G1, kb.BigInt(new(big.Int)))
 
 			remainingCalcAggregateDuration += time.Since(rCalcStart)
 

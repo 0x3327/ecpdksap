@@ -54,9 +54,9 @@ class App {
         console.log("senderInfo", senderInfo);
         const recipientInfo = await this.goHandler.genRecipientInfo();
         console.log("recipientInfo", recipientInfo);
-        const sendInfo = await this.goHandler.send(recipientInfo as Info);
+        const sendInfo = await this.goHandler.send();
         console.log("sendInfo", sendInfo);
-        const receiveScanInfo = await this.goHandler.receiveScan(recipientInfo as Info, sendInfo as SendInfo);
+        const receiveScanInfo = await this.goHandler.receiveScan();
         console.log("receiveScanInfo", receiveScanInfo)
         
         // Start API

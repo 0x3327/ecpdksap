@@ -91,22 +91,29 @@ class GoHandler {
             }).catch(err => reject(err))})
     };
 
-    send(recipientInfo: Info) {
+    send() {
         return new Promise((resolve, reject) => {
             WebAssembly.instantiate(
                 readFileSync(path.join(__dirname, '..', 'public', 'ecpdksap.wasm')),
                 this.go.importObject
             ).then((result) => {
-                const senderInfo = JSON.parse((globalThis as any).senderMeta);
-
-                recipientInfo.r = senderInfo.r;
-                recipientInfo.ViewTagVersion = 'v0-1byte';
+                const recipientInfo = JSON.parse((global as any).recipientMeta);
+                const senderInfo = JSON.parse((global as any).senderMeta);
                 
-                this.go.argv = ["js", "send", JSON.stringify(recipientInfo)];
+                this.go.argv = ["js", "send", JSON.stringify({
+                    r: senderInfo.r,
+                    K: recipientInfo.K,
+                    V: recipientInfo.V,
+                    Version: recipientInfo.Version,
+                    ViewTagVersion: "v0-1byte",
+                })];
 
                 this.go.run(result.instance);
 
-                const stealthPubKey = (global as any).StealthPubKey;
+                const stealthPubKeyCleaned = (global as any).StealthPubKey.replace("E([", "").replace("])", "");
+                let [x, y] = stealthPubKeyCleaned.split(",");
+                const stealthPubKey = `${x}.${y}`;
+                (global as any).StealthPubKey = stealthPubKey;
                 const stealthAddress = (global as any).StealthAddress;
                 const stealthViewTag = (global as any).StealthViewTag;
 
@@ -120,33 +127,34 @@ class GoHandler {
         })
     };
 
-    receiveScan(recipientInfo: Info, sendInfo: SendInfo) {
+    receiveScan() {
         return new Promise((resolve, reject) => {
             WebAssembly.instantiate(
                 readFileSync(path.join(__dirname, '..', 'public', 'ecpdksap.wasm')),
                 this.go.importObject
             ).then((result) => {
+                const recipientInfo = JSON.parse((global as any).recipientMeta);
+                const senderInfo = JSON.parse((global as any).senderMeta);
                 // const Rs = this._DB.txList.map((el) => el.senderPubKey);
                 // const ViewTags = this._DB.txList.map((el) => el.viewTag);
 
                 // console.log("global", global);
-                console.log("global StealthPubKey", (globalThis as any).StealthPubKey);
-                console.log("global StealthViewTag", (globalThis as any).StealthViewTag);
-                const Rs = [(globalThis as any).StealthPubKey];
-                const ViewTags = [(globalThis as any).StealthViewTag];
+                console.log("global StealthPubKey", (global as any).StealthPubKey);
+                console.log("global StealthViewTag", (global as any).StealthViewTag);
+                // const Rs = [(global as any).StealthPubKey];
+                const Rs = [senderInfo.R];
+                const ViewTags = [(global as any).StealthViewTag];
 
                 this.go.argv = ["js", "receive-scan", JSON.stringify({
                     k: recipientInfo.k,
                     v: recipientInfo.v,
-                    Version: "v2",
-                    ViewtagVersion: "v0-1byte",
                     Rs,
+                    Version: "v2",
                     ViewTags,
+                    ViewtagVersion: "v0-1byte",
                 })];
 
                 this.go.run(result.instance);
-
-                console.log("prosao run");
 
                 console.log("discoveredSA", (global as any).DiscoveredStealthAddrs);
                 console.log("discoveredPK", (global as any).DiscoveredStealthPrivKeys);

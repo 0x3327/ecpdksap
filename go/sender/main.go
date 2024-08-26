@@ -25,7 +25,7 @@ func Send(jsonInputString string) (rr string, rR string, rVTag string, rP string
 	var senderInputData SenderInputData
 	json.Unmarshal([]byte(jsonInputString), &senderInputData)
 
-	fmt.Println("senderInputData", senderInputData)
+	fmt.Printf("SenderInputData %+v\n", senderInputData)
 
 	if senderInputData.Version == "v0" {
 
@@ -111,13 +111,13 @@ func Send(jsonInputString string) (rr string, rR string, rVTag string, rP string
 		rVTag = utils.ComputeViewTag(senderInputData.ViewTagVersion, &tmp)
 	}
 
-	return 
+	return
 }
 
 type SenderInputData struct {
 	PK_r           string `json:"r"`
 	K              string `json:"K"`
 	V              string `json:"V"`
-	Version        string
-	ViewTagVersion string
+	Version        string `json:"Version"`
+	ViewTagVersion string `json:"ViewTagVersion"`
 }
