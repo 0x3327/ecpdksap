@@ -12,8 +12,7 @@ contract ECPDKSAP_Announcer {
     _announce(_stealthAddress, _R, _viewTag);
 
     _stealthAddress.transfer(msg.value);
-
-   }
+  }
 
   function _announce(
     address _stealthAddress,
@@ -32,5 +31,4 @@ contract ECPDKSAP_Announcer {
     bytes ephemeralPubKey,
     bytes metadata
   );
-  
 }
