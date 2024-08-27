@@ -25,25 +25,19 @@ import (
 	"ecpdksap-go/utils"
 )
 
-func RunBench(kind string) {
+func RunBench(kind string, rndSeed int) {
 
 	b := new(testing.B)
 	b.StartTimer()
 
 	if kind == "only-bn254" {
 
-		// bn254.Run(b, 5_000, 10, true)
-
-		bn254_optimized.Run(b, 5_000, 10, 12312312312312312)
-
-		// 	bn254.Run(b, 10_000, 10, true)
-		// 	bn254.Run(b, 20_000, 10, true)
-		// 	bn254.Run(b, 40_000, 10, true)
-		// 	bn254.Run(b, 80_000, 10, true)
-		// 	bn254.Run(b, 100_000, 10, true)
-		// 	bn254.Run(b, 500_000, 10, true)
-		// 	bn254.Run(b, 1_000_000, 10, true)
-		// 	bn254.Run(b, 5_000_000, 10, true)
+		bn254_optimized.Run(b, 5_000, 10, rndSeed)
+		bn254_optimized.Run(b, 10_000, 10, rndSeed)
+		bn254_optimized.Run(b, 20_000, 10, rndSeed)
+		bn254_optimized.Run(b, 40_000, 10, rndSeed)
+		bn254_optimized.Run(b, 80_000, 10, rndSeed)
+		bn254_optimized.Run(b, 100_000, 10, rndSeed)
 
 	} else if kind == "all-curves" {
 

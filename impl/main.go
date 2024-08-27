@@ -7,6 +7,7 @@ import (
 	"ecpdksap-go/sender"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -38,10 +39,19 @@ func main() {
 		gen_example.GenerateExample(os.Args[2], os.Args[3], os.Args[4])
 
 	case "bench":
-		if len(os.Args) != 3 {
+		if len(os.Args) < 3 {
 			panic(`Subcommand 'bench' takes one argument <only-bn254 | all-curves>!`)
 		}
-		benchmark.RunBench(os.Args[2])
+
+		if len(os.Args) == 4 {
+			fmt.Println("Received str:", os.Args[3])
+			seed, _ := strconv.Atoi(os.Args[3])
+			fmt.Println("Converted str to int:", seed)
+			benchmark.RunBench(os.Args[2], seed)
+		} else {
+			defaultSeed := 12318726
+			benchmark.RunBench(os.Args[2], defaultSeed)
+		}
 
 	default:
 		fmt.Printf("\nERR: Only: 'send' | 'receive-scan' | 'gen-example' | 'bench' subcommands allowed.\n\n")

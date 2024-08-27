@@ -21,15 +21,10 @@ import (
 
 func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 
-	fmt.Println("Running `bn254` Benchmark ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions)
+	fmt.Println("Running `bn254` Benchmark ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions, "seed:", randomSeed)
 	fmt.Println()
 
 	rndGen := rand.New(rand.NewSource(int64(randomSeed)))
-
-	bint := new(big.Int)
-	bint.SetUint64((rndGen.Uint64()))
-
-	fmt.Println("bint:", bint)
 
 	durations := map[string]time.Duration{}
 
@@ -95,14 +90,9 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 		//protocol: V0 and viewTag: V0-1byte
 		b.ResetTimer()
 
-		nHits := 0
-		nSample := 0
-
 		for _, cm := range combinedMeta {
 
 			hasher.Reset()
-
-			nSample += 1
 
 			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
 
@@ -115,13 +105,9 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 			pairingResult, _ := EC.PairFixedQ(cm.Rj_asAffArr, precomputedQLines)
 
 			P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
-
-			nHits += 1
 		}
 
 		durations["v0.v0-1byte"] += b.Elapsed()
-
-		fmt.Println("nHits:", nHits, "nSample:", nSample)
 
 		//protocol: V0 and viewTag: V0-2bytes
 		b.ResetTimer()
