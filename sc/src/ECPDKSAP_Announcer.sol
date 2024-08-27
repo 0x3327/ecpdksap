@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 contract ECPDKSAP_Announcer {
 
-  function sendEth(
+  function sendEthViaContract(
     address payable _stealthAddress,
     bytes memory _R, 
     bytes memory _viewTag

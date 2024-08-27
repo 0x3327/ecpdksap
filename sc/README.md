@@ -1,3 +1,3 @@
-## ECPDKSAP Contracts
+## ECPDKSAP contracts
 
 TBD
