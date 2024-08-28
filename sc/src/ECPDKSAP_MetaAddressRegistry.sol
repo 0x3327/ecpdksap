@@ -1,28 +1,30 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-contract ECPDKSAP_MetaAddressRegistry {
+import { IECPDKSAP_MetaAddressRegistry } from "./interface/IECPDKSAP_MetaAddressRegistry.sol";
+import { ErrorCodes } from "./Utils.sol";
 
-  function register(
-    string memory _id,
-    bytes memory _spendingPubKey,
-    bytes memory _viewingPubKey
-  ) external payable {
+contract ECPDKSAP_MetaAddressRegistry is IECPDKSAP_MetaAddressRegistry {
+  /// @inheritdoc IECPDKSAP_MetaAddressRegistry
+  function registerMetaAddress(string memory _id, bytes memory _metaAddress) external payable {
+    bytes32 _accessKey = keccak256(abi.encode(_id, "string"));
 
-    s_spendingPubKeys[msg.sender].push(_spendingPubKey);
-    s_viewingPubKeys[msg.sender].push(_viewingPubKey);
+    require(s_idToMetaAddress[_accessKey].length == 0, ErrorCodes.META_ID_ALREADY_REGISTERED);
 
-    require(s_idToPubKeys[_id].length == 0, "Meta addr. `id` already used!");
+    s_idToMetaAddress[_accessKey] = _metaAddress;
 
-    s_idToPubKeys[_id].push([_spendingPubKey, _viewingPubKey]);
-
-    emit MetaAddressRegistered(_id, _spendingPubKey, _viewingPubKey);
+    emit MetaAddressRegistered(_id, _metaAddress);
   }
 
-    mapping(address => bytes[]) public s_spendingPubKeys;
-    mapping(address => bytes[]) public s_viewingPubKeys;
+  /// @inheritdoc IECPDKSAP_MetaAddressRegistry
+  function resolve(string memory _id) external view returns (bytes memory metaAddress) {
+    bytes32 _accessKey = keccak256(abi.encode(_id, "string"));
 
-    mapping(string => bytes[][]) public s_idToPubKeys;
+    metaAddress = s_idToMetaAddress[_accessKey];
 
-    event MetaAddressRegistered (string id, bytes spendingPubKey, bytes viewingPubKey);
+    require(metaAddress.length != 0, ErrorCodes.META_ID_IS_NOT_REGISTERED);
+  }
+
+  /// @notice Maps the keccak256(_id) to the underlying meta address bytes
+  mapping(bytes32 => bytes) public s_idToMetaAddress;
 }
