@@ -24,13 +24,16 @@ func main() {
 		if len(os.Args) != 3 {
 			panic(`Subcommand 'send' receives all info. as one JSON input string!`)
 		}
-		sender.Send(os.Args[2])
+		_, _, _, _, addr := sender.Send(os.Args[2])
+		fmt.Println("addr:", addr)
 
 	case "receive-scan":
 		if len(os.Args) != 3 {
 			panic(`Subcommand 'receive-scan' receives all info. as one JSON input string!`)
 		}
-		recipient.Scan(os.Args[2])
+		_, addrs, privKeys := recipient.Scan(os.Args[2])
+		fmt.Println("addrs:", addrs)
+		fmt.Println("privKeys:", privKeys)
 
 	case "gen-example":
 		if len(os.Args) != 5 {
