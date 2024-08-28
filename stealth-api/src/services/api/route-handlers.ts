@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import App from '../../app';
 import { SendFundsRequest, CheckReceivedRequest, TransferReceivedFundsRequest } from './request-types';
+import GoHandler from '../go-service';
+import BlockchainListener from '../blockchain-listener';
+import { Op } from 'sequelize';
 
 interface RouteHandlerConfig {
     method: 'GET' | 'POST';
@@ -37,7 +40,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
     {
         method: 'POST',
         path: '/send',
-        handler: (req: Request, res: Response) => {
+        handler: async (req: Request, res: Response) => {
             const { 
                 recipientIdType,
                 dns,
@@ -47,9 +50,12 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 amount,
             } = (req.body as SendFundsRequest);
 
-            if (typeof amount !== 'number' || typeof address !== 'string') {
+            if (typeof amount !== 'number' || typeof address !== 'string' || typeof dns !== 'string') {
                 return sendResponseBadRequest(res, 'Invalid request body', null);
             }
+
+            const goHandler = new GoHandler();
+            const blockchainListener = new BlockchainListener(app);
 
             // TODO:
             // - Generate recipient's stealth address and ephemeral key daya
@@ -57,7 +63,33 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             // - Register computed ephemeral key in smart contract registry
 
             try {
-                sendResponseOK(res, 'Transfer successfull', null)
+                const recipientInfo = await goHandler.genRecipientInfo();
+                const senderInfo = await goHandler.genSenderInfo();
+
+                const sendInfo = await goHandler.send();
+
+                app.db.models.sentTransactions.create({
+                    transaction_hash: '0x123456',
+                    block_number: blockchainListener.getCurrentBlockNumber(),
+                    amount: amount,
+                    recipient_identifier: recipientIdType === 'eth_dns' ? dns : address,
+                    recipient_identifier_type: recipientIdType,
+                    recipient_k: recipientK,
+                    recipient_v: recipientV,
+                    recipient_stealth_address: sendInfo.address,
+                    ephemeral_key: sendInfo.pubKey
+                })
+
+                console.log(`Sending ${amount} to stealth address: ${sendInfo.address}`);
+
+                console.log(`Registering ephemeral key: ${sendInfo.pubKey}`);
+
+                sendResponseOK(res, 'Transfer simulated successfully', {
+                    stealthAddress: sendInfo.address,
+                    ephemeralPubKey: sendInfo.pubKey,
+                    viewTag: sendInfo.viewTag,
+                    amount: amount
+                });
             } catch (err) {
                 sendResponseBadRequest(res, `Transfer failed: ${(err as Error).message}`, null);
             }
@@ -66,7 +98,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
     {
         method: 'GET',
         path: '/check-received',
-        handler: (req: Request, res: Response) => {
+        handler: async (req: Request, res: Response) => {
             const { 
                 fromBlock,
                 toBlock,
@@ -74,14 +106,44 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             console.log(fromBlock, toBlock);
 
+            const fromBlockNumber = parseInt(fromBlock as string);
+            const toBlockNumber = parseInt(toBlock as string);
+
+            if (isNaN(fromBlockNumber) || isNaN(toBlockNumber)) {
+                return sendResponseBadRequest(res, 'Invalid block numbers', null);
+            }
+
+            const goHandler = new GoHandler();
+            const blockchainListener = new BlockchainListener(app);
+
             // TODO: 
             // - Fetch from DB or Blockchain (this.app.db...)
             // - Store new receipts in db (received_transactions)
 
-            const receivedData = {};
-
             try {
-                sendResponseOK(res, 'Success', receivedData)
+                // Fetch from DB
+                const existingReceipts = await app.db.models.receivedTransactions.findAll({
+                    block_number: {
+                        [Op.between]: [fromBlockNumber, toBlockNumber]
+                    }
+                });
+                let allReceipts = [...existingReceipts];
+
+                if (existingReceipts.length === 0) {
+                    const newReceipt = await goHandler.receiveScan();
+
+                    // Store new receipts in db
+                    await app.db.models.receivedTransactions.create({
+                        transaction_hash: '0x123456',
+                        block_number: blockchainListener.getCurrentBlockNumber(),
+                        amount: (newReceipt as any).amount,
+                        stealth_address: (newReceipt as any).address,
+                        ephemeral_key: (newReceipt as any).ephemeralKey,
+                    });
+                    allReceipts = [...existingReceipts, newReceipt];
+                }
+
+                sendResponseOK(res, 'Success', { receipts: allReceipts });
             } catch (err) {
                 sendResponseBadRequest(res, `Request failed: ${(err as Error).message}`, null);
             }
@@ -90,7 +152,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
     {
         method: 'GET',
         path: '/transfer/:receiptId',
-        handler: (req: Request, res: Response) => {
+        handler: async (req: Request, res: Response) => {
             const receiptId: number = parseInt(req.params.receiptId);
             const { 
                 address,
@@ -105,6 +167,19 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             // - Send <amount> to <address>
 
             try {
+                const receipt = await app.db.models.receivedTransactions.findAll({
+                    id: receiptId
+                });
+                if (!receipt) {
+                    return sendResponseBadRequest(res, 'Receipt not found', null);
+                }
+
+                const goHandler = new GoHandler();
+
+                const sendInfo = await goHandler.send();
+
+                
+
                 sendResponseOK(res, 'Success')
             } catch (err) {
                 sendResponseBadRequest(res, `Transfer failed: ${(err as Error).message}`, null);

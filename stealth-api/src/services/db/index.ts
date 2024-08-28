@@ -1,5 +1,5 @@
 import { DbConfig } from "../../../types";
-import { ModelCtor, Sequelize }  from 'sequelize-typescript';
+import { Sequelize }  from 'sequelize-typescript';
 import { init as receivedTransactionsModelInit } from "./models/received-transaction-model";
 import { init as sentTransactionsModelInit } from "./models/sent-transaction-model";
 

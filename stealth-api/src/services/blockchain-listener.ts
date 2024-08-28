@@ -16,7 +16,6 @@ class BlockchainListener {
     public async getCurrentBlockNumber() {
         try {
             const blockNumber = await provider.getBlockNumber();
-            // console.log('Current block number:', blockNumber);
             return blockNumber;
         } catch (error) {
             console.error('Error fetching block number:', error);
@@ -26,7 +25,6 @@ class BlockchainListener {
     public async getTransaction(transactionHash: string) {
         try {
             const transaction = await provider.getTransaction(transactionHash);
-            // console.log('Transaction details:', transaction);
             return transaction
         } catch (error) {
             console.error('Error fetching transaction details:', error);
