@@ -52,13 +52,25 @@ source .env && forge test --fork-url $SEPOLIA_RPC_URL
 Deployment:
 
 ```
-TODO
+forge script --chain sepolia script/Deployment.s.sol:DeploymentScript --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv
 ```
 
-## Deployed Contracts
+## Deployed Contracts (Sepolia)
 
-TODO
+[ECPDKSAP_MetaAddressRegistry](https://sepolia.etherscan.io/address/0xb4b82918613524db74967ca6c71979cd030b7991)
 
-- [ECPDKSAP_MetaAddressRegistry]()
-- [ECPDKSAP_Announcer]()
-- Existing singleton [ERC5564Announcer]()
+- ```
+  0xB4B82918613524DB74967CA6c71979cD030B7991
+  ```
+
+[ECPDKSAP_Announcer](https://sepolia.etherscan.io/address/0x79820c9a124023d47bbcc6d0a24db4d0075ca724)
+
+- ```
+  0x79820C9a124023D47BbCC6d0a24DB4D0075Ca724
+  ```
+
+Existing singleton [ERC5564Announcer](https://sepolia.etherscan.io/address/0x55649E01B5Df198D18D95b5cc5051630cfD45564)
+
+- ```
+  0x55649E01B5Df198D18D95b5cc5051630cfD45564
+  ```
