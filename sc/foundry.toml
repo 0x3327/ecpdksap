@@ -12,3 +12,9 @@ runs = 2
 line_length = 100
 tab_width = 2
 bracket_spacing = true
+
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}" }
