@@ -1,14 +1,8 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express} from 'express';
 import bodyParser from 'body-parser';
 import routeHandlers from './route-handlers';
 import App from '../../app';
 import { queryParser } from 'express-query-parser';
-
-interface AppConfig {
-    serverName: string;
-    host: string;
-    port: string;
-}
 
 class API {
     private app: App;

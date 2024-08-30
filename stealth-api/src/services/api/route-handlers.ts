@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import App from '../../app';
-import { SendFundsRequest, CheckReceivedRequest, TransferReceivedFundsRequest } from './request-types';
+import { SendFundsRequest, TransferReceivedFundsRequest } from './request-types';
 import GoHandler from '../go-service';
 import BlockchainListener from '../blockchain-listener';
 import { Op } from 'sequelize';
+import { Info, ReceiveScanInfo, SendInfo } from '../../types';
 
 interface RouteHandlerConfig {
     method: 'GET' | 'POST';
@@ -62,13 +63,13 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             // - Send funds to stealth address
             // - Register computed ephemeral key in smart contract registry
 
+            const senderInfo: Info = await goHandler.genSenderInfo();
+            const recipientInfo: Info = await goHandler.genRecipientInfo();
+
             try {
-                const recipientInfo = await goHandler.genRecipientInfo();
-                const senderInfo = await goHandler.genSenderInfo();
+                const sendInfo: SendInfo = await goHandler.send(senderInfo.r, recipientInfo.K, recipientInfo.V);
 
-                const sendInfo = await goHandler.send();
-
-                app.db.models.sentTransactions.create({
+                await app.db.models.sentTransactions.create({
                     transaction_hash: '0x123456',
                     block_number: blockchainListener.getCurrentBlockNumber(),
                     amount: amount,
@@ -77,7 +78,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                     recipient_k: recipientK,
                     recipient_v: recipientV,
                     recipient_stealth_address: sendInfo.address,
-                    ephemeral_key: sendInfo.pubKey
+                    ephemeral_key: sendInfo.pubKey,
                 })
 
                 console.log(`Sending ${amount} to stealth address: ${sendInfo.address}`);
@@ -116,9 +117,13 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             const goHandler = new GoHandler();
             const blockchainListener = new BlockchainListener(app);
 
-            // TODO: 
-            // - Fetch from DB or Blockchain (this.app.db...)
-            // - Store new receipts in db (received_transactions)
+            // TODO:
+            // - pokupiti informacije sa blockchain-a
+            // - obaviti recieveScan
+            // - proveriti da li na adresama ima para
+            // - ako ima para ubaciti u bazu received_transactions
+
+            const senderInfo = await goHandler.genSenderInfo();
 
             try {
                 // Fetch from DB
@@ -129,8 +134,10 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 });
                 let allReceipts = [...existingReceipts];
 
+                const recipientInfo: Info = await goHandler.genRecipientInfo();
+
                 if (existingReceipts.length === 0) {
-                    const newReceipt = await goHandler.receiveScan();
+                    const newReceipt = await goHandler.receiveScan(recipientInfo.k, recipientInfo.v, [senderInfo.R], [senderInfo.viewTag]);
 
                     // Store new receipts in db
                     await app.db.models.receivedTransactions.create({
@@ -139,6 +146,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                         amount: (newReceipt as any).amount,
                         stealth_address: (newReceipt as any).address,
                         ephemeral_key: (newReceipt as any).ephemeralKey,
+                        view_tag: (newReceipt as any).viewTag,
                     });
                     allReceipts = [...existingReceipts, newReceipt];
                 }
@@ -159,15 +167,8 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 amount,
             } = req.body as TransferReceivedFundsRequest;
 
-            console.log(address, amount);
-
-            // TODO: 
-            // - Fetch receipt data from received_transactions
-            // - Generate private key for address
-            // - Send <amount> to <address>
-
             try {
-                const receipt = await app.db.models.receivedTransactions.findAll({
+                const receipt = await app.db.models.receivedTransactions.findByPk({
                     id: receiptId
                 });
                 if (!receipt) {
@@ -176,9 +177,20 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
                 const goHandler = new GoHandler();
 
-                const sendInfo = await goHandler.send();
+                const ephemeralKey = receipt.ephemeral_key;
+                const viewTag = receipt.view_tag;
 
-                
+                const recipientInfo: Info = await goHandler.genRecipientInfo();
+
+                // TODO: pozvati receiveScan iz go-service
+                // tako da Rs = [ephemeralKey] i ViewTags = [viewTag]
+                // sa dobijenim privatnim kljucem potpisati transakciju
+                // na adresu iz req.body
+
+                // TODO: generisati recipientInfo kako treba !!!!
+                const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(recipientInfo.k, recipientInfo.v, [ephemeralKey], [viewTag]);
+
+                // Kako potpisati transakciju ?
 
                 sendResponseOK(res, 'Success')
             } catch (err) {

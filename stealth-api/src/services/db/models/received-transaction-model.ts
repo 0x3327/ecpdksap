@@ -19,11 +19,15 @@ export const init = (sequelize: Sequelize) => sequelize.define<Model>('received_
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    stealthAddress: {
+    stealth_address: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    ephemeralKey: {
+    ephemeral_key: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    view_tag: {
         type: DataTypes.STRING,
         allowNull: false,
     }
