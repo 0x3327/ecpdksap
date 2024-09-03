@@ -54,7 +54,7 @@ func RunBench(kind string, rndSeed int) {
 		// _Benchmark_Curves(b, 40_000, 10)
 		// _Benchmark_Curves(b, 80_000, 10)
 		// _Benchmark_Curves(b, 100_000, 10)
-	}
+	} 
 }
 
 func _Benchmark_Curves(b *testing.B, sampleSize int, nRepetitions int) {
