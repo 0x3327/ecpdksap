@@ -21,6 +21,7 @@ import (
 	bw6_761 "ecpdksap-go/benchmark/curves/bw6-761"
 
 	bn254_optimized "ecpdksap-go/benchmark/bn254"
+	bn254_crk "ecpdksap-go/benchmark/bn254_constant_recipient_keys"
 
 	"ecpdksap-go/utils"
 )
@@ -38,7 +39,13 @@ func RunBench(kind string, rndSeed int) {
 		bn254_optimized.Run(b, 40_000, 10, rndSeed)
 		bn254_optimized.Run(b, 80_000, 10, rndSeed)
 		bn254_optimized.Run(b, 100_000, 10, rndSeed)
+		bn254_optimized.Run(b, 1_000_000, 10, rndSeed)
 
+	} else if kind == "only-bn254-crk" { 
+
+		bn254_crk.Run(b, 5_000, 10, rndSeed)
+		bn254_crk.Run(b, 80_000, 10, rndSeed)
+	
 	} else if kind == "all-curves" {
 
 		_Benchmark_Curves(b, 5_000, 10)
