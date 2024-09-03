@@ -31,10 +31,10 @@ Using either `go run .` command prefix or the binary file(located in `./builds`)
     export RECEIVE_EXAMPLE_INPUT=$(cat ./gen_example/example/inputs/receive.json) && go run . receive-scan $RECEIVE_EXAMPLE_INPUT
     ```
 
-- `gen-example <version: v0 | v1 | v2> <sample-size: 1...1000>`
+- `gen-example < version: v0 | v1 | v2 > < sample-size: 1...1000 >`
   - generates input examples for the sender's recipient's side
-  - `<version: v0 | v1 | v2>` refers to the protocol versions
-  - `<sample-size: 1...1000>` number of senders' public keys
+  - `< version: v0 | v1 | v2 >` refers to the protocol versions
+  - `< sample-size: 1...1000 >` number of senders' public keys
 
 ## Directory structure
 
