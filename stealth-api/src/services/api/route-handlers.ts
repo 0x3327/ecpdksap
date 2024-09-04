@@ -135,8 +135,8 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
                 // Store new receipts in db
                 await app.db.models.receivedTransactions.create({
-                    transaction_hash: '0x123456',
-                    block_number: blockchainListener.getCurrentBlockNumber(),
+                    transaction_hash: (newReceipt as any).hash,
+                    block_number: (newReceipt as any).blockNumber,
                     amount: (newReceipt as any).amount,
                     stealth_address: (newReceipt as any).address,
                     ephemeral_key: (newReceipt as any).ephemeralKey,
