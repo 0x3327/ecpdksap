@@ -137,6 +137,11 @@ class BlockchainListener {
             console.error('Error sending ETH:', error);
         }
     }
+
+    public async getBalance(address: string) {
+        const balance = await provider.getBalance(address);
+        return balance;
+    }
 }
 
 export default BlockchainListener;

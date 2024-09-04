@@ -5,6 +5,7 @@ import DB from './services/db';
 import { Config } from '../types';
 import { Op } from 'sequelize';
 import { Info, ReceiveScanInfo, SendInfo } from './types';
+import axios from 'axios';
 
 require('../public/wasm_exec.js');
 
@@ -95,12 +96,18 @@ class App {
         // const metaAddress = await this.blockchainListener.resolveMetaAddress('1');
         // console.log("app print", metaAddress);
 
-        const receipt = await this.blockchainListener.sendEthViaProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, '0.001');
-        console.log("app print", receipt);
-        console.log("app print to", receipt.to);
-        console.log("app print from", receipt.from);
-        console.log("app print blockNumber", receipt.blockNumber);
-        console.log("app print hash", receipt.hash);
+        // const receipt = await this.blockchainListener.sendEthViaProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, '0.001');
+        // console.log("app print", receipt);
+
+        console.log("testing axios check-received");
+        await axios.get("http://localhost:8765/check-received?fromBlock=1&toBlock=4")
+            .then((res) => {
+
+                console.log(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     }
 }
 

@@ -124,6 +124,8 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             const recipientInfo = await goHandler.genRecipientInfo();
 
             try {
+                let allReceipts: any[] = [];
+
                 const existingReceipts = await app.db.models.receivedTransactions.findAll({
                     where: { block_number: {
                         [Op.between]: [fromBlockNumber, toBlockNumber]
@@ -133,16 +135,26 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
                 const newReceipt = await goHandler.receiveScan(recipientInfo.k, recipientInfo.v, [senderInfo.R], [senderInfo.viewTag]);
 
-                // Store new receipts in db
-                await app.db.models.receivedTransactions.create({
-                    transaction_hash: (newReceipt as any).hash,
-                    block_number: (newReceipt as any).blockNumber,
-                    amount: (newReceipt as any).amount,
-                    stealth_address: (newReceipt as any).address,
-                    ephemeral_key: (newReceipt as any).ephemeralKey,
-                    view_tag: (newReceipt as any).viewTag,
-                });
-                const allReceipts = [...existingReceipts, newReceipt];
+                const balance = await blockchainListener.getBalance((newReceipt as any).address);
+                if (balance > 0) {
+                    const res = await app.db.models.sentTransactions.findAll({
+                        where: {
+                            recipient_stealth_address: (newReceipt as any).address,
+                            amount: balance,
+                        }
+                    });
+                    await app.db.models.receivedTransactions.create({
+                        transaction_hash: res[0].transaction_hash,
+                        block_number: res[0].block_number,
+                        amount: balance,
+                        stealth_address: (newReceipt as any).address,
+                        ephemeral_key: res[0].ephemeral_key,
+                        view_tag: res[0].view_tag,
+                    });
+                    allReceipts = [...existingReceipts, newReceipt];
+                } else {
+                    allReceipts = existingReceipts;
+                }
 
                 sendResponseOK(res, 'Success', { receipts: allReceipts });
             } catch (err) {
