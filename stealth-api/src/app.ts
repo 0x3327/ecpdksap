@@ -8,8 +8,6 @@ import { Info, ReceiveScanInfo, SendInfo } from './types';
 
 require('../public/wasm_exec.js');
 
-const { readFileSync } = require('fs');
-
 class App {
     public config: Config;
     public api!: API;
@@ -38,9 +36,9 @@ class App {
         console.log("senderInfo", senderInfo);
         const recipientInfo: Info = await this.goHandler.genRecipientInfo();
         console.log("recipientInfo", recipientInfo);
-        const sendInfo: SendInfo = await this.goHandler.send(senderInfo.r, recipientInfo.K,recipientInfo.V);
+        const sendInfo: SendInfo = await this.goHandler.send(senderInfo.r, recipientInfo.K, recipientInfo.V);
         console.log("sendInfo", sendInfo);
-        const receiveScanInfo: ReceiveScanInfo[] = await this.goHandler.receiveScan(senderInfo.k, senderInfo.v, [senderInfo.R], [sendInfo.viewTag]);
+        const receiveScanInfo: ReceiveScanInfo[] = await this.goHandler.receiveScan(recipientInfo.k, recipientInfo.v, [senderInfo.R], [sendInfo.viewTag]);
         console.log("receiveScanInfo", receiveScanInfo)
 
         // This will pass
@@ -63,32 +61,46 @@ class App {
             amount: 101,
             recipient_identifier: 'pera.eth',
             recipient_identifier_type: 'eth_dns',
-            recipient_k: '0x12345.0x3345674',
-            recipient_v: '0x12345.0xabc1232',
+            recipient_k: '0x123450334565674',
+            recipient_v: '0x123450abc431232',
             recipient_stealth_address: '0xabcdef54321',
-            ephemeral_key: '0x12345.0xabc1232',
+            ephemeral_key: '0x12345789abc1232',
         })
 
         // Fetch all receipts by given parameters
         const res_received = await this.db.models.receivedTransactions.findAll({
-            block_number: {
-                [Op.gte]: 1, // block_number >= 1
-                [Op.lte]: 4, // block_number <= 4
-                amount: 100  // amount == 100
-            }
+            where: {
+                block_number: {
+                    [Op.between]: [1, 4],
+                },
+                amount: 100,
+            },
         });
         console.log(res_received);
 
         const res_sent = await this.db.models.sentTransactions.findAll({
-            block_number: {
-                [Op.gte]: 1, // block_number >= 1
-                [Op.lte]: 4, // block_number <= 4
-                amount: 101  // amount == 101
-            }
+            where: {
+                block_number: {
+                    [Op.between]: [1, 4],
+                },
+                amount: 101,
+            },
         });
         console.log(res_sent);
 
         // Testirati funckcionalnosti BlockchainListener-a
+        // const receipt = await this.blockchainListener.registerMetaAddress('1', '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
+        // console.log("app print", receipt);
+
+        // const metaAddress = await this.blockchainListener.resolveMetaAddress('1');
+        // console.log("app print", metaAddress);
+
+        const receipt = await this.blockchainListener.sendEthViaProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, '0.001');
+        console.log("app print", receipt);
+        console.log("app print to", receipt.to);
+        console.log("app print from", receipt.from);
+        console.log("app print blockNumber", receipt.blockNumber);
+        console.log("app print hash", receipt.hash);
     }
 }
 

@@ -7,15 +7,14 @@ import abi_announcer from '../abi/Announcer.json';
 dotenv.config({ path: `.env.development` });
 
 const provider = new ethers.InfuraProvider('sepolia', process.env.INFURA_API_KEY);
+const privateKey = process.env.PRIVATE_KEY;
+const wallet = new ethers.Wallet(privateKey!, provider);
 
-const metaAddressRegistry = new ethers.Contract('0xB4B82918613524DB74967CA6c71979cD030B7991', abi_registry, provider);
-const announcer = new ethers.Contract('0x79820C9a124023D47BbCC6d0a24DB4D0075Ca724', abi_announcer, provider);
+const metaAddressRegistry = new ethers.Contract('0xB4B82918613524DB74967CA6c71979cD030B7991', abi_registry, wallet);
+const announcer = new ethers.Contract('0x79820C9a124023D47BbCC6d0a24DB4D0075Ca724', abi_announcer, wallet);
 
 class BlockchainListener {
     public app: App;
-
-    private privateKey = process.env.PRIVATE_KEY;
-    private wallet = new ethers.Wallet(this.privateKey!, provider);
 
     constructor(app: App) {
         this.app = app;
@@ -46,7 +45,7 @@ class BlockchainListener {
             const metaAddressBytes = ethers.toUtf8Bytes(metaAddress);
 
             const tx = await metaAddressRegistry.registerMetaAddress(id, metaAddressBytes, {
-                value: ethers.parseEther('0.001')
+                value: ethers.parseEther('0.00001')
             });
             console.log('Transaction sent:', tx.hash);
 
@@ -62,6 +61,7 @@ class BlockchainListener {
         try {
             const metaAddress = await metaAddressRegistry.resolve(id);
             console.log('Meta address resolved:', ethers.toUtf8String(metaAddress));
+            return ethers.toUtf8String(metaAddress);
         } catch (error) {
             console.error('Error resolving meta address:', error);
         }
@@ -106,9 +106,36 @@ class BlockchainListener {
     public async listenAnnouncementEvent() {
         announcer.on('Announcement', (schemaId: string, stealthAddress: string, sender: string, R: string, viewTag: string) => {
             console.log('Announcement received:', schemaId, stealthAddress, sender, ethers.hexlify(R), ethers.hexlify(viewTag));
+            this.app.db.models.sentTransactions.create({
+                transaction_hash: '0x123456',
+                block_number: 4,
+                amount: 101,
+                recipient_identifier: stealthAddress,
+                recipient_identifier_type: null,
+                recipient_k: '0x123450334565674',
+                recipient_v: '0x123450abc431232',
+                recipient_stealth_address: stealthAddress,
+                ephemeral_key: R,
+            });
         });
 
         console.log('Listening for Announcement event...');
+    }
+
+    public async transferEth(address: string, amount: string, privKey: string) {
+        const signer = new ethers.Wallet(privKey, provider);
+        try {
+            const tx = await signer.sendTransaction({
+                to: address,
+                value: ethers.parseEther(amount)
+            });
+            console.log('Transaction sent:', tx.hash);
+
+            const receipt = await tx.wait();
+            return receipt;
+        } catch (error) {
+            console.error('Error sending ETH:', error);
+        }
     }
 }
 
