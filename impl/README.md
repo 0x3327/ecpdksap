@@ -19,7 +19,7 @@ Using either `go run .` command prefix or the binary file(located in `./builds`)
   - `jsonString` is a text string containing all necessary parameters (see: [example-send-input](./gen_example/example/inputs/send.json))
   - Format
 
-    ```json
+    ```javascript
     {
       //Sender's private key
       "r": string,
@@ -50,7 +50,7 @@ Using either `go run .` command prefix or the binary file(located in `./builds`)
   - `jsonString` is a text string containing all necessary parameters (see: [example-receive-input](./gen_example/example/inputs/receive.json))
   - Format:
 
-    ```json
+    ```javascript
     {
       //Recipient's private spending key
       "k": string,
