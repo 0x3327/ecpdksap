@@ -31,7 +31,7 @@ class App {
         this.db = new DB(this.config.dbConfig);
 
         // Init database
-        await this.db.sequelize.sync({ force: false });
+        await this.db.sequelize.sync({ force: true }); // true if you want to drop the table
         
         // Start API
         await this.api.start();
@@ -103,11 +103,12 @@ class App {
         // console.log("app print", receipt);
     }
 
-    async testRoutes(route: string) {
+    async testRoutes(route: string): Promise<void> {
         console.log('Testing routes functionality using axios');
         console.log(`route: ${route}`);
         switch (route) {
             case '/':
+                console.log('usao /');
                 await axios.get(`http://localhost:${process.env.API_PORT || 8765}/`)
                     .then((res) => {
                         console.log('GET / response:', res.data);
@@ -115,39 +116,46 @@ class App {
                     .catch((err) => {
                         console.error('Error in GET /:', err.message);
                     });
+                break;
             case '/send':
+                console.log('usao /send');
                 await axios.post(`http://localhost:${process.env.API_PORT || 8765}/send`, {
-                    r: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-                    K: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-                    V: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+                    r: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', // it needs to be a valid r
+                    K: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', // it needs to be a valid K
+                    V: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', // it needs to be a valid V
                 }).then((res) => {
                     console.log('POST /send response:', res.data);
                 }).catch((err) => {
                     console.error('Error in POST /send:', err.message);
                 });
+                break;
             case '/check-received':
+                console.log('usao /check-received');
                 await axios.get(`http://localhost:${process.env.API_PORT || 8765}/check-received`, {
-                    params: {
-                        fromBlock: 1,
-                        toBlock: 10,
+                    params: { // here maybe needs to be body and different params for input parameters for this route
+                        fromBlock: 1, // it needs to be a valid fromBlock   
+                        toBlock: 10, // it needs to be a valid toBlock 
                     },
                 }).then((res) => {
                     console.log('GET /check-received response:', res.data);
                 }).catch((err) => {
                     console.error('Error in GET /check-received:', err.message);
                 });
+                break;
             case '/transfer/:recieveId':
+                console.log('usao /transfer/:recieveId');
                 await axios.get(`http://localhost:${process.env.API_PORT || 8765}/transfer/:recieveId`, {
                     params: {
-                        recieveId: 1,
-                        address: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-                        amount: 100,
+                        recieveId: 1, // it needs to be a valid recieveId
+                        address: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', // it needs to be a valid address    
+                        amount: 100, // it needs to be a valid amount
                     },
                 }).then((res) => {
                     console.log('GET /transfer response:', res.data);
                 }).catch((err) => {
                     console.error('Error in GET /transfer:', err.message);
                 });
+                break;
         }
     }
 }
