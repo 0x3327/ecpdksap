@@ -1,4 +1,4 @@
-package bn254_bench
+package bn254_constant_recipient_keys_bench
 
 import (
 	"crypto/sha256"
@@ -21,7 +21,7 @@ import (
 
 func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[string]time.Duration {
 
-	fmt.Println("Running `bn254` optimized Benchmark ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions, "seed:", randomSeed)
+	fmt.Println("Running `bn254_constant_recipient_keys` Benchmark ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions, "seed:", randomSeed)
 	fmt.Println()
 
 	rndGen := rand.New(rand.NewSource(int64(randomSeed)))
@@ -33,8 +33,9 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 		g1, _, _, g2Aff := EC.Generators()
 
 		//common for versions: V0, V1, V2
-		_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair(rndGen)
-		v_asBigIntPtr := &v_asBigInt
+		v_asBigInt := big.NewInt(2)
+		V, _ := _EC_G1PublicKey(*v_asBigInt)
+		v_asBigIntPtr := v_asBigInt
 
 		var r_asBigInt big.Int
 
@@ -65,6 +66,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 			cm.ViewTagTwoBytes = uint16(rndGen.Uint32() % 65536)
 			cm.ViewTagSingleByte = uint8(rndGen.Uint32() % 256)
 			cm.ViewTagSecondByte = uint8(rndGen.Uint32() % 256)
+			cm.viewTag11Nibbles.SetUint64(rndGen.Uint64() >> 20)
 
 			combinedMeta = append(combinedMeta, cm)
 		}
@@ -77,7 +79,8 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 
 		//protocol V0 -------------------------------------
 
-		_, _, _, K2_EC_asAff := _EC_GenerateG2KeyPair(rndGen)
+		k := big.NewInt(3)
+		_, K2_EC_asAff := _EC_G2PublicKey(*k)
 		K2_EC_asAffArr := []EC.G2Affine{K2_EC_asAff}
 
 		var vR EC.G1Jac
@@ -154,6 +157,34 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 		}
 
 		durations["v0.v1-1byte"] += b.Elapsed()
+
+		var viewTag big.Int
+
+		//protocol: V0 and viewTag: V0-11nibbles
+		b.ResetTimer()
+
+		for _, cm := range combinedMeta {
+
+			hasher.Reset()
+
+			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
+
+			compressed := vR_asAff.FromJacobian(&vR).Bytes()
+
+			hash := hasher.Sum(compressed[:])[:6]
+			hash[0] >>= 4
+			viewTag.SetBytes(hash)
+
+			if viewTag.Cmp(&cm.viewTag11Nibbles) != 0 {
+				continue
+			}
+
+			pairingResult, _ := EC.PairFixedQ(cm.Rj_asAffArr, precomputedQLines)
+
+			P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
+		}
+
+		durations["v0.v0-11nibbles"] += b.Elapsed()
 
 		//protocol: V1 -------------------
 
@@ -244,8 +275,31 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 		K_SECP256k1_AffPtr := new(SECP256K1.G1Affine)
 		K_SECP256k1_AffPtr.FromJacobian(K_SECP256k1_JacPtr)
 
-		//protocol: V2 and viewTag: v0-1byte
+		//protocol: V1 and viewTag: V0-11nibbles
+		b.ResetTimer()
 
+		for _, cm := range combinedMeta {
+
+			hasher.Reset()
+
+			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
+
+			compressed := vR_asAff.FromJacobian(&vR).Bytes()
+
+			hash := hasher.Sum(compressed[:])[:6]
+			hash[0] >>= 4
+			viewTag.SetBytes(hash)
+
+			if viewTag.Cmp(&cm.viewTag11Nibbles) != 0 {
+				continue
+			}
+
+			EC.PairFixedQ([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, precomputedQLines)
+		}
+
+		durations["v1.v0-11nibbles"] += b.Elapsed()
+
+		//protocol: V2 and viewTag: v0-1byte
 		precomputedQLines[0] = EC.PrecomputeLines(g2Aff_asArray[0])
 
 		b.ResetTimer()
@@ -319,12 +373,36 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 		}
 
 		durations["v2.v1-1byte"] += b.Elapsed()
+
+		//protocol: V2 and viewTag: v1-1byte
+		b.ResetTimer()
+
+		for _, cm := range combinedMeta {
+
+			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
+
+			compressed := vR_asAff.FromJacobian(&vR).Bytes()
+
+			hash := hasher.Sum(compressed[:])[:6]
+			hash[0] >>= 4
+			viewTag.SetBytes(hash)
+
+			if viewTag.Cmp(&cm.viewTag11Nibbles) != 0 {
+				continue
+			}
+
+			S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedQLines)
+
+			ecpdksap_v2.ComputeEthAddress(Pv2.FromJacobian(Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))))
+		}
+
+		durations["v2.v0-11nibbles"] += b.Elapsed()
 	}
 
 	protocolVersions := []string{
-		"v0.none", "v0.v0-1byte", "v0.v0-2bytes", "v0.v1-1byte",
-		"v1.none", "v1.v0-1byte", "v1.v0-2bytes", "v1.v1-1byte",
-		"v2.none", "v2.v0-1byte", "v2.v0-2bytes", "v2.v1-1byte",
+		"v0.none", "v0.v0-1byte", "v0.v0-2bytes", "v0.v1-1byte", "v0.v0-11nibbles",
+		"v1.none", "v1.v0-1byte", "v1.v0-2bytes", "v1.v1-1byte", "v1.v0-11nibbles",
+		"v2.none", "v2.v0-1byte", "v2.v0-2bytes", "v2.v1-1byte", "v2.v0-11nibbles",
 	}
 
 	for _, pVersion := range protocolVersions {
@@ -336,6 +414,24 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 	fmt.Println()
 
 	return durations
+}
+
+func _EC_G1PublicKey(privKey big.Int) (pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
+	g1, _, _, _ := EC.Generators()
+
+	pubKey.ScalarMultiplication(&g1, &privKey)
+	pubKeyAff.FromJacobian(&pubKey)
+
+	return
+}
+
+func _EC_G2PublicKey(privKey big.Int) (pubKey EC.G2Jac, pubKeyAff EC.G2Affine) {
+	_, g2, _, _ := EC.Generators()
+
+	pubKey.ScalarMultiplication(&g2, &privKey)
+	pubKeyAff.FromJacobian(&pubKey)
+
+	return
 }
 
 func _EC_GenerateG1KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigInt big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
@@ -381,4 +477,5 @@ type _CombinedMeta struct {
 	ViewTagTwoBytes   uint16
 	ViewTagSingleByte uint8
 	ViewTagSecondByte uint8
+	viewTag11Nibbles  big.Int
 }

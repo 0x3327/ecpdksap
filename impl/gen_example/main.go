@@ -63,7 +63,7 @@ func GenerateExample(version string, viewTagVersion string, sampleSizeStr string
 	}
 
 	sampleSize, _ := strconv.Atoi(sampleSizeStr)
-	Rs, viewTags := utils.GenRandomRsAndViewTags(sampleSize - 1)
+	Rs, viewTags := utils.GenRandomRsAndViewTags(sampleSize - 1, viewTagVersion)
 	Rs = append(Rs, metaInfo.R)
 	viewTags = append(viewTags, metaInfo.ViewTag)
 
