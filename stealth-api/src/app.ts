@@ -6,6 +6,9 @@ import { Config } from '../types';
 import { Op } from 'sequelize';
 import { Info, ReceiveScanInfo, SendInfo } from './types';
 import axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: `.env.development` });
 
 require('../public/wasm_exec.js');
 
@@ -77,7 +80,7 @@ class App {
                 amount: 100,
             },
         });
-        console.log(res_received);
+        // console.log(res_received);
 
         const res_sent = await this.db.models.sentTransactions.findAll({
             where: {
@@ -87,7 +90,7 @@ class App {
                 amount: 101,
             },
         });
-        console.log(res_sent);
+        // console.log(res_sent);
 
         // Testirati funckcionalnosti BlockchainListener-a
         // const receipt = await this.blockchainListener.registerMetaAddress('1', '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
@@ -98,16 +101,54 @@ class App {
 
         // const receipt = await this.blockchainListener.sendEthViaProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, '0.001');
         // console.log("app print", receipt);
+    }
 
-        console.log("testing axios check-received");
-        await axios.get("http://localhost:8765/check-received?fromBlock=1&toBlock=4")
-            .then((res) => {
-
-                console.log(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+    async testRoutes(route: string) {
+        console.log('Testing routes functionality using axios');
+        console.log(`route: ${route}`);
+        switch (route) {
+            case '/':
+                await axios.get(`http://localhost:${process.env.API_PORT || 8765}/`)
+                    .then((res) => {
+                        console.log('GET / response:', res.data);
+                    })
+                    .catch((err) => {
+                        console.error('Error in GET /:', err.message);
+                    });
+            case '/send':
+                await axios.post(`http://localhost:${process.env.API_PORT || 8765}/send`, {
+                    r: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+                    K: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+                    V: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+                }).then((res) => {
+                    console.log('POST /send response:', res.data);
+                }).catch((err) => {
+                    console.error('Error in POST /send:', err.message);
+                });
+            case '/check-received':
+                await axios.get(`http://localhost:${process.env.API_PORT || 8765}/check-received`, {
+                    params: {
+                        fromBlock: 1,
+                        toBlock: 10,
+                    },
+                }).then((res) => {
+                    console.log('GET /check-received response:', res.data);
+                }).catch((err) => {
+                    console.error('Error in GET /check-received:', err.message);
+                });
+            case '/transfer/:recieveId':
+                await axios.get(`http://localhost:${process.env.API_PORT || 8765}/transfer/:recieveId`, {
+                    params: {
+                        recieveId: 1,
+                        address: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+                        amount: 100,
+                    },
+                }).then((res) => {
+                    console.log('GET /transfer response:', res.data);
+                }).catch((err) => {
+                    console.error('Error in GET /transfer:', err.message);
+                });
+        }
     }
 }
 

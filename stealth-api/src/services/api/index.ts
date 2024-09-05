@@ -1,4 +1,4 @@
-import express, { Express} from 'express';
+import express, { Express } from 'express';
 import bodyParser from 'body-parser';
 import routeHandlers from './route-handlers';
 import App from '../../app';

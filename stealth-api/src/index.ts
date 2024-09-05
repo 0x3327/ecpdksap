@@ -9,3 +9,9 @@ app.start().then(() => {
 }).catch((err) => {
     console.error('Failed to start the application:', err);
 });
+
+app.testRoutes('/').then(() => {
+    console.log('Routes tested successfully.');
+}).catch((err) => {
+    console.error('Failed to test routes:', err);
+});
