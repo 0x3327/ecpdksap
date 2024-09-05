@@ -54,8 +54,8 @@ func main() {
 		senderMeta := data_generation.GenerateSenderInfo() 
 		fmt.Println("senderMeta", senderMeta)
 
-		//wasm.build::: senderMeta := data_generation.GenerateSenderInfo("v2", "") 
-		//wasm.build::: js.Global().Set("senderMeta", senderMeta)
+		//wasm.build:::senderMeta := data_generation.GenerateSenderInfo("v2", "") 
+		//wasm.build:::js.Global().Set("senderMeta", senderMeta)
 
 	case "gen-recipient-info":
 		if len(os.Args) != 3 {
@@ -64,7 +64,7 @@ func main() {
 
 		recipientMeta := data_generation.GenerateRecipientInfo(os.Args[2])
 		fmt.Println("recipientMeta", recipientMeta)
-		//wasm.build::: js.Global().Set("recipientMeta", recipientMeta)
+		//wasm.build:::js.Global().Set("recipientMeta", recipientMeta)
 
 	case "bench":
 		if len(os.Args) < 3 {
