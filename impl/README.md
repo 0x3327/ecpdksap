@@ -79,10 +79,19 @@ Using either `go run .` command prefix or the binary file(located in `./builds`)
     ```
 
 - `gen-example < version: v0 | v1 | v2 > < sample-size: uint >`
+
   - generates input examples for the sender's recipient's side
   - `< version: v0 | v1 | v2 >` refers to the protocol versions
   - `< view-tag-version: v0-1byte | v0-2bytes | v1-1byte >` refers to the version of the view tag being used
   - `< sample-size: uint >` number of senders' public keys
+
+- `gen-send-info`
+
+  - generates sender's private/public key
+
+- `gen-recipient-info < protocol version >`
+  - generates recipients's private/public keys
+  - `< protocol version >` : string (v0 | v1 | v2)
 
 ## Directory structure
 
