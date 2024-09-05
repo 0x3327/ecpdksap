@@ -17,24 +17,72 @@ Using either `go run .` command prefix or the binary file(located in `./builds`)
 
   - called before sending ETH to a stealth address
   - `jsonString` is a text string containing all necessary parameters (see: [example-send-input](./gen_example/example/inputs/send.json))
-  - For example:
-    ```
-    export SEND_EXAMPLE_INPUT=$(cat ./gen_example/example/inputs/send.json) && go run . send $SEND_EXAMPLE_INPUT
+  - Format
+
+    ```json
+    {
+      //Sender's private key
+      "r": string,
+
+      //Recipient's public spending key
+      "K": string,
+
+      //Recipient's public viewing key
+      "V": "XAffineCoord.YAffineCoord", // note the `.` separator
+
+      //Protocol Version
+      "Version": string, // v0, v1, v2
+
+      //View tag being used
+      "ViewTagVersion": string // v0-1byte, v0-2bytes, v1-1byte
+    }
     ```
 
-- `recive-scan < jsonString >`
+  - For example:
+    ```bash
+    export SND_INPUT=$(cat ./gen_example/example/inputs/send.json) \
+    && go run . send $SND_INPUT
+    ```
+
+- `receive-scan < jsonString >`
 
   - called on the recipient's side to check for incoming ETH transfers
   - `jsonString` is a text string containing all necessary parameters (see: [example-receive-input](./gen_example/example/inputs/receive.json))
-  - In example:
-    ```
-    export RECEIVE_EXAMPLE_INPUT=$(cat ./gen_example/example/inputs/receive.json) && go run . receive-scan $RECEIVE_EXAMPLE_INPUT
+  - Format:
+
+    ```json
+    {
+      //Recipient's private spending key
+      "k": string,
+
+      //Recipient's private viewing key
+      "v": string,
+
+      //List of Senders' public keys
+      "Rs": ["Rj_AffineXCoord.Rj_AffineYCoord"], // note the `.` separator
+
+      //List of corresponding view tags
+      "ViewTags": [] string, // hexadecimal string: 1 or 2 byte long
+
+      //Protocol Version
+      "Version": string, // v0, v1, v2
+
+      //View tag being used
+      "ViewTagVersion": string // v0-1byte, v0-2bytes, v1-1byte
+    }
     ```
 
-- `gen-example < version: v0 | v1 | v2 > < sample-size: 1...1000 >`
+  - In example:
+    ```bash
+    export RCV_INPUT=$(cat ./gen_example/example/inputs/receive.json) \
+    && go run . receive-scan $RCV_INPUT
+    ```
+
+- `gen-example < version: v0 | v1 | v2 > < sample-size: uint >`
   - generates input examples for the sender's recipient's side
   - `< version: v0 | v1 | v2 >` refers to the protocol versions
-  - `< sample-size: 1...1000 >` number of senders' public keys
+  - `< view-tag-version: v0-1byte | v0-2bytes | v1-1byte >` refers to the version of the view tag being used
+  - `< sample-size: uint >` number of senders' public keys
 
 ## Directory structure
 
