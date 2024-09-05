@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"ecpdksap-go/gen_example"
+	"ecpdksap-go/data_generation"
 	"ecpdksap-go/recipient"
 	"ecpdksap-go/sender"
 	"testing"
@@ -23,7 +23,7 @@ func Benchmark_ThroughCLI(b *testing.B) {
 
 			fmt.Println("")
 
-			sendParams, recipientParams := gen_example.GenerateExample(pVersion, vtVersion, sampleSize)
+			sendParams, recipientParams := data_generation.GenerateExample(pVersion, vtVersion, sampleSize)
 
 			jsonBytes, _ := json.MarshalIndent(sendParams, "", " ")
 			sender.Send(string(jsonBytes))

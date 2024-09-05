@@ -1,4 +1,4 @@
-package gen_example
+package data_generation
 
 import (
 	"encoding/hex"
@@ -8,6 +8,59 @@ import (
 
 	"ecpdksap-go/utils"
 )
+
+
+func GenerateSenderInfo() (string) {
+
+	r, R, _ := utils.BN254_GenG1KeyPair()
+
+	R_asString := R.X.String() + "." + R.Y.String()
+
+	sendMeta := MetaDbg{
+		PK_r: hex.EncodeToString(r.Marshal()),
+		R: R_asString,
+		ViewTagVersion: "n/a",
+		Version:        "n/a",
+	}
+
+	text, _ := json.MarshalIndent(sendMeta, "", " ")
+	return string(text)
+}
+
+func GenerateRecipientInfo(version string) (string) {
+
+	v, V, _ := utils.BN254_GenG1KeyPair()
+
+	var K_asString string
+	var kBytes []byte
+
+	if version == "v0" || version == "v1" {
+		k, K, _ := utils.BN254_GenG2KeyPair()
+		K_asString = K.X.String() + "." + K.Y.String()
+		kBytes = k.Marshal()
+	}
+
+	if version == "v2" {
+		k, K := utils.SECP256k_Gen1G1KeyPair()
+		K_asString = K.X.String() + "." + K.Y.String()
+		kBytes = k.Marshal()
+	}
+
+	V_asString := V.X.String() + "." + V.Y.String()
+
+	recipientMeta := MetaDbg{
+		PK_k: hex.EncodeToString(kBytes),
+		PK_v: hex.EncodeToString(v.Marshal()),
+
+		K: K_asString,
+		V: V_asString,
+
+		Version: version,
+	}
+
+	text, _ := json.MarshalIndent(recipientMeta, "", " ")
+	return string(text)
+}
 
 func GenerateExample(version string, viewTagVersion string, sampleSizeStr string) (sendParams SendParams, recipientParams RecipientParams) {
 

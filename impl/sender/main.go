@@ -16,7 +16,7 @@ import (
 	"ecpdksap-go/utils"
 )
 
-func Send(jsonInputString string) (rr string, rR string, rVTag string, rP string) {
+func Send(jsonInputString string) (rr string, rR string, rVTag string, rP string, rAddr string) {
 
 	// ------------------------ Unpacking json
 
@@ -99,13 +99,16 @@ func Send(jsonInputString string) (rr string, rR string, rVTag string, rP string
 		var b_asElement SECP256K1_fr.Element
 		b_asElement.SetBigInt(&b)
 
-		ecpdksap_v2.SenderComputesEthAddress(&b_asElement, &K)
+		R, _ := utils.BN254_CalcG1PubKey(r)
+		rR = hex.EncodeToString(R.Marshal())
+		rP = "ETH stealth address Public Key - not important"
+
+		rAddr = ecpdksap_v2.SenderComputesEthAddress(&b_asElement, &K)
 
 		tmp := utils.BN254_MulG1PointandElement(&V, &r)
 		rVTag = utils.ComputeViewTag(senderInputData.ViewTagVersion, &tmp)
 	}
-
-	return rr, rR, rVTag, rP
+	return rr, rR, rVTag, rP, rAddr
 }
 
 type SenderInputData struct {
