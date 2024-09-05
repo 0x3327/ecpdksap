@@ -19,9 +19,9 @@ import (
 	"ecpdksap-go/utils"
 )
 
-func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
+func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[string]time.Duration {
 
-	fmt.Println("Running `bn254` Benchmark ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions, "seed:", randomSeed)
+	fmt.Println("Running `bn254` optimized Benchmark ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions, "seed:", randomSeed)
 	fmt.Println()
 
 	rndGen := rand.New(rand.NewSource(int64(randomSeed)))
@@ -334,6 +334,8 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) {
 
 	fmt.Println()
 	fmt.Println()
+
+	return durations
 }
 
 func _EC_GenerateG1KeyPair(r *rand.Rand) (privKey EC_fr.Element, privKey_asBigInt big.Int, pubKey EC.G1Jac, pubKeyAff EC.G1Affine) {
