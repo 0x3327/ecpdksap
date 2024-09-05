@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	//wasm.build:::"strings"
 	//wasm.build:::"syscall/js"
 )
 
@@ -53,8 +54,6 @@ func main() {
 
 		senderMeta := data_generation.GenerateSenderInfo() 
 		fmt.Println("senderMeta", senderMeta)
-
-		//wasm.build:::senderMeta := data_generation.GenerateSenderInfo("v2", "") 
 		//wasm.build:::js.Global().Set("senderMeta", senderMeta)
 
 	case "gen-recipient-info":
