@@ -149,10 +149,123 @@ In the initial implementation results, we found that Protocol 1 (with a view tag
 
 Figure 4. Protocol 1 with the view tag performance (green) vs DKSAP with the view tag performance (orange) for different numbers of announcements.
 
-​​
-We have also performed initial implementations of all three ECPDKSAPs for all three versions of the view tag and have come to the following conclusions:
+The tables show the average times for scanning the ephemeral pubkey registry for the proposed protocols, obtained for 10 protocol runs. The tables are divided into three sections.
+First section: time comparison (in milliseconds) of three proposed protocols.
+Pairing friendly elliptic curve: BN254
+Protocol: Protocol 1, Protocol 2, Protocol 3
+View tag: one byte of the hash of the point $v* R$, two bytes of the hash of the point $v* R$, one byte of the $x $-coordinate of the point $v* R$
+Number of announcements in the ephemeral pubkey registry: 5000, 10000, 20000, 40000, 80000, 1 000 000
 
-- the fastest is Protocol 3 for all versions of the view tag and the slowest is Protocol 1;
-- for all three protocols, the fastest version of the view tag is two bytes of $hash(r* V)$ and the slowest version is when the view tag is one byte of $hash(r*V)$.
+N = 5 000
+|         | one byte of the hash(v*R)           | two bytes of the hash(v*R)  | one byte of the x-coordinate of the v*R|
+| ------------- |:-------------:| -----:| ----:|
+|  Protocol 1    |     283     |   263       |     283   |
+|  Protocol 2  |      275       |     265     |    282    |
+| Protocol 3 |   276    |       263        |      275      |
 
-Detailed implementation results will be added later.
+
+N = 10 000
+|         | one byte of the hash(v*R)           | two bytes of the hash(v*R)  | one byte of the x-coordinate of the v*R|
+| ------------- |:-------------:| -----:| ----:|
+|  Protocol 1    |     568     |     527     | 566       |
+|  Protocol 2  |     553        |   527       |   553     |
+| Protocol 3 |  555     |        525       |       553     |
+
+
+
+
+N = 20 000
+|         | one byte of the hash(v*R)           | two bytes of the hash(v*R)  | one byte of the x-coordinate of the v*R|
+| ------------- |:-------------:| -----:| ----:|
+|  Protocol 1    |     1140     |     1058     | 1130       |
+|  Protocol 2  |     1110        |   1050       |   1105     |
+| Protocol 3 |  1111     |        1054       |       1106     |
+
+
+N = 40 000
+|         | one byte of the hash(v*R)           | two bytes of the hash(v*R)  | one byte of the x-coordinate of the v*R|
+| ------------- |:-------------:| -----:| ----:|
+|  Protocol 1    |     2270     |     2120     | 2275       |
+|  Protocol 2  |     2219        |   2120       |   2214     |
+| Protocol 3 |  2222     |        2119       |       2217     |
+
+
+N = 80 000
+|         | one byte of the hash(v*R)           | two bytes of the hash(v*R)  | one byte of the x-coordinate of the v*R|
+| ------------- |:-------------:| -----:| ----:|
+|  Protocol 1    |     4539     |     4244     | 4535       |
+|  Protocol 2  |     4438        |   4201       |   4427     |
+| Protocol 3 |  4444     |        4204       |       4430     |
+
+
+N = 1 000 000
+|         | one byte of the hash(v*R)           | two bytes of the hash(v*R)  | one byte of the x-coordinate of the v*R|
+| ------------- |:-------------:| -----:| ----:|
+|  Protocol 1    |     57100     |     43100     | 57120       |
+|  Protocol 2  |     55600        |   43100       |   55900     |
+| Protocol 3 |  56250     |        43236       |       55758     |
+
+
+
+Second section: time comparison (in seconds) of Protocol 3 for different pairing friendly curves.
+Pairing friendly elliptic curve: BN254, BLS12-377, BLS12-381, BLS24-315, BW6-633, BW6-761
+Protocol: Protocol 3
+View tag: two bytes of the hash of the point $v*R$
+Number of announcements in the ephemeral pubkey registry: 80 000
+
+
+|    BN254     | BLS12-377           | BLS12-381  | BLS24-315| BW6-633          | BW6-761|
+| :-------------: |:-------------:|:-------------:| :-------------:| :-------------:| :-------------:|
+| 4.37 | 7.11 |7.08|5.54|24.98|38.1|
+
+
+Third section: time comparison (in milliseconds) of three proposed protocols for fixed spending and viewing key ​​and view tag size for which the implementation of the DKSAP from the paper BaseSAP was tested.
+Pairing friendly elliptic curve: BN254
+Protocol: Protocol 1, Protocol 2, Protocol 3
+Number of announcements in the ephemeral pubkey registry: 5000, 10000, 20000, 40000, 80000.
+
+
+N = 5 000
+|     Protocol 1    |    61       | 
+|-|-|
+|     Protocol 2    |    60       | 
+|     Protocol 3    |    61       | 
+|DKSAP| 308|
+
+
+N = 10 000
+|     Protocol 1    |    124       | 
+|-|-|
+|     Protocol 2    |    123       | 
+|     Protocol 3    |    123      | 
+|DKSAP| 614|
+
+
+
+
+N = 20 000
+|     Protocol 1    |    247       | 
+|-|-|
+|     Protocol 2    |    248       | 
+|     Protocol 3    |    246      | 
+|DKSAP| 1225|
+
+
+N = 40 000
+|     Protocol 1    |    491       | 
+|-|-|
+|     Protocol 2    |    490       | 
+|     Protocol 3    |    497      | 
+|DKSAP| 2450|
+
+
+
+N = 80 000
+|     Protocol 1    |    990       | 
+|-|-|
+|     Protocol 2    |    987       | 
+|     Protocol 3    |    989      | 
+|DKSAP| 4885|
+
+After a detailed analysis (on the side of security and time comparison), we recommend the use of Protocol 3 with elliptic curve BN254 and Optimal Ate Pairing and with a view tag of two bytes of the hash of the point $v* R$.
+
