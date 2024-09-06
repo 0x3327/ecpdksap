@@ -1,6 +1,8 @@
 export type Config = {
+    logging: boolean,
     apiConfig: ApiConfig;
     dbConfig: DbConfig;
+    blockchainConfig: BlockchainConfig;
 }
 
 export type ApiConfig = {
@@ -15,4 +17,14 @@ export type DbConfig = {
     database: string;
     username: string | undefined;
     password: string | undefined
+}
+
+export type BlockchainConfig = {
+    privateKey: string,
+    providerType: string, 
+    deployedContracts: {
+        announcer: string,
+        metaAddress: string,
+    }, 
+    infuraApiKey?: string
 }

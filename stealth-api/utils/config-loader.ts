@@ -15,7 +15,14 @@ const configLoader = {
         const dbUsername = process.env.DB_USERNAME;
         const dbPassword = process.env.DB_PASSWORD;
 
+        const privateKey = process.env.BLOCKCHAIN_PRIVATE_KEY!;
+        const providerType = process.env.BLOCKCHAIN_PROVIDER_TYPE!;
+        const announcer = process.env.BLOCKCHAIN_CONTRACT_ANNOUNCER!;
+        const metaAddress = process.env.BLOCKCHAIN_CONTRACT_META_ADDRESS!;
+        const logging = process.env.LOGGING === 'true';
+
         const config: Config = {
+            logging,
             apiConfig: {
                 serverName,
                 host,
@@ -27,6 +34,14 @@ const configLoader = {
                 database: dbDatabase,
                 username: dbUsername,
                 password: dbPassword,
+            },
+            blockchainConfig: {
+                privateKey,
+                providerType,
+                deployedContracts: {
+                    announcer,
+                    metaAddress,
+                }
             }
         };
 

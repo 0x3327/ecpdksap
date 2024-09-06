@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import routeHandlers from './route-handlers';
 import App from '../../app';
 import { queryParser } from 'express-query-parser';
+import winston from 'winston';
+import { Server } from 'http';
 
 class API {
     private app: App;
@@ -10,6 +12,8 @@ class API {
     private port : number;
     private serverName: string;
     private server: Express;
+    private logger: winston.Logger;
+    private apiServer: Server | undefined;
 
     constructor(app: App) {
         const { serverName, host, port } = app.config.apiConfig;
@@ -17,6 +21,7 @@ class API {
         this.host = host;
         this.port = port;
         this.serverName = serverName;
+        this.logger = app.loggerService.logger;
 
         this.server = express();
         this.server.use(bodyParser.json());
@@ -36,7 +41,7 @@ class API {
         for (const routeHandler of routes) {
             const { method, handler, path } = routeHandler;
 
-            console.log(`Exposing route: ${method.toUpperCase()}:${path}`)
+            this.logger.info(`Exposing route: ${method.toUpperCase()}:${path}`)
 
             switch (method.toLowerCase()) {
                 case 'post':
@@ -53,11 +58,23 @@ class API {
 
     public start(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.server.listen(this.port, this.host, () => {
-                console.log(`${this.serverName} server started on ${this.host}:${this.port}`);
+            this.apiServer = this.server.listen(this.port, this.host, () => {
+                this.logger.info(`${this.serverName} server started on ${this.host}:${this.port}`);
                 resolve();
             });
         });
+    }
+
+    public stop(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.apiServer!.close((err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        })
     }
 }
 

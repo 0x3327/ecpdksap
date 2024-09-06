@@ -1,11 +1,12 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 import { Info, ReceiveScanInfo, SendInfo } from '../types';
+import App from '../app';
 
 class GoHandler {
     go: any;
 
-    constructor() {
+    constructor(app: App) {
         const { Go } = (globalThis as any);
         this.go = new Go()
     }

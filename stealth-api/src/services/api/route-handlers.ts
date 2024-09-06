@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import App from '../../app';
 import { SendFundsRequest, TransferReceivedFundsRequest } from './request-types';
 import GoHandler from '../go-service';
-import BlockchainListener from '../blockchain-listener';
+import BlockchainService from '../blockchain-service';
 import { Op } from 'sequelize';
 import { Info, ReceiveScanInfo, SendInfo } from '../../types';
 import dotenv from 'dotenv';
@@ -38,7 +38,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
         method: 'GET',
         path: '/',
         handler: (req: Request, res: Response) => {
-            res.send('Sve OK!');
+            sendResponseOK(res, 'Service running', { timestamp: Date.now()});
         }
     },
     {
@@ -59,8 +59,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 return sendResponseBadRequest(res, 'Invalid request body', null);
             }
 
-            const goHandler = new GoHandler();
-            const blockchainListener = new BlockchainListener(app);
+            const goHandler = app.goHandler;
 
             // TODO:
             // - Generate recipient's stealth address and ephemeral key daya
@@ -70,7 +69,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             try {
                 const sendInfo: SendInfo = await goHandler.send(senderr!, recipientK!, recipientV!);
 
-                const receipt = await app.blockchainListener.sendEthViaProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, amount.toString());
+                const receipt = await app.blockchainService.sendEthViaProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, amount.toString());
 
                 await app.db.models.sentTransactions.create({
                     transaction_hash: receipt.hash,
@@ -84,9 +83,10 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                     ephemeral_key: sendInfo.pubKey,
                 })
 
-                console.log(`Sending ${amount} to stealth address: ${sendInfo.address}`);
 
-                console.log(`Registering ephemeral key: ${sendInfo.pubKey}`);
+                app.loggerService.logger.info(`Sending ${amount} to stealth address: ${sendInfo.address}`);
+
+                app.loggerService.logger.info(`Registering ephemeral key: ${sendInfo.pubKey}`);
 
                 sendResponseOK(res, 'Transfer simulated successfully', {
                     stealthAddress: sendInfo.address,
@@ -108,7 +108,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 toBlock,
             } = req.query;
 
-            console.log(fromBlock, toBlock);
+            app.loggerService.logger.info({fromBlock, toBlock});
 
             const fromBlockNumber = parseInt(fromBlock as string);
             const toBlockNumber = parseInt(toBlock as string);
@@ -117,8 +117,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 return sendResponseBadRequest(res, 'Invalid block numbers', null);
             }
 
-            const goHandler = new GoHandler();
-            const blockchainListener = new BlockchainListener(app);
+            const goHandler = app.goHandler;
 
             const senderInfo = await goHandler.genSenderInfo();
             const recipientInfo = await goHandler.genRecipientInfo();
@@ -135,7 +134,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
                 const newReceipt = await goHandler.receiveScan(recipientInfo.k, recipientInfo.v, [senderInfo.R], [senderInfo.viewTag]);
 
-                const balance = await blockchainListener.getBalance((newReceipt as any).address);
+                const balance = await app.blockchainService.getBalance((newReceipt as any).address);
                 if (balance > 0) {
                     const res = await app.db.models.sentTransactions.findAll({
                         where: {
@@ -180,14 +179,14 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                     return sendResponseBadRequest(res, 'Receipt not found', null);
                 }
 
-                const goHandler = new GoHandler();
+                const goHandler = app.goHandler;
 
                 const ephemeralKey = receipt.ephemeral_key;
                 const viewTag = receipt.view_tag;
 
                 const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(process.env.k!, process.env.v!, [ephemeralKey], [viewTag]);
 
-                const tx = await app.blockchainListener.transferEth(address, amount.toString(), receiveScanInfo[0].privKey);
+                const tx = await app.blockchainService.transferEth(address, amount.toString(), receiveScanInfo[0].privKey);
 
                 sendResponseOK(res, 'Success')
             } catch (err) {
