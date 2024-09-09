@@ -1,4 +1,4 @@
-package bn254_bench
+package bn254_v2_without_eth_addr_bench
 
 import (
 	"crypto/sha256"
@@ -14,14 +14,12 @@ import (
 
 	SECP256K1 "github.com/consensys/gnark-crypto/ecc/secp256k1"
 
-	ecpdksap_v2 "ecpdksap-go/versions/v2"
-
 	"ecpdksap-go/utils"
 )
 
 func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[string]time.Duration {
 
-	fmt.Println("Running `bn254` optimized Benchmark ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions, "seed:", randomSeed)
+	fmt.Println("Running `bn254` v2 without eth addr : Benchmark ::: sampleSize:", sampleSize, "nRepetitions:", nRepetitions, "seed:", randomSeed)
 	fmt.Println()
 
 	rndGen := rand.New(rand.NewSource(int64(randomSeed)))
@@ -29,8 +27,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 	durations := map[string]time.Duration{}
 
 	for iReps := 0; iReps < nRepetitions; iReps++ {
-
-		g1, _, _, g2Aff := EC.Generators()
+		_, _, _, g2Aff := EC.Generators()
 
 		//common for versions: V0, V1, V2
 		_, v_asBigInt, V, _ := _EC_GenerateG1KeyPair(rndGen)
@@ -38,7 +35,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 
 		var r_asBigInt big.Int
 
-		var P_v0 EC.GT
 
 		neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix := EC.PrecomputationForFixedScalarMultiplication(v_asBigIntPtr)
 		var table [15]EC.G1Jac
@@ -87,147 +83,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 
 		precomputedQLines := [][2][66]EC.LineEvaluationAff{EC.PrecomputeLines(K2_EC_asAffArr[0])}
 
-		//protocol: V0 and viewTag: V0-1byte
-		b.ResetTimer()
-
-		for _, cm := range combinedMeta {
-
-			hasher.Reset()
-
-			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
-
-			compressed := vR_asAff.FromJacobian(&vR).Bytes()
-
-			if hasher.Sum(compressed[:])[0] != cm.ViewTagSingleByte {
-				continue
-			}
-
-			pairingResult, _ := EC.PairFixedQ(cm.Rj_asAffArr, precomputedQLines)
-
-			P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
-		}
-
-		durations["v0.v0-1byte"] += b.Elapsed()
-
-		//protocol: V0 and viewTag: V0-2bytes
-		b.ResetTimer()
-
-		for _, cm := range combinedMeta {
-
-			hasher.Reset()
-
-			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
-
-			compressed := vR_asAff.FromJacobian(&vR).Bytes()
-
-			hash := hasher.Sum(compressed[:])
-
-			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte {
-				continue
-			}
-
-			pairingResult, _ := EC.PairFixedQ(cm.Rj_asAffArr, precomputedQLines)
-
-			P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
-		}
-
-		durations["v0.v0-2bytes"] += b.Elapsed()
-
-		//protocol: V0 and viewTag: V1-1byte
-		b.ResetTimer()
-
-		for _, cm := range combinedMeta {
-
-			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
-
-			a_El, b_El = vR_asAff.FromJacobianCoordX(&vR)
-
-			if vR_asAff.X.Bytes()[0] != cm.ViewTagSingleByte {
-				continue
-			}
-
-			vR_asAff.FromJacobianCoordY(a_El, b_El, &vR)
-
-			pairingResult, _ := EC.PairFixedQ(cm.Rj_asAffArr, precomputedQLines)
-
-			P_v0.CyclotomicExp(pairingResult, v_asBigIntPtr)
-		}
-
-		durations["v0.v1-1byte"] += b.Elapsed()
-
-		//protocol: V1 -------------------
-
-		// var P_v1 EC.GT
-		var tmp EC.G1Jac
-		var tmpAff EC.G1Affine
-		K_asArray := K2_EC_asAffArr
-
-		//protocol: V1 and viewTag: V0-1byte
-
-		precomputedQLines[0] = EC.PrecomputeLines(K_asArray[0])
-
-		b.ResetTimer()
-
-		for _, cm := range combinedMeta {
-
-			hasher.Reset()
-
-			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
-
-			compressed := vR_asAff.FromJacobian(&vR).Bytes()
-
-			if hasher.Sum(compressed[:])[0] != cm.ViewTagSingleByte {
-				continue
-			}
-
-			EC.PairFixedQ([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, precomputedQLines)
-		}
-
-		durations["v1.v0-1byte"] += b.Elapsed()
-
-		//protocol: V1 and viewTag: V0-2bytes
-		b.ResetTimer()
-
-		for _, cm := range combinedMeta {
-
-			hasher.Reset()
-
-			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
-
-			compressed := vR_asAff.FromJacobian(&vR).Bytes()
-
-			hash := hasher.Sum(compressed[:])
-
-			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte {
-				continue
-			}
-
-			EC.PairFixedQ([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, precomputedQLines)
-		}
-
-		durations["v1.v0-2bytes"] += b.Elapsed()
-
-		//protocol: V1 and viewTag: V1-1byte
-
-		b.ResetTimer()
-
-		for _, cm := range combinedMeta {
-
-			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
-
-			a_El, b_El = vR_asAff.FromJacobianCoordX(&vR)
-
-			if vR_asAff.X.Bytes()[0] != cm.ViewTagSingleByte {
-				continue
-			}
-
-			vR_asAff.FromJacobianCoordY(a_El, b_El, &vR)
-
-			EC.PairFixedQ([]EC.G1Affine{*tmpAff.FromJacobian(tmp.ScalarMultiplication(&g1, _EC_HashG1AffPoint(&vR_asAff)))}, precomputedQLines)
-		}
-
-		durations["v1.v1-1byte"] += b.Elapsed()
-
 		//protocol V2 --------------------
 
 		_, K_SECP256k1 := utils.SECP256k_Gen1G1KeyPair()
@@ -237,7 +92,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 		g2Aff_asArray := []EC.G2Affine{g2Aff}
 
 		var Pv2_asJac SECP256K1.G1Jac
-		var Pv2 SECP256K1.G1Affine
 
 		K_SECP256k1_JacPtr := &K_SECP256k1_Jac
 
@@ -268,7 +122,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 
 				S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedQLines)
 
-				ecpdksap_v2.ComputeEthAddress(Pv2.FromJacobian(Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))))
+				Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
 			}
 		}
 
@@ -293,7 +147,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 
 			S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedQLines)
 
-			ecpdksap_v2.ComputeEthAddress(Pv2.FromJacobian(Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))))
+			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
 		}
 
 		durations["v2.v0-2bytes"] += b.Elapsed()
@@ -313,9 +167,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, randomSeed int) map[str
 
 			vR_asAff.FromJacobianCoordY(a_El, b_El, &vR)
 
-			S, _ := EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedQLines)
-
-			ecpdksap_v2.ComputeEthAddress(Pv2.FromJacobian(Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))))
+			EC.PairFixedQ([]EC.G1Affine{vR_asAff}, precomputedQLines)
 		}
 
 		durations["v2.v1-1byte"] += b.Elapsed()

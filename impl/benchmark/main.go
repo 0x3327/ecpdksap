@@ -20,6 +20,7 @@ import (
 
 	bn254_optimized "ecpdksap-go/benchmark/bn254"
 	bn254_crk "ecpdksap-go/benchmark/bn254_constant_recipient_keys"
+	bn254_v2_wea "ecpdksap-go/benchmark/bn254_v2_without_eth_addr"
 )
 
 func RunBench(kind string, rndSeed int) {
@@ -31,25 +32,38 @@ func RunBench(kind string, rndSeed int) {
 
 		bn254_optimized.Run(b, 5_000, 10, rndSeed)
 		bn254_optimized.Run(b, 10_000, 10, rndSeed)
-		bn254_optimized.Run(b, 20_000, 10, rndSeed)
-		bn254_optimized.Run(b, 40_000, 10, rndSeed)
-		bn254_optimized.Run(b, 80_000, 10, rndSeed)
-		bn254_optimized.Run(b, 100_000, 10, rndSeed)
-		bn254_optimized.Run(b, 1_000_000, 10, rndSeed)
+		// bn254_optimized.Run(b, 20_000, 10, rndSeed)
+		// bn254_optimized.Run(b, 40_000, 10, rndSeed)
+		// bn254_optimized.Run(b, 80_000, 10, rndSeed)
+		// bn254_optimized.Run(b, 100_000, 10, rndSeed)
+		// bn254_optimized.Run(b, 1_000_000, 10, rndSeed)
 
 	} else if kind == "only-bn254-crk" {
 
 		bn254_crk.Run(b, 5_000, 10, rndSeed)
+		bn254_crk.Run(b, 10_000, 10, rndSeed)
+		bn254_crk.Run(b, 20_000, 10, rndSeed)
+		bn254_crk.Run(b, 40_000, 10, rndSeed)
 		bn254_crk.Run(b, 80_000, 10, rndSeed)
+		bn254_crk.Run(b, 1_000_000, 10, rndSeed)
+
+	} else if kind == "only-bn254-v2-wea" {
+
+		bn254_v2_wea.Run(b, 5_000, 10, rndSeed)
+		bn254_v2_wea.Run(b, 10_000, 10, rndSeed)
+		// bn254_v2_wea.Run(b, 20_000, 10, rndSeed)
+		// bn254_v2_wea.Run(b, 40_000, 10, rndSeed)
+		// bn254_v2_wea.Run(b, 80_000, 10, rndSeed)
+		// bn254_v2_wea.Run(b, 1_000_000, 10, rndSeed)
 
 	} else if kind == "all-curves" {
 
 		_Benchmark_Curves(b, 5_000, 10, rndSeed)
-		// _Benchmark_Curves(b, 10_000, 10)
-		// _Benchmark_Curves(b, 20_000, 10)
-		// _Benchmark_Curves(b, 40_000, 10)
-		// _Benchmark_Curves(b, 80_000, 10)
-		// _Benchmark_Curves(b, 100_000, 10)
+		_Benchmark_Curves(b, 10_000, 10, rndSeed)
+		_Benchmark_Curves(b, 20_000, 10, rndSeed)
+		_Benchmark_Curves(b, 40_000, 10, rndSeed)
+		_Benchmark_Curves(b, 80_000, 10, rndSeed)
+		_Benchmark_Curves(b, 100_000, 10, rndSeed)
 
 	} else if kind == "all-results-from-paper" {
 		//note: benchmark results used in the official ECPDKSAP paper
@@ -151,15 +165,37 @@ func RunBench(kind string, rndSeed int) {
 		fmt.Println(allResults)
 		fmt.Println()
 
-		//--------------- Average time cost per operation
+		//--------------- Only BN254 (v2 without eth address)
 
 		for i := 0; i < nRandomSeeds; i++ {
 
 			rndSeed := 3327 + i
 
+			// SumResults("bn254_v2_wea.5k", bn254_v2_wea.Run(b, 5_000, nRepetitions, rndSeed))
+			// SumResults("bn254_v2_wea.10k", bn254_v2_wea.Run(b, 10_000, nRepetitions, rndSeed))
+			// SumResults("bn254_v2_wea.20k", bn254_v2_wea.Run(b, 20_000, nRepetitions, rndSeed))
+			// SumResults("bn254_v2_wea.40k", bn254_v2_wea.Run(b, 40_000, nRepetitions, rndSeed))
+			// SumResults("bn254_v2_wea.80k", bn254_v2_wea.Run(b, 80_000, nRepetitions, rndSeed))
+			SumResults("bn254_v2_wea.1mil", bn254_v2_wea.Run(b, 1_000_000, nRepetitions, rndSeed))
+
+			fmt.Println("--------- Running avg. bn254_v2_wea: 5k - 1mil, nRandomSeeds:", nRandomSeeds)
+			fmt.Println(allResults)
+			fmt.Println()
+		}
+
+		fmt.Println("--------- Done. bn254_v2_wea: 5k - 1mil, nRandomSeeds:", nRandomSeeds)
+		fmt.Println(allResults)
+		fmt.Println()
+
+		//--------------- Average time cost per operation
+
+		for i := 0; i < 0; i++ {
+
+			rndSeed := 3327 + i
+
 			rndGen := rand.New(rand.NewSource(int64(rndSeed)))
 
-			for j := 0; j < 10_000; j++ {
+			for j := 0; j < 1_000; j++ {
 				_, v_asBigInt := _RandomPrivateKey(rndGen)
 				_, _, Rj, _ := _EC_GenerateG1KeyPair(rndGen)
 				_, _, _, K := _EC_GenerateG2KeyPair(rndGen)
