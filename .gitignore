@@ -9,6 +9,7 @@ package-lock.json
 
 .vscode
 
+<<<<<<< HEAD
 yarn.lock
 
 .env.development
@@ -18,3 +19,21 @@ logs.txt
 db.sqlite
 
 .env
+=======
+# Compiler files
+cache/
+out/
+
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+*.prof
+*.test
+>>>>>>> 1883ed2f70b6a4a34f0d24c5edd4078c2756a464
