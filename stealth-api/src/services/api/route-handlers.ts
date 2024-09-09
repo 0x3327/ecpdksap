@@ -6,6 +6,7 @@ import BlockchainService from '../blockchain-service';
 import { Op } from 'sequelize';
 import { Info, ReceiveScanInfo, SendInfo } from '../../types';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config({ path: `.env.development` });
 
@@ -47,15 +48,14 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
         handler: async (req: Request, res: Response) => {
             const { 
                 recipientIdType,
-                dns,
+                ens,
                 address,
-                senderr,
                 recipientK,
                 recipientV,
                 amount,
             } = (req.body as SendFundsRequest);
 
-            if (typeof amount !== 'number' || typeof address !== 'string' || typeof dns !== 'string') {
+            if (typeof amount !== 'number' || (address != null && typeof address !== 'string') || (ens != null && typeof ens !== 'string')) {
                 return sendResponseBadRequest(res, 'Invalid request body', null);
             }
 
@@ -66,8 +66,10 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             // - Send funds to stealth address
             // - Register computed ephemeral key in smart contract registry
 
+            const senderRandomness = crypto.randomBytes(32).toString('hex');
+
             try {
-                const sendInfo: SendInfo = await goHandler.send(senderr!, recipientK!, recipientV!);
+                const sendInfo: SendInfo = await goHandler.send(senderRandomness!, recipientK!, recipientV!);
 
                 const receipt = await app.blockchainService.sendEthViaProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, amount.toString());
 
@@ -75,7 +77,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                     transaction_hash: receipt.hash,
                     block_number: receipt.blockNumber,
                     amount: amount,
-                    recipient_identifier: recipientIdType === 'eth_dns' ? dns : address,
+                    recipient_identifier: recipientIdType === 'eth_ens' ? ens : address,
                     recipient_identifier_type: recipientIdType,
                     recipient_k: recipientK,
                     recipient_v: recipientV,

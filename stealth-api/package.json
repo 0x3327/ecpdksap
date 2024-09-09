@@ -4,8 +4,9 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev src/index.ts",
-    "test": "jest",
-    "ganache": "ganache --wallet.seed 42"
+    "test": "hardhat compile && jest --detectOpenHandles",
+    "ganache": "ganache --wallet.seed 42",
+    "hardhat:compile": "hardhat compile"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +22,9 @@
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "ganache": "^7.9.2",
+    "hardhat": "^2.22.10"
   },
   "dependencies": {
     "@sequelize/sqlite3": "^7.0.0-alpha.41",

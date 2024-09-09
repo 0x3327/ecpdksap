@@ -1,8 +1,7 @@
 import { Contract, ethers, Provider, Wallet } from 'ethers';
-import dotenv from 'dotenv';
 import App from '../../app';
-import abi_registry from '../../abi/MetaAddressRegistry.json';
-import abi_announcer from '../../abi/Announcer.json';
+import metaAddressArtifacts from '../../../artifacts/contracts/ECPDKSAP_MetaAddressRegistry.sol/ECPDKSAP_MetaAddressRegistry.json';
+import announcerArtifacts from '../../../artifacts/contracts/ECPDKSAP_Announcer.sol/ECPDKSAP_Announcer.json';
 import winston from 'winston';
 
 type Contracts = {
@@ -39,8 +38,8 @@ class BlockchainService {
 
         // Connect contracts
         this.contracts = {
-            metaAddressRegistry: new ethers.Contract(deployedContracts.metaAddress, abi_registry, this.wallet),
-            announcer: new ethers.Contract(deployedContracts.announcer, abi_announcer, this.wallet),
+            metaAddressRegistry: new ethers.Contract(deployedContracts.metaAddress, metaAddressArtifacts.abi, this.wallet),
+            announcer: new ethers.Contract(deployedContracts.announcer, announcerArtifacts.abi, this.wallet),
         }
 
         this.listenMetaAddressRegistredEvent();
@@ -103,6 +102,7 @@ class BlockchainService {
             this.logger.info('Sending ETH via Proxy, transaction confirmed:', receipt.transactionHash);
             return receipt;
         } catch (error) {
+            console.log(error);
             this.logger.error('Error sending ETH via proxy:', error);
         }
     }
@@ -171,6 +171,7 @@ class BlockchainService {
     public async stop() {
         await this.contracts.metaAddressRegistry.off('MetaAddressRegistered');
         await this.contracts.announcer.off('Announcement');
+        this.provider.destroy();
     }
 }
 
