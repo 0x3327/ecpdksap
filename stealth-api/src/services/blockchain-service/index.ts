@@ -145,7 +145,7 @@ class BlockchainService {
             const [K, V] = Buffer.from(R.slice(2, R.length), 'hex').toString('ascii').split('.');
 
             const amount = await this.provider.getBalance(stealthAddress);
-            console.log(event);
+            // console.log(event);
 
             // this.app.goHandler.receiveScan(
 

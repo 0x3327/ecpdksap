@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { Config } from '../types';
 
 const configLoader = {
-    load(configType: string = 'development'): Config {
+    load(configType: string = 'test'): Config {
         dotenv.config({ path: `.env.${configType}` });
 
         const serverName = process.env.API_SERVER_NAME || 'defaultServerName';
@@ -19,7 +19,17 @@ const configLoader = {
         const providerType = process.env.BLOCKCHAIN_PROVIDER_TYPE!;
         const announcer = process.env.BLOCKCHAIN_CONTRACT_ANNOUNCER!;
         const metaAddress = process.env.BLOCKCHAIN_CONTRACT_META_ADDRESS!;
+
         const logging = process.env.LOGGING === 'true';
+        
+        const senderRandomness = process.env.SENDER_r!;
+        const senderR = process.env.SENDER_R!;
+        const recipientk = process.env.RECIPIENT_k!;
+        const recipientK = process.env.RECIPIENT_K!;
+        const recipientv = process.env.RECIPIENT_v!;
+        const recipientV = process.env.RECIPIENT_V!;
+        const Rs = process.env.RS ? process.env.RS.split(';') : [];
+        const ViewTags = process.env.VIEW_TAG ? process.env.VIEW_TAG.split(';') : [];
 
         const config: Config = {
             logging,
@@ -42,6 +52,16 @@ const configLoader = {
                     announcer,
                     metaAddress,
                 }
+            },
+            stealthConfig:  {
+                senderRandomness,
+                senderR,
+                recipientk,
+                recipientK,
+                recipientv,
+                recipientV,
+                Rs,
+                ViewTags
             }
         };
 

@@ -7,6 +7,7 @@ import { Op } from 'sequelize';
 import { Info, ReceiveScanInfo, SendInfo } from '../../types';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import configLoader from '../../../utils/config-loader';
 
 dotenv.config({ path: `.env.development` });
 
@@ -33,6 +34,8 @@ const sendResponseOK = (res: Response, message: string, data?: any) => {
 const sendResponseBadRequest = (res: Response, message: string, data?: any) => {
     sendResponse(res, 400, message, data);
 };
+
+const config = configLoader.load('test');
 
 const routeHandlers = (app: App): RouteHandlerConfig[] => [
     {
@@ -62,10 +65,15 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             const goHandler = app.goHandler;
 
-            const senderRandomness = crypto.randomBytes(32).toString('hex');
+            const senderInfo = await goHandler.genSenderInfo();
+            config.stealthConfig.senderRandomness = senderInfo.r;
+            config.stealthConfig.senderR = senderInfo.R;
 
             try {
-                const sendInfo: SendInfo = await goHandler.send(senderRandomness!, recipientK!, recipientV!);
+                const sendInfo: SendInfo = await goHandler.send(config.stealthConfig.senderRandomness!, config.stealthConfig.recipientK!, config.stealthConfig.recipientV!);
+
+                config.stealthConfig.Rs = [config.stealthConfig.senderR];
+                config.stealthConfig.ViewTags = [sendInfo.viewTag]
 
                 let receipt;
 
@@ -86,7 +94,6 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                     recipient_stealth_address: sendInfo.address,
                     ephemeral_key: sendInfo.pubKey,
                 })
-
 
                 app.loggerService.logger.info(`Sending ${amount} to stealth address: ${sendInfo.address}`);
 
@@ -125,38 +132,57 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             const goHandler = app.goHandler;
 
-            const senderInfo = await goHandler.genSenderInfo();
-            const recipientInfo = await goHandler.genRecipientInfo();
-
             try {
                 let allReceipts: any[] = [];
 
                 const existingReceipts = await app.db.models.receivedTransactions.findAll({
-                    where: { block_number: {
-                        [Op.between]: [fromBlockNumber, toBlockNumber]
+                    where: { 
+                        block_number: {
+                            [Op.between]: [fromBlockNumber, toBlockNumber]
                     }
                 }
                 });
 
-                const newReceipt = await goHandler.receiveScan(recipientInfo.k, recipientInfo.v, [senderInfo.R], [senderInfo.viewTag]);
+                const newReceipts = await goHandler.receiveScan(config.stealthConfig.recipientk, config.stealthConfig.recipientv, config.stealthConfig.Rs, config.stealthConfig.ViewTags);
 
-                const balance = await app.blockchainService.getBalance((newReceipt as any).address);
+                console.log("nasao receive", newReceipts);
+
+                // TODO: add for loop for checking every element in newReceipt array
+                const balance = await app.blockchainService.getBalance((newReceipts[0] as any).address);
+                console.log("balance", balance);
                 if (balance > 0) {
+                    console.log("usao u if>0")
                     const res = await app.db.models.sentTransactions.findAll({
                         where: {
-                            recipient_stealth_address: (newReceipt as any).address,
-                            amount: balance,
+                            recipient_stealth_address: (newReceipts[0] as any).address,
+                            // amount: balance,
                         }
                     });
-                    await app.db.models.receivedTransactions.create({
-                        transaction_hash: res[0].transaction_hash,
-                        block_number: res[0].block_number,
-                        amount: balance,
-                        stealth_address: (newReceipt as any).address,
-                        ephemeral_key: res[0].ephemeral_key,
-                        view_tag: res[0].view_tag,
-                    });
-                    allReceipts = [...existingReceipts, newReceipt];
+                    // console.log("nasao tx", res[0]);
+                    // console.log("transaction_hash", res[0].transaction_hash);
+                    // console.log("block_number", res[0].block_number);
+                    // console.log("balance", balance);
+                    // console.log("stealth_address", ((newReceipts[0] as any).address));
+                    // console.log("ephemeral_key", res[0].ephemeral_key);
+                    // console.log("view_tag", config.stealthConfig.ViewTags[0]);
+                    // const res_rec = await app.db.models.receivedTransactions.findAll({
+                    //     where: {
+                    //         transaction_hash: res[0].transaction_hash,
+                    //         // amount: balance,
+                    //     }
+                    // });
+                    // console.log("nasao u db rec tx", res_rec);
+                    // await app.db.models.receivedTransactions.create({
+                    //     transaction_hash: res[0].transaction_hash,
+                    //     block_number: res[0].block_number,
+                    //     amount: balance,
+                    //     stealth_address: (newReceipts[0] as any).address,
+                    //     ephemeral_key: res[0].ephemeral_key,
+                    //     view_tag: config.stealthConfig.ViewTags[0],
+                    // });
+                    // console.log("dodao u db received tx");
+                    allReceipts = [...existingReceipts, newReceipts[0]];
+                    console.log("dodao newReceipt");
                 } else {
                     allReceipts = existingReceipts;
                 }
