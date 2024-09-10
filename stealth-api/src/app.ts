@@ -35,6 +35,7 @@ class App {
     async stop(): Promise<void> {
         await this.api.stop();
         await this.blockchainService.stop();
+        console.log('App stopped')
     }
 
     async start(): Promise<void> {

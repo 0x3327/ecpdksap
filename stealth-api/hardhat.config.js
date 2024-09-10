@@ -9,7 +9,7 @@ module.exports = {
         }
     },
     paths: {
-        sources: "./contracts",
+        sources: "./contracts/src",
         cache: "./cache",
         artifacts: "./artifacts"
     },

@@ -1,7 +1,6 @@
 package v2
 
 import (
-	"ecpdksap-go/utils"
 	"encoding/hex"
 	"math/big"
 
@@ -9,6 +8,8 @@ import (
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
 	SECP256K1 "github.com/consensys/gnark-crypto/ecc/secp256k1"
 	SECP256K1_fr "github.com/consensys/gnark-crypto/ecc/secp256k1/fr"
+
+	EC "github.com/consensys/gnark-crypto/ecc/bn254"
 
 	// "github.com/ethereum/go-ethereum/crypto/sha3"
 	"golang.org/x/crypto/sha3"
@@ -47,33 +48,14 @@ func SenderComputesSharedSecret(r *fr.Element, V *bn254.G1Affine, K *SECP256K1.G
 
 func Compute_b(pubKey *bn254.GT) (b big.Int) {
 
-	var res bn254.E2
-
-	res.Add(&pubKey.C0.B0, &pubKey.C0.B1)
-	res.Add(&res, &pubKey.C1.B0)
-	res.Add(&res, &pubKey.C1.B1)
-
-	res.A0.BigInt(&b)
-
-	b.Add(&b, res.A1.BigInt(new(big.Int)))
-
-	return
+	return *pubKey.C0.B0.A0.BigInt(new(big.Int))
 }
 
 func Compute_b_asElement(pubKey *bn254.GT) (b SECP256K1_fr.Element) {
 
-	var res bn254.E2
+	b_asBigInt := Compute_b(pubKey)
 
-	res.Add(&pubKey.C0.B0, &pubKey.C0.B1)
-	res.Add(&res, &pubKey.C1.B0)
-	res.Add(&res, &pubKey.C1.B1)
-
-	b = SECP256K1_fr.Element(res.A0)
-	b2 := SECP256K1_fr.Element(res.A1)
-
-	b.Add(&b, &b2)
-
-	return
+	return *b.SetBigInt(&b_asBigInt)
 }
 
 func SenderComputesPubKey(b *SECP256K1_fr.Element, K *SECP256K1.G1Affine) string {
@@ -101,22 +83,18 @@ func SenderComputesEthAddress(b *SECP256K1_fr.Element, K *SECP256K1.G1Affine) st
 
 // Computes the shared secred - from recipents's perspective
 func RecipientComputesSharedSecret(v *fr.Element, R *bn254.G1Affine, K2 *SECP256K1.G1Affine) bn254.GT {
+	_, _, _, g2Aff := EC.Generators()
 
-	productAffine := utils.BN254_MulG1PointandElement(R, v)
+	neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix := EC.PrecomputationForFixedScalarMultiplication(v.BigInt(new(big.Int)))
+	var table [15]EC.G1Jac
 
-	// Compute pairing
-	_, g2Gen, _, _ := bn254.Generators()
+	precomputedQLines := [][2][66]EC.LineEvaluationAff{EC.PrecomputeLines(g2Aff)}
 
-	one := new(big.Int)
-	one.SetString("1", 10)
+	var vR, R_asJac EC.G1Jac
+	var vR_asAff EC.G1Affine
+	vR.FixedScalarMultiplication(R_asJac.FromAffine(R), &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
 
-	var G2Jac bn254.G2Jac
-	G2Jac.ScalarMultiplication(&g2Gen, one)
-
-	var G2Aff bn254.G2Affine
-	G2Aff.FromJacobian(&G2Jac)
-
-	P, _ := bn254.Pair([]bn254.G1Affine{productAffine}, []bn254.G2Affine{G2Aff})
+	P, _ := EC.PairFixedQ([]EC.G1Affine{*vR_asAff.FromJacobian(&vR)}, precomputedQLines)
 
 	return P
 }

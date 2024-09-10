@@ -53,6 +53,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 recipientK,
                 recipientV,
                 amount,
+                withProxy
             } = (req.body as SendFundsRequest);
 
             if (typeof amount !== 'number' || (address != null && typeof address !== 'string') || (ens != null && typeof ens !== 'string')) {
@@ -61,17 +62,18 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             const goHandler = app.goHandler;
 
-            // TODO:
-            // - Generate recipient's stealth address and ephemeral key daya
-            // - Send funds to stealth address
-            // - Register computed ephemeral key in smart contract registry
-
             const senderRandomness = crypto.randomBytes(32).toString('hex');
 
             try {
                 const sendInfo: SendInfo = await goHandler.send(senderRandomness!, recipientK!, recipientV!);
 
-                const receipt = await app.blockchainService.sendEthViaProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, amount.toString());
+                let receipt;
+
+                if (withProxy) {
+                    receipt = await app.blockchainService.sendEthViaProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, amount.toString());
+                } else {
+                    receipt = await app.blockchainService.ethSentWithoutProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, amount.toString());
+                }
 
                 await app.db.models.sentTransactions.create({
                     transaction_hash: receipt.hash,
@@ -112,8 +114,10 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             app.loggerService.logger.info({fromBlock, toBlock});
 
-            const fromBlockNumber = parseInt(fromBlock as string);
-            const toBlockNumber = parseInt(toBlock as string);
+            const fromBlockNumber = parseInt((fromBlock || '0') as string);
+            const toBlockNumber = parseInt((toBlock || await app.blockchainService.provider.getBlockNumber()) as string);
+
+            console.log({ fromBlockNumber, toBlockNumber });
 
             if (isNaN(fromBlockNumber) || isNaN(toBlockNumber)) {
                 return sendResponseBadRequest(res, 'Invalid block numbers', null);

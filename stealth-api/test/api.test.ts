@@ -44,7 +44,7 @@ describe('API routes test', () => {
           });
 
         // console.log(axiosInstance);
-    })
+    }, 30000)
 
     test('Starting application', () => {
        expect(app).not.toBeNull();
@@ -62,7 +62,7 @@ describe('API routes test', () => {
         }    
     })
 
-    test('Send stealth transaction', async () => {
+    test('Send stealth transaction via Proxy', async () => {
         try {
             const recipientInfo = await app.goHandler.genRecipientInfo();
             
@@ -71,17 +71,27 @@ describe('API routes test', () => {
                 recipientK: recipientInfo.K,
                 recipientV: recipientInfo.V,
                 amount: 10,
+                withProxy: true,
             }
 
             const res = await axiosInstance.post('/send', payload);
-            const { data } = res;
 
-            console.log(res);
+            // TODO: Check response
+
+            // Wait for Announcement event
+            await (new Promise((resolve, reject) => setTimeout(resolve, 5000)));
+
+            
         } catch (err) {
             console.log(err);
             expect(true).toBe(false);
         }   
-    })
+    }, 30000);
+
+    test.skip('Check received funds', async () => {
+        const res = await axiosInstance.get('/check-received');
+        console.log(res);
+    });
 
     afterAll(async () => {
         try {

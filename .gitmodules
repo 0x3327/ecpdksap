@@ -1,0 +1,6 @@
+[submodule "impl/gnark-crypto-fork"]
+	path = impl/gnark-crypto-fork
+	url = https://github.com/0x3327/gnark-crypto
+[submodule "sc/lib/forge-std"]
+	path = sc/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std

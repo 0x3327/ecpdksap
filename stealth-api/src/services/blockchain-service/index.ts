@@ -1,7 +1,7 @@
 import { Contract, ethers, Provider, Wallet } from 'ethers';
 import App from '../../app';
-import metaAddressArtifacts from '../../../artifacts/contracts/ECPDKSAP_MetaAddressRegistry.sol/ECPDKSAP_MetaAddressRegistry.json';
-import announcerArtifacts from '../../../artifacts/contracts/ECPDKSAP_Announcer.sol/ECPDKSAP_Announcer.json';
+import metaAddressArtifacts from '../../../artifacts/contracts/src/ECPDKSAP_MetaAddressRegistry.sol/ECPDKSAP_MetaAddressRegistry.json';
+import announcerArtifacts from '../../../artifacts/contracts/src/ECPDKSAP_Announcer.sol/ECPDKSAP_Announcer.json';
 import winston from 'winston';
 
 type Contracts = {
@@ -93,7 +93,12 @@ class BlockchainService {
 
     public async sendEthViaProxy(stealthAddress: string, R: string, viewTag: string, amount: string) {
         try {
-            const tx = await this.contracts.announcer.sendEthViaProxy(stealthAddress, ethers.toUtf8Bytes(R), ethers.toUtf8Bytes(viewTag), {
+            console.log({
+                stealthAddress, 
+                R: `0x${Buffer.from(R, 'ascii').toString('hex')}`,
+                viewTag: `0x${viewTag}`
+            })
+            const tx = await this.contracts.announcer.sendEthViaProxy(stealthAddress, `0x${Buffer.from(R, 'ascii').toString('hex')}`, `0x${viewTag}`, {
                 value: ethers.parseEther(amount)
             });
             this.logger.info('Sending ETH via Proxy, transaction sent:', tx.hash);
@@ -107,9 +112,14 @@ class BlockchainService {
         }
     }
 
-    public async ethSentWithoutProxy(R: string, viewTag: string) {
+    public async ethSentWithoutProxy(stealthAddress: string, R: string, viewTag: string, amount: string) {
         try {
             const tx = await this.contracts.announcer.ethSentWithoutProxy(ethers.toUtf8Bytes(R), ethers.toUtf8Bytes(viewTag));
+            await this.wallet.sendTransaction({
+                to: stealthAddress,
+                value: ethers.parseEther(amount),
+              });
+              
             this.logger.info('Sending ETH Without Proxy, Transaction sent:', tx.hash);
 
             const receipt = await tx.wait();
@@ -129,19 +139,28 @@ class BlockchainService {
     }
 
     public async listenAnnouncementEvent() {
-        this.contracts.announcer.on('Announcement', (schemaId: string, stealthAddress: string, sender: string, R: string, viewTag: string) => {
+        this.contracts.announcer.on('Announcement', async (...parameters) => {
+            const [schemaId, stealthAddress, sender, R, viewTag, event] = parameters;
+            // console.log('Announcement received:', schemaId, stealthAddress, sender, ethers.hexlify(R), ethers.hexlify(viewTag))
+            const [K, V] = Buffer.from(R.slice(2, R.length), 'hex').toString('ascii').split('.');
+
+            const amount = await this.provider.getBalance(stealthAddress);
+            console.log(event);
+
+            // this.app.goHandler.receiveScan(
+
+            // )
+
             this.logger.info('Announcement received:', schemaId, stealthAddress, sender, ethers.hexlify(R), ethers.hexlify(viewTag));
-            this.app.db.models.sentTransactions.create({
-                transaction_hash: '0x123456',
-                block_number: 4,
-                amount: 101,
-                recipient_identifier: stealthAddress,
-                recipient_identifier_type: null,
-                recipient_k: '0x123450334565674',
-                recipient_v: '0x123450abc431232',
-                recipient_stealth_address: stealthAddress,
+            await this.app.db.models.receivedTransactions.create({
+                transaction_hash: event.log.transactionHash,
+                block_number: event.log.blockNumber,
+                amount,
                 ephemeral_key: R,
+                view_tag: viewTag,
+                stealth_address: stealthAddress,
             });
+            console.log('Announcement saved');
         });
 
         this.logger.info('Listening for Announcement event...');
@@ -171,7 +190,9 @@ class BlockchainService {
     public async stop() {
         await this.contracts.metaAddressRegistry.off('MetaAddressRegistered');
         await this.contracts.announcer.off('Announcement');
-        this.provider.destroy();
+        try {
+            this.provider.destroy();
+        } catch (err) {}
     }
 }
 

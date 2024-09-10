@@ -186,13 +186,14 @@ func Hash(input []byte) []byte {
 	return hash
 }
 
-func GenRandomRsAndViewTags(len int) (Rs []string, VTags []string) {
+func GenRandomRsAndViewTags(len int, viewTagVersion string) (Rs []string, VTags []string) {
 
 	for i := 0; i < len; i++ {
 		r, R, _ := BN254_GenG1KeyPair()
 
 		tmp := BN254_MulG1PointandElement(&R, &r)
-		vTag := BN254_G1PointToViewTag(&tmp, 2)
+		vTag := ComputeViewTag(viewTagVersion, &tmp)
+
 		Rs = append(Rs, R.X.String()+"."+R.Y.String())
 
 		VTags = append(VTags, vTag)

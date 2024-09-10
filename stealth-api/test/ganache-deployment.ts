@@ -1,8 +1,9 @@
 import ganache, { Server } from "ganache";
 import { ContractFactory, ethers } from 'ethers';
 
-import anouncerArtifacts from "../artifacts/contracts/ECPDKSAP_Announcer.sol/ECPDKSAP_Announcer.json";
-import metaAddressArtifacts from "../artifacts/contracts/ECPDKSAP_MetaAddressRegistry.sol/ECPDKSAP_MetaAddressRegistry.json";
+import anouncerArtifacts from "../artifacts/contracts/src/ECPDKSAP_Announcer.sol/ECPDKSAP_Announcer.json";
+import metaAddressArtifacts from "../artifacts/contracts/src/ECPDKSAP_MetaAddressRegistry.sol/ECPDKSAP_MetaAddressRegistry.json";
+import erc5564AnnouncerArtifacts from "../artifacts/contracts/src/ERC5564Announcer.sol/ERC5564Announcer.json";
 
 type BlockchainParams = {
   ganacheServer: Server,
@@ -25,16 +26,27 @@ export async function deployContracts(): Promise<BlockchainParams> {
         }
 
         console.log(`ganache listening on port ${server.address().port}...`);
-        const provider = new ethers.JsonRpcProvider(`http://127.0.0.1:${port}`);
+        const provider = ethers.getDefaultProvider(`http://127.0.0.1:${port}`);
 
         const wallet = ethers.Wallet.fromPhrase(mnemonic);
         const account = wallet.connect(provider);
 
+        const erc5564AnnouncerFactory = new ContractFactory(erc5564AnnouncerArtifacts.abi, erc5564AnnouncerArtifacts.bytecode, account);
         const announcerFactory = new ContractFactory(anouncerArtifacts.abi, anouncerArtifacts.bytecode, account);
         const metaAddressFactory = new ContractFactory(metaAddressArtifacts.abi, metaAddressArtifacts.bytecode, account);
 
-        const announcer = await announcerFactory.deploy();
-        const metaAddress = await metaAddressFactory.deploy();
+        console.log('Deploying meta address contract...');
+        const metaAddress = (await (await metaAddressFactory.deploy()).waitForDeployment());
+        console.log('Deploying ERC5564 Announcer contract...');
+        const erc5564Announcer = (await (await erc5564AnnouncerFactory.deploy()).waitForDeployment());
+        console.log('Deploying ECPDKSAP Announcer contract...');
+        const announcer = (await (await announcerFactory.deploy(await erc5564Announcer.getAddress())).waitForDeployment());
+
+        console.log('Contracts deployed.')
+        console.log('erc5564Announcer:', await erc5564Announcer.getAddress());
+        console.log('metaAddress:', await metaAddress.getAddress());
+        console.log('announcer:', await announcer.getAddress());
+        
 
         resolve({
           ganacheServer: server,

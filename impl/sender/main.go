@@ -101,8 +101,16 @@ func Send(jsonInputString string) (rr string, rR string, rVTag string, rP string
 
 		b := ecpdksap_v2.Compute_b_asElement(&GT)
 
+<<<<<<< HEAD
 		rP = ecpdksap_v2.SenderComputesPubKey(&b, &K)
 		rAddr = ecpdksap_v2.SenderComputesEthAddress(&b, &K)
+=======
+		R, _ := utils.BN254_CalcG1PubKey(r)
+		rR = hex.EncodeToString(R.Marshal())
+		rP = "ETH stealth address Public Key - not important"
+
+		rAddr = ecpdksap_v2.SenderComputesEthAddress(&b_asElement, &K)
+>>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28
 
 		tmp := utils.BN254_MulG1PointandElement(&V, &r)
 
@@ -110,8 +118,12 @@ func Send(jsonInputString string) (rr string, rR string, rVTag string, rP string
 
 		rVTag = utils.ComputeViewTag(senderInputData.ViewTagVersion, &tmp)
 	}
+<<<<<<< HEAD
 
 	return
+=======
+	return rr, rR, rVTag, rP, rAddr
+>>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28
 }
 
 type SenderInputData struct {

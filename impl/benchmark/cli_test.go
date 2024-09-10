@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+<<<<<<< HEAD
 	data_generation "ecpdksap-go/data_generation"
+=======
+	"ecpdksap-go/data_generation"
+>>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28
 	"ecpdksap-go/recipient"
 	"ecpdksap-go/sender"
 	"testing"

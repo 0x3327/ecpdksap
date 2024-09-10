@@ -1,6 +1,8 @@
 module ecpdksap-go
 
-go 1.21.3
+go 1.23.0
+
+replace github.com/consensys/gnark-crypto => ./gnark-crypto-fork
 
 replace github.com/consensys/gnark-crypto => /Users/bojinovic/Documents/MVPw-Projects/3327/forked-gnark-crypto
 

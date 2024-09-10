@@ -18,7 +18,7 @@ class DB {
             username: this.config.username,
             password: this.config.password,
             dialect: 'sqlite',
-            storage: 'db.sqlite',
+            storage: `${dbConfig.database || 'db'}.sqlite`,
             logging: false,
         })
 

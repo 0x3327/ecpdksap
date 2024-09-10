@@ -5,6 +5,7 @@ export type SendFundsRequest = {
     recipientK?: string,
     recipientV?: string,
     amount: number,
+    withProxy: boolean
 }
 
 export type CheckReceivedRequest = {

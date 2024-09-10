@@ -9,7 +9,7 @@ package-lock.json
 
 .vscode
 
-<<<<<<< HEAD
+
 yarn.lock
 
 .env.development
@@ -19,7 +19,7 @@ logs.txt
 db.sqlite
 
 .env
-=======
+
 # Compiler files
 cache/
 out/
@@ -36,4 +36,10 @@ docs/
 .env
 *.prof
 *.test
->>>>>>> 1883ed2f70b6a4a34f0d24c5edd4078c2756a464
+
+# Database
+*.sqlite
+
+# Hardhat
+artifacts
+cache
