@@ -30,6 +30,7 @@ const configLoader = {
         const recipientV = process.env.RECIPIENT_V!;
         const Rs = process.env.RS ? process.env.RS.split(';') : [];
         const ViewTags = process.env.VIEW_TAG ? process.env.VIEW_TAG.split(';') : [];
+        const transferAddress = process.env.TRANSFER_ADDRESS!;
 
         const config: Config = {
             logging,
@@ -61,7 +62,8 @@ const configLoader = {
                 recipientv,
                 recipientV,
                 Rs,
-                ViewTags
+                ViewTags,
+                transferAddress
             }
         };
 

@@ -145,32 +145,15 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
                 const newReceipts = await goHandler.receiveScan(config.stealthConfig.recipientk, config.stealthConfig.recipientv, config.stealthConfig.Rs, config.stealthConfig.ViewTags);
 
-                console.log("nasao receive", newReceipts);
-
                 // TODO: add for loop for checking every element in newReceipt array
                 const balance = await app.blockchainService.getBalance((newReceipts[0] as any).address);
-                console.log("balance", balance);
                 if (balance > 0) {
-                    console.log("usao u if>0")
                     const res = await app.db.models.sentTransactions.findAll({
                         where: {
                             recipient_stealth_address: (newReceipts[0] as any).address,
                             // amount: balance,
                         }
                     });
-                    // console.log("nasao tx", res[0]);
-                    // console.log("transaction_hash", res[0].transaction_hash);
-                    // console.log("block_number", res[0].block_number);
-                    // console.log("balance", balance);
-                    // console.log("stealth_address", ((newReceipts[0] as any).address));
-                    // console.log("ephemeral_key", res[0].ephemeral_key);
-                    // console.log("view_tag", config.stealthConfig.ViewTags[0]);
-                    // const res_rec = await app.db.models.receivedTransactions.findAll({
-                    //     where: {
-                    //         transaction_hash: res[0].transaction_hash,
-                    //         // amount: balance,
-                    //     }
-                    // });
                     // console.log("nasao u db rec tx", res_rec);
                     // await app.db.models.receivedTransactions.create({
                     //     transaction_hash: res[0].transaction_hash,
@@ -182,7 +165,6 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                     // });
                     // console.log("dodao u db received tx");
                     allReceipts = [...existingReceipts, newReceipts[0]];
-                    console.log("dodao newReceipt");
                 } else {
                     allReceipts = existingReceipts;
                 }
@@ -204,21 +186,31 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             } = req.body as TransferReceivedFundsRequest;
 
             try {
-                const receipt = await app.db.models.receivedTransactions.findByPk({
-                    id: receiptId
-                });
+                const receipt = await app.db.models.receivedTransactions.findByPk(receiptId);
                 if (!receipt) {
                     return sendResponseBadRequest(res, 'Receipt not found', null);
                 }
 
                 const goHandler = app.goHandler;
 
-                const ephemeralKey = receipt.ephemeral_key;
-                const viewTag = receipt.view_tag;
+                const ephemeralKeyHex = receipt.ephemeral_key;
+                console.log("ephemeralKey", ephemeralKeyHex);
+                console.log("Rs", config.stealthConfig.Rs);
+                const ephemeralKeySliced = ephemeralKeyHex.slice(2);
+                const ephemeralKey = ephemeralKeySliced.replace('e', '.');
+                const viewTagHex = receipt.view_tag;
+                console.log("viewTag", viewTagHex);
+                console.log("ViewTags", config.stealthConfig.ViewTags);
+                const viewTag = viewTagHex.slice(2);
+                const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(config.stealthConfig.recipientk!, config.stealthConfig.recipientv!, [config.stealthConfig.senderR], [viewTag]);
+                const addressDefined = address || config.stealthConfig.transferAddress;
+                const amountDefined = amount || 10;
+                console.log("address", addressDefined);
+                console.log("amount", amountDefined);
+                console.log("privKey", receiveScanInfo[0].privKey);
+                const tx = await app.blockchainService.transferEth(addressDefined, amountDefined.toString(), receiveScanInfo[0].privKey);
 
-                const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(process.env.k!, process.env.v!, [ephemeralKey], [viewTag]);
-
-                const tx = await app.blockchainService.transferEth(address, amount.toString(), receiveScanInfo[0].privKey);
+                console.log("tx", tx);
 
                 sendResponseOK(res, 'Success')
             } catch (err) {

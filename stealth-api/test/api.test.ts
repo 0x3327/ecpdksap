@@ -16,9 +16,6 @@ let ganacheServer: Server
 
 let config: Config;
 
-// const TIME_IN_SECONDS = 15 * 1000
-// setTimeout(TIME_IN_SECONDS)
-
 describe('API routes test', () => {
     beforeAll(async () => {
         config = configLoader.load('test');
@@ -101,15 +98,29 @@ describe('API routes test', () => {
 
     test('Check received funds', async () => {
         console.log("----------------------- CHECK-RECEIVED ------------------------");
-        // await (new Promise((resolve, reject) => setTimeout(resolve, 10000)));
-        const res = await axiosInstance.get('/check-received');
-        console.log(res);
-    },10000);
+        try {
+            const res = await axiosInstance.get('/check-received');
+            // console.log("res check-received", res);
 
-    test.skip('Transfer funds', async () => {
-        const res = await axiosInstance.get('transfer');
-        console.log(res);
-    });
+            // Wait for Announcement event ???
+            // await (new Promise((resolve, reject) => setTimeout(resolve, 20000)));
+        } catch(err) {
+            console.log(err);
+            expect(true).toBe(false);
+        }
+    }, 30000);
+
+    test('Transfer funds', async () => {
+        console.log("----------------------- TRANSFER ------------------------");
+        try {
+            const res = await axiosInstance.get('/transfer/1');
+            console.log("res transfer", res);
+            // await (new Promise((resolve, reject) => setTimeout(resolve, 20000))); ???
+        } catch (err) {
+            console.log(err);
+            expect(true).toBe(false);
+        }
+    }, 30000);
 
     afterAll(async () => {
         try {

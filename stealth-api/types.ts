@@ -39,4 +39,5 @@ export type StealthConfig = {
     recipientV: string,
     Rs: string[],
     ViewTags: string[],
+    transferAddress: string,
 }
