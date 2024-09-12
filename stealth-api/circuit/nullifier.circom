@@ -7,12 +7,14 @@ template NullifierMaker () {
     signal input publicVar;
     signal input hashName;
     signal input pid;
+    signal input privKey;
     signal output nullifier;
     
-    component hash = Poseidon(3);
+    component hash = Poseidon(4);
     hash.inputs[0] <== hashName;
     hash.inputs[1] <== pid;
-    hash.inputs[2] <== publicVar;
+    hash.inputs[2] <== privKey;
+    hash.inputs[3] <== publicVar;
     
     nullifier <== hash.out;
 

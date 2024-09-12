@@ -36,6 +36,7 @@ template inclusionProof (levels) {
     null.publicVar <== publicVar;
     null.hashName <== hashName;
     null.pid <== pid;
+    null.privKey <== privKey;
 
     nullifier <== null.nullifier;
 
