@@ -218,6 +218,16 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             }
         }
     },
+    {
+        method: 'POST',
+        path: '/register-account',
+        handler: (req: Request, res: Response) => {
+            // TODO:
+            //  - Generate private and public keys for the user
+            //  - Forward the request to regulatory body with the necessary data
+            //  - Extract Merkle proof from the regulatory body's response
+        }
+    },
 ];
 
 export default routeHandlers;
