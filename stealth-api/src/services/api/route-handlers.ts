@@ -154,16 +154,6 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                             // amount: balance,
                         }
                     });
-                    // console.log("nasao u db rec tx", res_rec);
-                    // await app.db.models.receivedTransactions.create({
-                    //     transaction_hash: res[0].transaction_hash,
-                    //     block_number: res[0].block_number,
-                    //     amount: balance,
-                    //     stealth_address: (newReceipts[0] as any).address,
-                    //     ephemeral_key: res[0].ephemeral_key,
-                    //     view_tag: config.stealthConfig.ViewTags[0],
-                    // });
-                    // console.log("dodao u db received tx");
                     allReceipts = [...existingReceipts, newReceipts[0]];
                 } else {
                     allReceipts = existingReceipts;
@@ -194,20 +184,49 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 const goHandler = app.goHandler;
 
                 const ephemeralKeyHex = receipt.ephemeral_key;
-                console.log("ephemeralKey", ephemeralKeyHex);
-                console.log("Rs", config.stealthConfig.Rs);
                 const ephemeralKeySliced = ephemeralKeyHex.slice(2);
                 const ephemeralKey = ephemeralKeySliced.replace('e', '.');
                 const viewTagHex = receipt.view_tag;
-                console.log("viewTag", viewTagHex);
-                console.log("ViewTags", config.stealthConfig.ViewTags);
                 const viewTag = viewTagHex.slice(2);
                 const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(config.stealthConfig.recipientk!, config.stealthConfig.recipientv!, [config.stealthConfig.senderR], [viewTag]);
                 const addressDefined = address || config.stealthConfig.transferAddress;
                 const amountDefined = amount || 10;
-                console.log("address", addressDefined);
-                console.log("amount", amountDefined);
-                console.log("privKey", receiveScanInfo[0].privKey);
+                const tx = await app.blockchainService.transferEth(addressDefined, amountDefined.toString(), receiveScanInfo[0].privKey);
+
+                console.log("tx", tx);
+
+                sendResponseOK(res, 'Success')
+            } catch (err) {
+                sendResponseBadRequest(res, `Transfer failed: ${(err as Error).message}`, null);
+            }
+        }
+    },
+    {
+        method: 'GET',
+        path: '/register',
+        handler: async (req: Request, res: Response) => {
+            const receiptId: number = parseInt(req.params.receiptId);
+            const { 
+                address,
+                amount,
+            } = req.body as TransferReceivedFundsRequest;
+
+            try {
+                const receipt = await app.db.models.receivedTransactions.findByPk(receiptId);
+                if (!receipt) {
+                    return sendResponseBadRequest(res, 'Receipt not found', null);
+                }
+
+                const goHandler = app.goHandler;
+
+                const ephemeralKeyHex = receipt.ephemeral_key;
+                const ephemeralKeySliced = ephemeralKeyHex.slice(2);
+                const ephemeralKey = ephemeralKeySliced.replace('e', '.');
+                const viewTagHex = receipt.view_tag;
+                const viewTag = viewTagHex.slice(2);
+                const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(config.stealthConfig.recipientk!, config.stealthConfig.recipientv!, [config.stealthConfig.senderR], [viewTag]);
+                const addressDefined = address || config.stealthConfig.transferAddress;
+                const amountDefined = amount || 10;
                 const tx = await app.blockchainService.transferEth(addressDefined, amountDefined.toString(), receiveScanInfo[0].privKey);
 
                 console.log("tx", tx);

@@ -122,6 +122,18 @@ describe('API routes test', () => {
         }
     }, 30000);
 
+    test('Register', async () => {
+        console.log("----------------------- TRANSFER ------------------------");
+        try {
+            const res = await axiosInstance.get('/transfer/1');
+            console.log("res transfer", res);
+            // await (new Promise((resolve, reject) => setTimeout(resolve, 20000))); ???
+        } catch (err) {
+            console.log(err);
+            expect(true).toBe(false);
+        }
+    }, 30000);
+
     afterAll(async () => {
         try {
             await app.stop()
