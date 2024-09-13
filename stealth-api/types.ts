@@ -31,13 +31,6 @@ export type BlockchainConfig = {
 }
 
 export type StealthConfig = {
-    senderRandomness: string,
-    senderR: string,
-    recipientk: string,
-    recipientK: string,
-    recipientv: string,
-    recipientV: string,
-    Rs: string[],
-    ViewTags: string[],
-    transferAddress: string,
+    k: string,
+    v: string,
 }

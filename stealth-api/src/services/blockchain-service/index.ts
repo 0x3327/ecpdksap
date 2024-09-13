@@ -64,9 +64,9 @@ class BlockchainService {
         }
     }
 
-    public async registerMetaAddress(id: string, metaAddress: string) {
+    public async registerMetaAddress(id: string, K: string, V: string) {
         try {
-            const metaAddressBytes = ethers.toUtf8Bytes(metaAddress);
+            const metaAddressBytes = `0x${Buffer.from(K + '|' + V, 'ascii').toString('hex')}`
 
             const tx = await this.contracts.metaAddressRegistry.registerMetaAddress(id, metaAddressBytes, {
                 value: ethers.parseEther('0.00001')
@@ -85,7 +85,11 @@ class BlockchainService {
         try {
             const metaAddress = await this.contracts.metaAddressRegistry.resolve(id);
             this.logger.info('Meta address resolved:', ethers.toUtf8String(metaAddress));
-            return ethers.toUtf8String(metaAddress);
+            const rawMetaAddress = Buffer.from(metaAddress, 'hex').toString('ascii').split('|');
+            return {
+                K: rawMetaAddress[0],
+                V: rawMetaAddress[1],
+            }
         } catch (error) {
             this.logger.error('Error resolving meta address:', error);
         }
@@ -142,25 +146,35 @@ class BlockchainService {
         this.contracts.announcer.on('Announcement', async (...parameters) => {
             const [schemaId, stealthAddress, sender, R, viewTag, event] = parameters;
             // console.log('Announcement received:', schemaId, stealthAddress, sender, ethers.hexlify(R), ethers.hexlify(viewTag))
-            const [K, V] = Buffer.from(R.slice(2, R.length), 'hex').toString('ascii').split('.');
 
             const amount = await this.provider.getBalance(stealthAddress);
             // console.log(event);
 
-            // this.app.goHandler.receiveScan(
+            const matched = await this.app.goHandler.receiveScan(
+                this.app.config.stealthConfig.k, 
+                this.app.config.stealthConfig.v,
+                [R],
+                [viewTag]
+            );
 
-            // )
+            if (matched.length === 0) {
+                return;
+            }
 
             this.logger.info('Announcement received:', schemaId, stealthAddress, sender, ethers.hexlify(R), ethers.hexlify(viewTag));
-            await this.app.db.models.receivedTransactions.create({
-                transaction_hash: event.log.transactionHash,
-                block_number: event.log.blockNumber,
-                amount,
-                ephemeral_key: R,
-                view_tag: viewTag,
-                stealth_address: stealthAddress,
-            });
-            console.log('Announcement saved');
+            const computedAddress = matched[0].address;
+            
+            if (computedAddress === stealthAddress) {    
+                await this.app.db.models.receivedTransactions.create({
+                    transaction_hash: event.log.transactionHash,
+                    block_number: event.log.blockNumber,
+                    amount,
+                    ephemeral_key: R,
+                    view_tag: viewTag,
+                    stealth_address: stealthAddress,
+                });
+                console.log('Announcement saved');
+            }
         });
 
         this.logger.info('Listening for Announcement event...');
