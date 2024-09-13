@@ -7,6 +7,8 @@ import { Op } from 'sequelize';
 import { Info, ReceiveScanInfo, SendInfo } from '../../types';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import configLoader from '../../../utils/config-loader';
+import { ethers } from 'ethers';
 
 dotenv.config({ path: `.env.development` });
 
@@ -34,12 +36,28 @@ const sendResponseBadRequest = (res: Response, message: string, data?: any) => {
     sendResponse(res, 400, message, data);
 };
 
+const config = configLoader.load('test');
+
 const routeHandlers = (app: App): RouteHandlerConfig[] => [
     {
         method: 'GET',
         path: '/',
         handler: (req: Request, res: Response) => {
             sendResponseOK(res, 'Service running', { timestamp: Date.now()});
+        }
+    },
+    {
+        method: 'POST',
+        path: '/register-address',
+        handler: async (req: Request, res: Response) => {
+            const { id, K, V } = req.body;
+
+            try {
+                await app.blockchainService.registerMetaAddress(id, K, V);
+                sendResponseBadRequest(res, 'Meta address registered', { id });
+            } catch (err: any) {
+                sendResponseBadRequest(res, err.message, { timestamp: Date.now()});
+            }
         }
     },
     {
@@ -75,8 +93,6 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             const goHandler = app.goHandler;
 
-            const senderRandomness = crypto.randomBytes(32).toString('hex');
-
             let recK, recV;
 
             if (recipientIdType !== 'meta_address') {
@@ -91,7 +107,8 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             }
 
             try {
-                const sendInfo: SendInfo = await goHandler.send(senderRandomness!, recK!, recV!);
+                const senderRandomness = crypto.randomBytes(32).toString('hex');
+                const sendInfo: SendInfo = await goHandler.send(senderRandomness, recK!, recV!);
 
                 let receipt;
 
@@ -100,7 +117,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 } else {
                     receipt = await app.blockchainService.ethSentWithoutProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, amount.toString());
                 }
-s
+
                 await app.db.models.sentTransactions.create({
                     transaction_hash: receipt.hash,
                     block_number: receipt.blockNumber,
@@ -112,7 +129,6 @@ s
                     recipient_stealth_address: sendInfo.address,
                     ephemeral_key: sendInfo.pubKey,
                 })
-
 
                 app.loggerService.logger.info(`Sending ${amount} to stealth address: ${sendInfo.address}`);
 
@@ -149,45 +165,16 @@ s
                 return sendResponseBadRequest(res, 'Invalid block numbers', null);
             }
 
-            const goHandler = app.goHandler;
-
-            const senderInfo = await goHandler.genSenderInfo();
-            const recipientInfo = await goHandler.genRecipientInfo();
-
             try {
-                let allReceipts: any[] = [];
-
-                const existingReceipts = await app.db.models.receivedTransactions.findAll({
-                    where: { block_number: {
-                        [Op.between]: [fromBlockNumber, toBlockNumber]
+                const receipts = await app.db.models.receivedTransactions.findAll({
+                    where: { 
+                        block_number: {
+                            [Op.between]: [fromBlockNumber, toBlockNumber]
+                        }
                     }
-                }
                 });
 
-                const newReceipt = await goHandler.receiveScan(recipientInfo.k, recipientInfo.v, [senderInfo.R], [senderInfo.viewTag]);
-
-                const balance = await app.blockchainService.getBalance((newReceipt as any).address);
-                if (balance > 0) {
-                    const res = await app.db.models.sentTransactions.findAll({
-                        where: {
-                            recipient_stealth_address: (newReceipt as any).address,
-                            amount: balance,
-                        }
-                    });
-                    await app.db.models.receivedTransactions.create({
-                        transaction_hash: res[0].transaction_hash,
-                        block_number: res[0].block_number,
-                        amount: balance,
-                        stealth_address: (newReceipt as any).address,
-                        ephemeral_key: res[0].ephemeral_key,
-                        view_tag: res[0].view_tag,
-                    });
-                    allReceipts = [...existingReceipts, newReceipt];
-                } else {
-                    allReceipts = existingReceipts;
-                }
-
-                sendResponseOK(res, 'Success', { receipts: allReceipts });
+                sendResponseOK(res, 'Success', { receipts });
             } catch (err) {
                 sendResponseBadRequest(res, `Request failed: ${(err as Error).message}`, null);
             }
@@ -204,21 +191,18 @@ s
             } = req.body as TransferReceivedFundsRequest;
 
             try {
-                const receipt = await app.db.models.receivedTransactions.findByPk({
-                    id: receiptId
-                });
+                const receipt = await app.db.models.receivedTransactions.findByPk(receiptId);
                 if (!receipt) {
                     return sendResponseBadRequest(res, 'Receipt not found', null);
                 }
 
                 const goHandler = app.goHandler;
+                const { k, v } = app.config.stealthConfig;
+                const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(k, v, [receipt.ephemeral_key], [receipt.viewTag]);
+                
+                const tx = await app.blockchainService.transferEth(address, ethers.parseEther(amount.toString()).toString(), receiveScanInfo[0].privKey);
 
-                const ephemeralKey = receipt.ephemeral_key;
-                const viewTag = receipt.view_tag;
-
-                const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(process.env.k!, process.env.v!, [ephemeralKey], [viewTag]);
-
-                const tx = await app.blockchainService.transferEth(address, amount.toString(), receiveScanInfo[0].privKey);
+                console.log("tx", tx);
 
                 sendResponseOK(res, 'Success')
             } catch (err) {

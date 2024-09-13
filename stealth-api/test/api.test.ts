@@ -1,10 +1,10 @@
 import { describe, expect, test } from '@jest/globals';
 import App from '../src/app';
-import { after, before } from 'node:test';
 import configLoader from '../utils/config-loader';
 import axios, { AxiosInstance } from 'axios';
 import { deployContracts } from './ganache-deployment';
 import { Server } from 'ganache';
+import { Config } from '../types';
 
 // Application object
 let app: App;
@@ -14,9 +14,11 @@ let axiosInstance: AxiosInstance;
 
 let ganacheServer: Server
 
+let config: Config;
+
 describe('API routes test', () => {
     beforeAll(async () => {
-        const config = configLoader.load('test');
+        config = configLoader.load('test');
         
         const {
             deployedContracts,
@@ -63,8 +65,14 @@ describe('API routes test', () => {
     })
 
     test('Send stealth transaction via Proxy', async () => {
+        console.log("----------------------- SEND ------------------------");
         try {
             const recipientInfo = await app.goHandler.genRecipientInfo();
+
+            config.stealthConfig.recipientk = recipientInfo.k;
+            config.stealthConfig.recipientv = recipientInfo.v;
+            config.stealthConfig.recipientK = recipientInfo.K;
+            config.stealthConfig.recipientV = recipientInfo.V;
             
             const payload = {
                 recipientIdType: 'meta_address',
@@ -77,21 +85,42 @@ describe('API routes test', () => {
             const res = await axiosInstance.post('/send', payload);
 
             // TODO: Check response
+            // console.log(res);
 
             // Wait for Announcement event
             await (new Promise((resolve, reject) => setTimeout(resolve, 5000)));
 
-            
         } catch (err) {
             console.log(err);
             expect(true).toBe(false);
         }   
     }, 30000);
 
-    test.skip('Check received funds', async () => {
-        const res = await axiosInstance.get('/check-received');
-        console.log(res);
-    });
+    test('Check received funds', async () => {
+        console.log("----------------------- CHECK-RECEIVED ------------------------");
+        try {
+            const res = await axiosInstance.get('/check-received');
+            // console.log("res check-received", res);
+
+            // Wait for Announcement event ???
+            // await (new Promise((resolve, reject) => setTimeout(resolve, 20000)));
+        } catch(err) {
+            console.log(err);
+            expect(true).toBe(false);
+        }
+    }, 30000);
+
+    test('Transfer funds', async () => {
+        console.log("----------------------- TRANSFER ------------------------");
+        try {
+            const res = await axiosInstance.get('/transfer/1');
+            console.log("res transfer", res);
+            // await (new Promise((resolve, reject) => setTimeout(resolve, 20000))); ???
+        } catch (err) {
+            console.log(err);
+            expect(true).toBe(false);
+        }
+    }, 30000);
 
     afterAll(async () => {
         try {

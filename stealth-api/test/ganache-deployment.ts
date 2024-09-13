@@ -4,6 +4,8 @@ import { ContractFactory, ethers } from 'ethers';
 import anouncerArtifacts from "../artifacts/contracts/src/ECPDKSAP_Announcer.sol/ECPDKSAP_Announcer.json";
 import metaAddressArtifacts from "../artifacts/contracts/src/ECPDKSAP_MetaAddressRegistry.sol/ECPDKSAP_MetaAddressRegistry.json";
 import erc5564AnnouncerArtifacts from "../artifacts/contracts/src/ERC5564Announcer.sol/ERC5564Announcer.json";
+import { Config } from "../types";
+import configLoader from "../utils/config-loader";
 
 type BlockchainParams = {
   ganacheServer: Server,
@@ -13,6 +15,8 @@ type BlockchainParams = {
     metaAddress: string;
   };
 };
+
+let config: Config = configLoader.load('test');
 
 export async function deployContracts(): Promise<BlockchainParams> {
   return new Promise((resolve, reject) => {
@@ -30,6 +34,7 @@ export async function deployContracts(): Promise<BlockchainParams> {
 
         const wallet = ethers.Wallet.fromPhrase(mnemonic);
         const account = wallet.connect(provider);
+        config.stealthConfig.transferAddress = wallet.address;
 
         const erc5564AnnouncerFactory = new ContractFactory(erc5564AnnouncerArtifacts.abi, erc5564AnnouncerArtifacts.bytecode, account);
         const announcerFactory = new ContractFactory(anouncerArtifacts.abi, anouncerArtifacts.bytecode, account);

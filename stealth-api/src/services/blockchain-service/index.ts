@@ -146,25 +146,35 @@ class BlockchainService {
         this.contracts.announcer.on('Announcement', async (...parameters) => {
             const [schemaId, stealthAddress, sender, R, viewTag, event] = parameters;
             // console.log('Announcement received:', schemaId, stealthAddress, sender, ethers.hexlify(R), ethers.hexlify(viewTag))
-            const [K, V] = Buffer.from(R.slice(2, R.length), 'hex').toString('ascii').split('.');
 
             const amount = await this.provider.getBalance(stealthAddress);
-            console.log(event);
+            // console.log(event);
 
-            // this.app.goHandler.receiveScan(
+            const matched = await this.app.goHandler.receiveScan(
+                this.app.config.stealthConfig.k, 
+                this.app.config.stealthConfig.v,
+                [R],
+                [viewTag]
+            );
 
-            // )
+            if (matched.length === 0) {
+                return;
+            }
 
             this.logger.info('Announcement received:', schemaId, stealthAddress, sender, ethers.hexlify(R), ethers.hexlify(viewTag));
-            await this.app.db.models.receivedTransactions.create({
-                transaction_hash: event.log.transactionHash,
-                block_number: event.log.blockNumber,
-                amount,
-                ephemeral_key: R,
-                view_tag: viewTag,
-                stealth_address: stealthAddress,
-            });
-            console.log('Announcement saved');
+            const computedAddress = matched[0].address;
+            
+            if (computedAddress === stealthAddress) {    
+                await this.app.db.models.receivedTransactions.create({
+                    transaction_hash: event.log.transactionHash,
+                    block_number: event.log.blockNumber,
+                    amount,
+                    ephemeral_key: R,
+                    view_tag: viewTag,
+                    stealth_address: stealthAddress,
+                });
+                console.log('Announcement saved');
+            }
         });
 
         this.logger.info('Listening for Announcement event...');

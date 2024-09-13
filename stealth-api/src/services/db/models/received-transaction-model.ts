@@ -29,7 +29,7 @@ export const init = (sequelize: Sequelize) => sequelize.define<Model>('received_
     },
     view_tag: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     }
 }, {
     timestamps: false

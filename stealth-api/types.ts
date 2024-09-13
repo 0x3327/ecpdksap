@@ -3,6 +3,7 @@ export type Config = {
     apiConfig: ApiConfig;
     dbConfig: DbConfig;
     blockchainConfig: BlockchainConfig;
+    stealthConfig: StealthConfig;
 }
 
 export type ApiConfig = {
@@ -27,4 +28,9 @@ export type BlockchainConfig = {
         metaAddress: string,
     }, 
     infuraApiKey?: string
+}
+
+export type StealthConfig = {
+    k: string,
+    v: string,
 }
