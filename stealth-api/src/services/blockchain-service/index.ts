@@ -64,9 +64,9 @@ class BlockchainService {
         }
     }
 
-    public async registerMetaAddress(id: string, metaAddress: string) {
+    public async registerMetaAddress(id: string, K: string, V: string) {
         try {
-            const metaAddressBytes = ethers.toUtf8Bytes(metaAddress);
+            const metaAddressBytes = `0x${Buffer.from(K + '|' + V, 'ascii').toString('hex')}`
 
             const tx = await this.contracts.metaAddressRegistry.registerMetaAddress(id, metaAddressBytes, {
                 value: ethers.parseEther('0.00001')
@@ -85,7 +85,11 @@ class BlockchainService {
         try {
             const metaAddress = await this.contracts.metaAddressRegistry.resolve(id);
             this.logger.info('Meta address resolved:', ethers.toUtf8String(metaAddress));
-            return ethers.toUtf8String(metaAddress);
+            const rawMetaAddress = Buffer.from(metaAddress, 'hex').toString('ascii').split('|');
+            return {
+                K: rawMetaAddress[0],
+                V: rawMetaAddress[1],
+            }
         } catch (error) {
             this.logger.error('Error resolving meta address:', error);
         }

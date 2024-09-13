@@ -1,7 +1,6 @@
 export type SendFundsRequest = {
-    recipientIdType: 'eth_ens' | 'address' | 'meta_address',
-    ens?: string,
-    address?: string,
+    recipientIdType: 'id' | 'eth_ens' | 'address' | 'meta_address',
+    id?: string,
     recipientK?: string,
     recipientV?: string,
     amount: number,

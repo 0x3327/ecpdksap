@@ -44,19 +44,32 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
     },
     {
         method: 'POST',
+        path: '/register-address',
+        handler: async (req: Request, res: Response) => {
+            const { id, K, V } = req.body;
+
+            try {
+                await app.blockchainService.registerMetaAddress(id, K, V);
+                sendResponseBadRequest(res, 'Meta address registered', { id });
+            } catch (err: any) {
+                sendResponseBadRequest(res, err.message, { timestamp: Date.now()});
+            }
+        }
+    },
+    {
+        method: 'POST',
         path: '/send',
         handler: async (req: Request, res: Response) => {
             const { 
                 recipientIdType,
-                ens,
-                address,
+                id,
                 recipientK,
                 recipientV,
                 amount,
                 withProxy
             } = (req.body as SendFundsRequest);
 
-            if (typeof amount !== 'number' || (address != null && typeof address !== 'string') || (ens != null && typeof ens !== 'string')) {
+            if (typeof amount !== 'number' || (id != null && typeof id !== 'string')) {
                 return sendResponseBadRequest(res, 'Invalid request body', null);
             }
 
@@ -64,8 +77,21 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             const senderRandomness = crypto.randomBytes(32).toString('hex');
 
+            let recK, recV;
+
+            if (recipientIdType !== 'meta_address') {
+                recK = recipientK;
+                recV = recipientV;
+            } else {
+                const resolved = await app.blockchainService.resolveMetaAddress(id!)
+                const { K: resolvedK, V: resolvedV } = resolved!;
+
+                recK = resolvedK;
+                recV = resolvedV;
+            }
+
             try {
-                const sendInfo: SendInfo = await goHandler.send(senderRandomness!, recipientK!, recipientV!);
+                const sendInfo: SendInfo = await goHandler.send(senderRandomness!, recK!, recV!);
 
                 let receipt;
 
@@ -74,12 +100,12 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 } else {
                     receipt = await app.blockchainService.ethSentWithoutProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, amount.toString());
                 }
-
+s
                 await app.db.models.sentTransactions.create({
                     transaction_hash: receipt.hash,
                     block_number: receipt.blockNumber,
                     amount: amount,
-                    recipient_identifier: recipientIdType === 'eth_ens' ? ens : address,
+                    recipient_identifier: recipientIdType === 'meta_address' ? id : 'meta',
                     recipient_identifier_type: recipientIdType,
                     recipient_k: recipientK,
                     recipient_v: recipientV,
