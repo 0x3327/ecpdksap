@@ -62,30 +62,44 @@ describe('API routes test', () => {
             console.log(err);
             expect(true).toBe(false);
         }    
-    })
+    });
+
+    test('Register', async () => {
+        console.log("----------------------- REGISTER ------------------------");
+        try {
+            const recipientInfo = await app.goHandler.genRecipientInfo();
+            config.stealthConfig.k = recipientInfo.k;
+            config.stealthConfig.v = recipientInfo.v;
+
+            const payload = {
+                id: 'Mihailo',
+                K: recipientInfo.K,
+                V: recipientInfo.V,
+            };
+
+            const res = await axiosInstance.post('/register-address', payload);
+            // console.log("res register", res);
+
+            // Wait for MetaAddressRegistry event
+            await (new Promise((resolve, reject) => setTimeout(resolve, 5000)));
+        } catch (err) {
+            console.log(err);
+            expect(true).toBe(false);
+        }
+    }, 10000);
 
     test('Send stealth transaction via Proxy', async () => {
         console.log("----------------------- SEND ------------------------");
         try {
-            const recipientInfo = await app.goHandler.genRecipientInfo();
-
-            config.stealthConfig.recipientk = recipientInfo.k;
-            config.stealthConfig.recipientv = recipientInfo.v;
-            config.stealthConfig.recipientK = recipientInfo.K;
-            config.stealthConfig.recipientV = recipientInfo.V;
-            
             const payload = {
-                recipientIdType: 'meta_address',
-                recipientK: recipientInfo.K,
-                recipientV: recipientInfo.V,
+                recipientIdType: 'eth_ens',
+                id: 'Mihailo', 
                 amount: 10,
                 withProxy: true,
             }
 
             const res = await axiosInstance.post('/send', payload);
-
-            // TODO: Check response
-            // console.log(res);
+            // console.log("res send", res);
 
             // Wait for Announcement event
             await (new Promise((resolve, reject) => setTimeout(resolve, 5000)));
@@ -94,50 +108,34 @@ describe('API routes test', () => {
             console.log(err);
             expect(true).toBe(false);
         }   
-    }, 30000);
+    }, 10000);
 
     test('Check received funds', async () => {
         console.log("----------------------- CHECK-RECEIVED ------------------------");
         try {
             const res = await axiosInstance.get('/check-received');
             // console.log("res check-received", res);
-
-            // Wait for Announcement event ???
-            // await (new Promise((resolve, reject) => setTimeout(resolve, 20000)));
         } catch(err) {
             console.log(err);
             expect(true).toBe(false);
         }
-    }, 30000);
+    });
 
     test('Transfer funds', async () => {
         console.log("----------------------- TRANSFER ------------------------");
         try {
             const res = await axiosInstance.get('/transfer/1');
-            console.log("res transfer", res);
-            // await (new Promise((resolve, reject) => setTimeout(resolve, 20000))); ???
+            // console.log("res transfer", res);
         } catch (err) {
             console.log(err);
             expect(true).toBe(false);
         }
-    }, 30000);
-
-    test('Register', async () => {
-        console.log("----------------------- TRANSFER ------------------------");
-        try {
-            const res = await axiosInstance.get('/transfer/1');
-            console.log("res transfer", res);
-            // await (new Promise((resolve, reject) => setTimeout(resolve, 20000))); ???
-        } catch (err) {
-            console.log(err);
-            expect(true).toBe(false);
-        }
-    }, 30000);
+    }, 10000);
 
     afterAll(async () => {
         try {
             await app.stop()
             await ganacheServer.close();
         } catch (err) {}
-    })
+    }, 50000)
 });

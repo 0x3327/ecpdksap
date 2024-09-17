@@ -33,4 +33,5 @@ export type BlockchainConfig = {
 export type StealthConfig = {
     k: string,
     v: string,
+    transferAddress: string,
 }

@@ -35,17 +35,18 @@ export async function deployContracts(): Promise<BlockchainParams> {
         const wallet = ethers.Wallet.fromPhrase(mnemonic);
         const account = wallet.connect(provider);
         config.stealthConfig.transferAddress = wallet.address;
+        console.log("transferAddress deploy", config.stealthConfig.transferAddress);
 
         const erc5564AnnouncerFactory = new ContractFactory(erc5564AnnouncerArtifacts.abi, erc5564AnnouncerArtifacts.bytecode, account);
         const announcerFactory = new ContractFactory(anouncerArtifacts.abi, anouncerArtifacts.bytecode, account);
         const metaAddressFactory = new ContractFactory(metaAddressArtifacts.abi, metaAddressArtifacts.bytecode, account);
 
         console.log('Deploying meta address contract...');
-        const metaAddress = (await (await metaAddressFactory.deploy()).waitForDeployment());
+        const metaAddress = (await (await metaAddressFactory.deploy({nonce: 0})).waitForDeployment());
         console.log('Deploying ERC5564 Announcer contract...');
-        const erc5564Announcer = (await (await erc5564AnnouncerFactory.deploy()).waitForDeployment());
+        const erc5564Announcer = (await (await erc5564AnnouncerFactory.deploy({nonce: 1})).waitForDeployment());
         console.log('Deploying ECPDKSAP Announcer contract...');
-        const announcer = (await (await announcerFactory.deploy(await erc5564Announcer.getAddress())).waitForDeployment());
+        const announcer = (await (await announcerFactory.deploy(await erc5564Announcer.getAddress(), {nonce: 2})).waitForDeployment());
 
         console.log('Contracts deployed.')
         console.log('erc5564Announcer:', await erc5564Announcer.getAddress());

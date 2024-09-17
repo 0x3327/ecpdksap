@@ -22,12 +22,8 @@ const configLoader = {
 
         const logging = process.env.LOGGING === 'true';
         
-        const senderRandomness = process.env.SENDER_r!;
-        const senderR = process.env.SENDER_R!;
-        const k = process.env.PRIVATE_K!;
-        const v = process.env.PRIVATE_V!;
-        const Rs = process.env.RS ? process.env.RS.split(';') : [];
-        const ViewTags = process.env.VIEW_TAG ? process.env.VIEW_TAG.split(';') : [];
+        const k = process.env.RECIPIENT_k!;
+        const v = process.env.RECIPIENT_v!;
         const transferAddress = process.env.TRANSFER_ADDRESS!;
 
         const config: Config = {
@@ -55,6 +51,7 @@ const configLoader = {
             stealthConfig:  {
                 k,
                 v,
+                transferAddress,
             }
         };
 
