@@ -185,10 +185,10 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(k, v, [receipt.ephemeral_key], [receipt.view_tag]);
                 
                 const transferAddress = address || config.stealthConfig.transferAddress;
-                const transferAmount = amount || 10;
+                const transferAmount = amount || 0.001;
                 const tx = await app.blockchainService.transferEth(transferAddress, transferAmount.toString(), receiveScanInfo[0].privKey);
 
-                console.log("tx", tx);
+                // console.log("tx", tx);
 
                 sendResponseOK(res, 'Success')
             } catch (err) {

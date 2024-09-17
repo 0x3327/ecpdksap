@@ -35,7 +35,6 @@ export async function deployContracts(): Promise<BlockchainParams> {
         const wallet = ethers.Wallet.fromPhrase(mnemonic);
         const account = wallet.connect(provider);
         config.stealthConfig.transferAddress = wallet.address;
-        console.log("transferAddress deploy", config.stealthConfig.transferAddress);
 
         const erc5564AnnouncerFactory = new ContractFactory(erc5564AnnouncerArtifacts.abi, erc5564AnnouncerArtifacts.bytecode, account);
         const announcerFactory = new ContractFactory(anouncerArtifacts.abi, anouncerArtifacts.bytecode, account);

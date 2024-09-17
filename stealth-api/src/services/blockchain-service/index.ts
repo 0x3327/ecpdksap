@@ -187,17 +187,14 @@ class BlockchainService {
 
     public async transferEth(address: string, amount: string, privKey: string) {
         const signer = new ethers.Wallet(privKey, this.provider);
-        console.log('signer', signer);
         try {
             const tx = await signer.sendTransaction({
                 to: address,
                 value: ethers.parseEther(amount)
             });
-            console.log("prosao sendTransaction");
             this.logger.info('Transfer ETH, transaction sent:', tx.hash);
 
             const receipt = await tx.wait();
-            console.log("prosao wait");
             return receipt;
         } catch (error) {
             this.logger.error('Error sending ETH:', error);
