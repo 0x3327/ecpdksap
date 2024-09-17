@@ -51,24 +51,9 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
         path: '/register-address',
         handler: async (req: Request, res: Response) => {
             const { id, K, V } = req.body;
-
             try {
                 await app.blockchainService.registerMetaAddress(id, K, V);
-                sendResponseBadRequest(res, 'Meta address registered', { id });
-            } catch (err: any) {
-                sendResponseBadRequest(res, err.message, { timestamp: Date.now()});
-            }
-        }
-    },
-    {
-        method: 'POST',
-        path: '/register-address',
-        handler: async (req: Request, res: Response) => {
-            const { id, K, V } = req.body;
-
-            try {
-                await app.blockchainService.registerMetaAddress(id, K, V);
-                sendResponseBadRequest(res, 'Meta address registered', { id });
+                sendResponseOK(res, 'Meta address registered', { id });
             } catch (err: any) {
                 sendResponseBadRequest(res, err.message, { timestamp: Date.now()});
             }
@@ -95,7 +80,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             let recK, recV;
 
-            if (recipientIdType !== 'meta_address') {
+            if (recipientIdType === 'meta_address') {
                 recK = recipientK;
                 recV = recipientV;
             } else {
@@ -107,15 +92,14 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             }
 
             try {
-                const senderRandomness = crypto.randomBytes(32).toString('hex');
-                const sendInfo: SendInfo = await goHandler.send(senderRandomness, recK!, recV!);
+                const senderInfo = await goHandler.genSenderInfo();
+                const sendInfo: SendInfo = await goHandler.send(senderInfo.r, recK!, recV!);
 
                 let receipt;
-
                 if (withProxy) {
-                    receipt = await app.blockchainService.sendEthViaProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, amount.toString());
+                    receipt = await app.blockchainService.sendEthViaProxy(sendInfo.address, senderInfo.R, sendInfo.viewTag, amount.toString());
                 } else {
-                    receipt = await app.blockchainService.ethSentWithoutProxy(sendInfo.address, sendInfo.pubKey, sendInfo.viewTag, amount.toString());
+                    receipt = await app.blockchainService.ethSentWithoutProxy(sendInfo.address, senderInfo.R, sendInfo.viewTag, amount.toString());
                 }
 
                 await app.db.models.sentTransactions.create({
@@ -124,8 +108,8 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                     amount: amount,
                     recipient_identifier: recipientIdType === 'meta_address' ? id : 'meta',
                     recipient_identifier_type: recipientIdType,
-                    recipient_k: recipientK,
-                    recipient_v: recipientV,
+                    recipient_k: recK,
+                    recipient_v: recV,
                     recipient_stealth_address: sendInfo.address,
                     ephemeral_key: sendInfo.pubKey,
                 })
@@ -158,8 +142,6 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             const fromBlockNumber = parseInt((fromBlock || '0') as string);
             const toBlockNumber = parseInt((toBlock || await app.blockchainService.provider.getBlockNumber()) as string);
-
-            console.log({ fromBlockNumber, toBlockNumber });
 
             if (isNaN(fromBlockNumber) || isNaN(toBlockNumber)) {
                 return sendResponseBadRequest(res, 'Invalid block numbers', null);
@@ -197,10 +179,14 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 }
 
                 const goHandler = app.goHandler;
-                const { k, v } = app.config.stealthConfig;
-                const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(k, v, [receipt.ephemeral_key], [receipt.viewTag]);
+                const k = app.config.stealthConfig.k;
+                const v = app.config.stealthConfig.v;
+
+                const receiveScanInfo: ReceiveScanInfo[] = await goHandler.receiveScan(k, v, [receipt.ephemeral_key], [receipt.view_tag]);
                 
-                const tx = await app.blockchainService.transferEth(address, ethers.parseEther(amount.toString()).toString(), receiveScanInfo[0].privKey);
+                const transferAddress = address || config.stealthConfig.transferAddress;
+                const transferAmount = amount || 10;
+                const tx = await app.blockchainService.transferEth(transferAddress, transferAmount.toString(), receiveScanInfo[0].privKey);
 
                 console.log("tx", tx);
 

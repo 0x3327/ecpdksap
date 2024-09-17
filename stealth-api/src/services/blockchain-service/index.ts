@@ -2,7 +2,7 @@ import { Contract, ethers, Provider, Wallet } from 'ethers';
 import App from '../../app';
 import metaAddressArtifacts from '../../../artifacts/contracts/src/ECPDKSAP_MetaAddressRegistry.sol/ECPDKSAP_MetaAddressRegistry.json';
 import announcerArtifacts from '../../../artifacts/contracts/src/ECPDKSAP_Announcer.sol/ECPDKSAP_Announcer.json';
-import winston from 'winston';
+import winston, { add } from 'winston';
 
 type Contracts = {
     metaAddressRegistry: Contract,
@@ -71,6 +71,7 @@ class BlockchainService {
             const tx = await this.contracts.metaAddressRegistry.registerMetaAddress(id, metaAddressBytes, {
                 value: ethers.parseEther('0.00001')
             });
+
             this.logger.info('Meta address registration, transaction sent:', tx.hash);
             const receipt = await tx.wait();
 
@@ -85,7 +86,9 @@ class BlockchainService {
         try {
             const metaAddress = await this.contracts.metaAddressRegistry.resolve(id);
             this.logger.info('Meta address resolved:', ethers.toUtf8String(metaAddress));
-            const rawMetaAddress = Buffer.from(metaAddress, 'hex').toString('ascii').split('|');
+
+            const metaAddressString = ethers.toUtf8String(metaAddress)
+            const rawMetaAddress = metaAddressString.split('|');
             return {
                 K: rawMetaAddress[0],
                 V: rawMetaAddress[1],
@@ -146,32 +149,34 @@ class BlockchainService {
         this.contracts.announcer.on('Announcement', async (...parameters) => {
             const [schemaId, stealthAddress, sender, R, viewTag, event] = parameters;
             // console.log('Announcement received:', schemaId, stealthAddress, sender, ethers.hexlify(R), ethers.hexlify(viewTag))
+            const cleanedR = R.slice(2);
+            const RGo = Buffer.from(cleanedR, "hex").toString("ascii");
+            const viewTagGo = viewTag.slice(2);
 
             const amount = await this.provider.getBalance(stealthAddress);
             // console.log(event);
-
             const matched = await this.app.goHandler.receiveScan(
-                this.app.config.stealthConfig.k, 
+                this.app.config.stealthConfig.k,
                 this.app.config.stealthConfig.v,
-                [R],
-                [viewTag]
+                [RGo],
+                [viewTagGo]
             );
-
+            
             if (matched.length === 0) {
                 return;
             }
 
             this.logger.info('Announcement received:', schemaId, stealthAddress, sender, ethers.hexlify(R), ethers.hexlify(viewTag));
             const computedAddress = matched[0].address;
-            
-            if (computedAddress === stealthAddress) {    
+
+            if (computedAddress === stealthAddress.toLowerCase()) {   
                 await this.app.db.models.receivedTransactions.create({
                     transaction_hash: event.log.transactionHash,
                     block_number: event.log.blockNumber,
                     amount,
-                    ephemeral_key: R,
-                    view_tag: viewTag,
-                    stealth_address: stealthAddress,
+                    ephemeral_key: RGo,
+                    view_tag: viewTagGo,
+                    stealth_address: computedAddress,
                 });
                 console.log('Announcement saved');
             }
@@ -182,14 +187,17 @@ class BlockchainService {
 
     public async transferEth(address: string, amount: string, privKey: string) {
         const signer = new ethers.Wallet(privKey, this.provider);
+        console.log('signer', signer);
         try {
             const tx = await signer.sendTransaction({
                 to: address,
                 value: ethers.parseEther(amount)
             });
+            console.log("prosao sendTransaction");
             this.logger.info('Transfer ETH, transaction sent:', tx.hash);
 
             const receipt = await tx.wait();
+            console.log("prosao wait");
             return receipt;
         } catch (error) {
             this.logger.error('Error sending ETH:', error);
