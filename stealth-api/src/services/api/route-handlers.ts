@@ -4,10 +4,26 @@ import { SendFundsRequest, TransferReceivedFundsRequest } from './request-types'
 import GoHandler from '../go-service';
 import BlockchainService from '../blockchain-service';
 import { Op } from 'sequelize';
-import { Info, ReceiveScanInfo, SendInfo } from '../../types';
+import { Info, ReceiveScanInfo, SendInfo } from '../../types'; 
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import configLoader from '../../../utils/config-loader';
+import { mulPointEscalar, Base8, Point } from '@zk-kit/baby-jubjub'; 
+
+ 
+const generateKeys = (): { privateKey: bigint, publicKey: Point<bigint> } => { 
+    const privateKey = BigInt('0x' + crypto.randomBytes(32).toString('hex')) % 
+    BigInt("2736030358979909402780800718157159386076813972158567259200215660948447373041"); // Generate random private key 
+    const publicKey = mulPointEscalar(Base8, privateKey); // Compute public key by scalar multiplication 
+    return { privateKey, publicKey }; 
+}; 
+ 
+const { privateKey, publicKey } = generateKeys(); 
+const publicKeyX = publicKey[0].toString(10); 
+const publicKeyY = publicKey[1].toString(10); 
+ 
+console.log("Generated private key:", privateKey.toString(10)); 
+console.log("Generated public key:", publicKeyX, publicKeyY);
 
 dotenv.config({ path: `.env.development` });
 
@@ -222,10 +238,34 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
         method: 'POST',
         path: '/register-account',
         handler: (req: Request, res: Response) => {
-            // TODO:
-            //  - Generate private and public keys for the user
-            //  - Forward the request to regulatory body with the necessary data
-            //  - Extract Merkle proof from the regulatory body's response
+            try {
+                // Generate private and public keys for the user
+                const { privateKey, publicKey } = generateKeys();
+                const publicKeyX = publicKey[0].toString(16);
+                const publicKeyY = publicKey[1].toString(16);
+
+                console.log("Generated private key:", privateKey.toString(16));
+                console.log("Generated public key:", publicKeyX, publicKeyY);
+
+                // Generate necessary data
+                const data = {
+                    name: req.body.name,
+                    pid: req.body.pid, 
+                    publicKeyX: publicKeyX,
+                    publicKeyY: publicKeyY
+                };
+
+                // Forward the request to regulatory body with the necessary data
+                // TODO
+
+                // Extract Merkle proof from the regulatory body's response
+                // TODO
+
+
+            }catch(error){
+                console.error("Error during registration:", error);
+                res.status(500).json({ error: "Registration failed" });
+            }
         }
     },
 ];
