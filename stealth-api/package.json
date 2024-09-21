@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@sequelize/sqlite3": "^7.0.0-alpha.41",
+    "@zk-kit/baby-jubjub": "^1.0.3",
     "assemblyscript": "^0.27.29",
     "axios": "^1.7.7",
     "circomlibjs": "^0.1.7",

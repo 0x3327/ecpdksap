@@ -237,30 +237,36 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
     {
         method: 'POST',
         path: '/register-account',
-        handler: (req: Request, res: Response) => {
+        handler: async (req: Request, res: Response) => {
             try {
                 // Generate private and public keys for the user
                 const { privateKey, publicKey } = generateKeys();
-                const publicKeyX = publicKey[0].toString(16);
-                const publicKeyY = publicKey[1].toString(16);
+                const publicKeyX = publicKey[0];
+                const publicKeyY = publicKey[1];
 
-                console.log("Generated private key:", privateKey.toString(16));
-                console.log("Generated public key:", publicKeyX, publicKeyY);
+                //console.log("Generated private key:", privateKey.toString(16));
+                //console.log("Generated public key:", publicKeyX, publicKeyY);
 
                 // Generate necessary data
                 const data = {
                     name: req.body.name,
                     pid: req.body.pid, 
-                    publicKeyX: publicKeyX,
-                    publicKeyY: publicKeyY
+                    publicKeyX: publicKeyX.toString(),
+                    publicKeyY: publicKeyY.toString()
                 };
 
                 // Forward the request to regulatory body with the necessary data
                 // TODO
-
-                // Extract Merkle proof from the regulatory body's response
-                // TODO
-
+                const response = await fetch("http://localhost:5555/register-user", {
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data),
+                    method: "POST"
+                })
+                const responseData = await response.json();
+                const proofData = responseData["data"];
+                sendResponseOK(res, "Recieved merkle proof", proofData);
 
             }catch(error){
                 console.error("Error during registration:", error);

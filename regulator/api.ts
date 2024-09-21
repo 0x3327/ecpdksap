@@ -43,17 +43,33 @@ class API {
         });
 
         this.server.post('/register-user', (req: Request, res: Response) => {
-            const { name, pid, pub_x, pub_y } = req.body;
+            const { name, pid, publicKeyX, publicKeyY } = req.body;
 
             // TODO: check if the tree is full already
-            let index = this.regulator.registerUser(name, Number(pid), BigInt(pub_x), BigInt(pub_y));
+            let index = this.regulator.registerUser(name, Number(pid), BigInt(publicKeyX), BigInt(publicKeyY));
 
             this.regulator.saveTreeToFile();
 
             let responseData = this.regulator.getProofForUser(index);
-            responseData.push([this.regulator.tree.getRoot().toString()]);
-            // TODO: also add signed merkle root as response
-            sendResponseOK(res, "Handling /register-user", responseData);
+            // TODO: 
+            //      - also add signed merkle root as response
+            //      - send proper json format back
+            
+            let proof = {
+                hashes: [] as {hash: string, index: number }[],
+                root: null,
+                signedRoot: null
+            };
+            for (let i = 0; i < responseData.length; i++) {
+                proof["hashes"].push({ 
+                    hash: responseData[i][0], 
+                    index: responseData[i][1] 
+                });
+            }
+            proof["root"] = this.regulator.tree.getRoot().toString();
+            // console.log("Sending...");
+            // console.log(proof);
+            sendResponseOK(res, "Handling /register-user", proof);
         });
 
         // handling unspecified routes
