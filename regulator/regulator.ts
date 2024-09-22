@@ -169,13 +169,9 @@ class Regulator {
     
             // Add leaves
             treeData.leaves.forEach((leaf: string) => {
-                this.tree?.insert(BigInt('0x' + leaf));
+                if (leaf !== '0')
+                    this.tree?.insert(BigInt('0x' + leaf));
             });
-    
-            // Write parents
-            console.log("Parents:", treeData.parents);
-    
-            console.log(`Merkle tree with parents loaded from ${this.merkleTreeFilePath}`);
         } else {
             console.log(`File ${this.merkleTreeFilePath} does not exist.`);
         }
