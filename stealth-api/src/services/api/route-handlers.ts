@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import App from '../../app';
-import { SendFundsRequest, TransferReceivedFundsRequest } from './request-types';
+import { SendFundsRequest, TransferReceivedFundsRequest, RegisterUser } from './request-types';
 import GoHandler from '../go-service';
 import BlockchainService from '../blockchain-service';
 import { Op } from 'sequelize';
@@ -19,7 +19,7 @@ const generateKeys = (): { privateKey: bigint, publicKey: Point<bigint> } => {
 }; 
  
 const { privateKey, publicKey } = generateKeys(); 
-const publicKeyX = publicKey[0].toString(10); 
+const publicKeyX = publicKey[0].toString(10);  
 const publicKeyY = publicKey[1].toString(10); 
  
 console.log("Generated private key:", privateKey.toString(10)); 
@@ -251,9 +251,20 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 const data = {
                     name: req.body.name,
                     pid: req.body.pid, 
-                    publicKeyX: publicKeyX.toString(),
-                    publicKeyY: publicKeyY.toString()
+                    publicKeyX: publicKeyX.toString(16),
+                    publicKeyY: publicKeyY.toString(16)
                 };
+
+                // Write data in db
+                const userData = {
+                    name: req.body.name,
+                    pid: req.body.pid,
+                    privateKey: privateKey.toString(16),
+                    publicKeyX: publicKeyX.toString(16),
+                    publicKeyY: publicKeyY.toString(16)
+                };
+
+                await app.db.models.registerAccount.create(userData);
 
                 // Forward the request to regulatory body with the necessary data
                 // TODO

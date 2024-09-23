@@ -17,3 +17,11 @@ export type TransferReceivedFundsRequest = {
     address: string,
     amount: number,
 }
+
+export type RegisterUser = {
+    pid: number,
+    name: string,
+    privateKey: string,
+    publicKeyX: string,
+    publicKeyY: string,
+}

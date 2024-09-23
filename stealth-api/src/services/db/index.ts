@@ -2,6 +2,8 @@ import { DbConfig } from "../../../types";
 import { Sequelize }  from 'sequelize-typescript';
 import { init as receivedTransactionsModelInit } from "./models/received-transaction-model";
 import { init as sentTransactionsModelInit } from "./models/sent-transaction-model";
+import { init as registerAccountModelInit } from "./models/register-account-model";
+
 
 
 class DB {
@@ -10,6 +12,7 @@ class DB {
     models!: {
         receivedTransactions: any,
         sentTransactions: any,
+        registerAccount: any,
     };
 
     constructor(dbConfig: DbConfig) {
@@ -29,6 +32,7 @@ class DB {
         const models = {
             receivedTransactions: receivedTransactionsModelInit(this.sequelize),
             sentTransactions: sentTransactionsModelInit(this.sequelize),
+            registerAccount: registerAccountModelInit(this.sequelize),
         };
         
         this.models = models;
