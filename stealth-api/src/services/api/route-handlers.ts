@@ -1,14 +1,10 @@
 import { Request, Response } from 'express';
 import App from '../../app';
 import { SendFundsRequest, TransferReceivedFundsRequest } from './request-types';
-import GoHandler from '../go-service';
-import BlockchainService from '../blockchain-service';
 import { Op } from 'sequelize';
-import { Info, ReceiveScanInfo, SendInfo } from '../../types';
+import { ReceiveScanInfo, SendInfo } from '../../types';
 import dotenv from 'dotenv';
-import crypto from 'crypto';
 import configLoader from '../../../utils/config-loader';
-import { ethers } from 'ethers';
 
 dotenv.config({ path: `.env.development` });
 
@@ -188,7 +184,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 const transferAmount = amount || 0.001;
                 const tx = await app.blockchainService.transferEth(transferAddress, transferAmount.toString(), receiveScanInfo[0].privKey);
 
-                // console.log("tx", tx);
+                console.log("tx", tx);
 
                 sendResponseOK(res, 'Success')
             } catch (err) {

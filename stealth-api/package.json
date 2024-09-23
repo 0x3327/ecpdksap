@@ -4,7 +4,10 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev src/index.ts",
+    "start:cli": "ts-node-dev src/services/api/cli.ts",
     "test": "hardhat compile && jest --detectOpenHandles",
+    "test:api": "hardhat compile && jest api.test.ts --detectOpenHandles",
+    "test:cli": "hardhat compile && jest cli.test.ts --detectOpenHandles",
     "ganache": "ganache --wallet.seed 42",
     "hardhat:compile": "hardhat compile"
   },
@@ -30,6 +33,7 @@
     "@sequelize/sqlite3": "^7.0.0-alpha.41",
     "assemblyscript": "^0.27.29",
     "axios": "^1.7.7",
+    "commander": "^12.1.0",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.2",
     "express-query-parser": "^1.3.3",
