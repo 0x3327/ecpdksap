@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev src/index.ts",
-    "start:cli": "ts-node-dev src/services/api/cli.ts",
+    "cli": "ts-node-dev src/services/api/cli.ts",
     "test": "hardhat compile && jest --detectOpenHandles",
     "test:api": "hardhat compile && jest api.test.ts --detectOpenHandles",
     "test:cli": "hardhat compile && jest cli.test.ts --detectOpenHandles",

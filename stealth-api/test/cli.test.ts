@@ -42,15 +42,6 @@ describe('CLI API commands test', () => {
         // Start application
         await app.start();
 
-        // Read API config params
-        // const { host, port } = app.config.apiConfig;
-
-        // Initialize axios instance
-        // axiosInstance = axios.create({
-        //     baseURL: `http://${host}:${port}`
-        //   });
-
-        // console.log(axiosInstance);
     }, 30000)
 
     test('Starting application', () => {
