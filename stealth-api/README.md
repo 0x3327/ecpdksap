@@ -17,7 +17,7 @@ This project is designed to interact with Ethereum-based smart contracts and han
 - **Blockchain Service**: Manages interactions with the Ethereum blockchain, smart contracts, and event listeners.
 - **Go Handler**: Interfaces with a WebAssembly (Wasm) module to perform cryptographic operations related to stealth addresses and meta-addresses.
 - **CLI Commands**: Commands for running protocol functionalities through command line. 
-- **Socket API**:
+- **Socket API**: This module defines WebSocket handlers for the Stealth API project. It uses the socket.io library to manage WebSocket connections and handle real-time communication between the server and clients.
 
 ---
 
@@ -47,8 +47,8 @@ The Stealth API is designed to provide an interface for interacting with stealth
 4. **GET /check-received**
    - **Description**: Retrieves a list of received transactions within specified block range.
    - **Parameters**:
-     - `fromBlock`: optional parameter which represent first block service need to check for transaction
-     - `toBlock`: optional parameter which represent last block service need to check for transaction
+     - `fromBlock`: Optional parameter which represent first block service need to check for transaction.
+     - `toBlock`: Optional parameter which represent last block service need to check for transaction.
    - **Response**: Returns an array of received transactions with details.
 
 5. **POST /transfer/:receiptId**
@@ -154,7 +154,7 @@ The `CLI` is designed to facilitate interaction with the API directly from the c
 are the available commands along with their options:
 
 #### 1. `register-address`
-- **Description**: Register a meta address on contract.
+- **Description**: Register a new meta address on the contract.
 - **Options**:
   - `--id <string>`: The ID associated with the meta address.
   - `--K <string>`: The spending public key for the meta address.
@@ -189,7 +189,7 @@ are the available commands along with their options:
   ```
 
 #### 4. `transfer`
-- **Description**: Transfers received funds based on a receipt.
+- **Description**: Transfer received funds to another address.
 - **Options**:
   - `receiptId <number>`: The ID of the receipt for which the transfer will occur.
   - `address <string>`: Optional transfer address. If not provided, it will use the default address from the configuration.
@@ -200,3 +200,56 @@ are the available commands along with their options:
   ```
 
 ## Socket API
+
+This module defines WebSocket handlers for the Stealth API project. It uses the socket.io library to manage WebSocket connections and handle real-time communication between the server and clients. The module allows clients to interact with the blockchain. The main function, `setupSocketHandlers`, listens for specific WebSocket events and invokes the appropriate business logic in the application.
+
+The `setupSocketHandlers` function sets up various WebSocket events for handling client requests. It takes two arguments:
+- `io: Server` - The socket.io server instance.
+- `app: App` - The main application instance, which contains the business logic and services for blockchain, database interactions, and logging.
+The main ecents of this functions are:
+
+#### 1. register-address
+- **Description**: Register a new meta address on the contract.
+- **Parameters**:
+  - `data`:
+    - `id`: A unique identifier for the meta address.
+    - `K`: The spending public key associated with the meta address.
+    - `V`: The viewing public key associated with the meta address.
+  - `callback`:
+    - `message`
+    - `id` 
+
+#### 2. send
+- **Description**: Sends funds to a specified recipient's stealth address.
+- **Parameters**:
+  - `data`:
+    - `recipientIdType`: Type of id
+    - `id`: Optional parameter which represent recipient meta addres if recipientIdType is 'meta_address'
+    - `recipientK`: Optional parameter which represent recipient spending key if recipientIdType isn't 'meta_address'.
+    - `recipientV`: Optional parameter which represent recipient viewing key if recipientIdType isn't 'meta_address'.
+    - `amount`: The amount of ETH to send.
+    - `withProxy`: Bool value if you want to send with or without Proxy.
+  - `callback`:
+    - `message`
+    - `data` = { `stealthAddress`, `ephemeralPubKey`, `viewTag`, `amount` }
+
+#### 3. check-received
+- **Description**: Checks for any received transactions between specified block ranges.
+- **Parameters**:
+  - `data`:
+    - `fromBlock`: Optional parameter which represent first block service need to check for transaction.
+    - `toBlock`: Optional parameter which represent last block service need to check for transaction.
+  - `callback`:
+    - `message`
+    - `receipt`
+
+#### 4. transfer
+- **Description**: Transfer received funds to another address.
+- **Parameters**:
+  - `data`:
+    - `receiptId`: The ID of the transaction receipt.
+    - `address`: The address where you want to transfer funds
+    - `amount`: The amount of funds you want to transfer
+  - `callback`:
+    - `message`
+    - `transaction`

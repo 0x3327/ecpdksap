@@ -132,8 +132,7 @@ const setupSocketHandlers = (io: Server, app: App) => {
                 const transferAmount = amount || 0.001;
                 const tx = await app.blockchainService.transferEth(transferAddress, transferAmount.toString(), receiveScanInfo[0].privKey);
 
-                console.log("tx", tx);
-                callback({ message: 'Success' });
+                callback({ message: 'Success' , tx});
             } catch (err) {
                 callback({ error: `Transfer failed: ${(err as Error).message}` });
             }

@@ -127,7 +127,6 @@ describe('Socket.IO functionalities test', () => {
         };
 
         clientSocket.emit('transfer', transferData, (response: any) => {
-            console.log("transfer  res", response);
             expect(response.message).toBe('Success');
             clientSocket.disconnect();
             done();
