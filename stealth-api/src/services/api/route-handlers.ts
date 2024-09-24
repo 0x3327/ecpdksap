@@ -251,23 +251,10 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 const data = {
                     name: req.body.name,
                     pid: req.body.pid, 
-                    publicKeyX: publicKeyX.toString(16),
-                    publicKeyY: publicKeyY.toString(16)
+                    publicKeyX: publicKeyX.toString(),
+                    publicKeyY: publicKeyY.toString()
                 };
 
-                // Write data in db
-                const userData = {
-                    name: req.body.name,
-                    pid: req.body.pid,
-                    privateKey: privateKey.toString(16),
-                    publicKeyX: publicKeyX.toString(16),
-                    publicKeyY: publicKeyY.toString(16)
-                };
-
-                await app.db.models.registerAccount.create(userData);
-
-                // Forward the request to regulatory body with the necessary data
-                // TODO
                 const response = await fetch("http://localhost:5555/register-user", {
                     headers: {
                         "Content-Type": "application/json"
@@ -279,12 +266,34 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 const proofData = responseData["data"];
                 sendResponseOK(res, "Recieved merkle proof", proofData);
 
+                // Write user to database
+                const userData = {
+                    name: req.body.name,
+                    pid: req.body.pid,
+                    privateKey: privateKey.toString(),
+                    publicKeyX: publicKeyX.toString(),
+                    publicKeyY: publicKeyY.toString()
+                };
+
+                await app.db.models.registerAccount.create(userData);
             }catch(error){
                 console.error("Error during registration:", error);
                 res.status(500).json({ error: "Registration failed" });
             }
         }
     },
+    {
+        method: 'POST',
+        path: '/register-meta-address',
+        handler: (req: Request, res: Response) => {
+            // TODO:
+            //  - take hashes from regulator
+            //  - generate inclusion proof on circom
+            //  - generate nullifier on circom
+            //  - generate meta address (K, V)
+            //  - send meta address with inclusion proof and nullifier to smart contract
+        }
+    }
 ];
 
 export default routeHandlers;
