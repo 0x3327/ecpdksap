@@ -7,6 +7,7 @@ import { Op } from 'sequelize';
 import { Info, ReceiveScanInfo, SendInfo } from '../../types'; 
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import { sha256 } from 'js-sha256';
 import configLoader from '../../../utils/config-loader';
 import { mulPointEscalar, Base8, Point } from '@zk-kit/baby-jubjub'; 
 
@@ -18,13 +19,6 @@ const generateKeys = (): { privateKey: bigint, publicKey: Point<bigint> } => {
     return { privateKey, publicKey }; 
 }; 
  
-const { privateKey, publicKey } = generateKeys(); 
-const publicKeyX = publicKey[0].toString(10);  
-const publicKeyY = publicKey[1].toString(10); 
- 
-console.log("Generated private key:", privateKey.toString(10)); 
-console.log("Generated public key:", publicKeyX, publicKeyY);
-
 dotenv.config({ path: `.env.development` });
 
 interface RouteHandlerConfig {
@@ -288,10 +282,35 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
         handler: (req: Request, res: Response) => {
             // TODO:
             //  - take hashes from regulator
+            //  - verify root signature
             //  - generate inclusion proof on circom
             //  - generate nullifier on circom
             //  - generate meta address (K, V)
             //  - send meta address with inclusion proof and nullifier to smart contract
+
+            // data needed for inclusion proof is provided in the request
+            const {name, pid, privKey, hashes, root, signedRoot } = req.body;
+            
+            let pathElements: string[] = [];
+            let pathIndex: number[] = [];
+            for (let i = 0; i < hashes.length; i++) {
+                pathElements.push(hashes[i].hash);
+                pathIndex.push(hashes[i].index);
+            }
+
+            const circomData = {
+                hashName: BigInt('0x' + sha256(name)).toString(),
+                pid: pid,
+                privKey: privKey,
+                path_elements: pathElements,
+                path_index: pathIndex,
+                publicVar: 10000,
+                root: root
+            }
+
+            console.log("Data to send to circom ", circomData);
+
+            sendResponseOK(res, "testing");
         }
     }
 ];
