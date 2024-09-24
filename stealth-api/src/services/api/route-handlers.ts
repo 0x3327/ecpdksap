@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import { sha256 } from 'js-sha256';
 import configLoader from '../../../utils/config-loader';
 import { mulPointEscalar, Base8, Point } from '@zk-kit/baby-jubjub'; 
+import { groth16 } from 'snarkjs';
 
  
 const generateKeys = (): { privateKey: bigint, publicKey: Point<bigint> } => { 
@@ -235,6 +236,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             try {
                 // Generate private and public keys for the user
                 const { privateKey, publicKey } = generateKeys();
+                console.log("Private key is: ", privateKey);
                 const publicKeyX = publicKey[0];
                 const publicKeyY = publicKey[1];
 
@@ -279,7 +281,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
     {
         method: 'POST',
         path: '/register-meta-address',
-        handler: (req: Request, res: Response) => {
+        handler: async (req: Request, res: Response) => {
             // TODO:
             //  - take hashes from regulator
             //  - verify root signature
@@ -290,6 +292,13 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             // data needed for inclusion proof is provided in the request
             const {name, pid, privKey, hashes, root, signedRoot } = req.body;
+
+            // extracting user from database
+            // const account = await app.db.models.registerAccount.findOne({
+            //     where: {pid: parseInt(pid)},
+            //     attributes: ['privateKey']
+            // });
+            // console.log("Account: ", account);
             
             let pathElements: string[] = [];
             let pathIndex: number[] = [];
@@ -307,10 +316,19 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 publicVar: 10000,
                 root: root
             }
+            
+            const { proof, publicSignals } = await groth16.fullProve(
+                circomData,
+                "/home/blin/Documents/3327internship/ecpdksap/stealth-api/circuit/build/main_js/main.wasm",
+                "/home/blin/Documents/3327internship/ecpdksap/stealth-api/circuit/build/main_final.zkey"
+            );
 
+            console.log("> Proof: ", proof);
+            console.log("> Nullifier: ", publicSignals);
+            
             console.log("Data to send to circom ", circomData);
 
-            sendResponseOK(res, "testing");
+            sendResponseOK(res, "Generated inclusion proof and nullifier");
         }
     }
 ];

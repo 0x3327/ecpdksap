@@ -47,3 +47,4 @@ cache
 # Circom related
 stealth-api/circuit/build/
 stealth-api/circuit/powersOfTau*
+stealth-api/circuit/verification_key.json
