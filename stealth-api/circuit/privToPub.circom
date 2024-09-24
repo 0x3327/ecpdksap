@@ -1,9 +1,9 @@
 pragma circom 2.1.6;
 
 // circomlib imports
-include "circomlib/bitify.circom";
-include "circomlib/comparators.circom";
-include "circomlib/escalarmulfix.circom";
+include "../node_modules/circomlib/circuits/bitify.circom";
+include "../node_modules/circomlib/circuits/comparators.circom";
+include "../node_modules/circomlib/circuits/escalarmulfix.circom";
 
 /**
  * Converts a private key to a public key on the BabyJubJub curve.

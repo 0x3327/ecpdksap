@@ -1,6 +1,6 @@
 pragma circom 2.1.6;
 
-include "circomlib/poseidon.circom";
+include "../node_modules/circomlib/circuits/poseidon.circom";
 include "./merkleTree.circom";
 include "./hashers.circom";
 include "./nullifier.circom";

@@ -43,3 +43,7 @@ docs/
 # Hardhat
 artifacts
 cache
+
+# Circom related
+stealth-api/circuit/build/
+stealth-api/circuit/powersOfTau*
