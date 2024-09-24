@@ -92,7 +92,7 @@ describe('API routes test', () => {
         console.log("----------------------- SEND ------------------------");
         try {
             const payload = {
-                recipientIdType: 'eth_ens',
+                recipientIdType: 'id',
                 id: 'Mihailo', 
                 amount: 10,
                 withProxy: true,

@@ -5,10 +5,8 @@ This document provides an overview of the `API`, `BlockchainService` and `GoHand
 ## Table of Contents
 - [Introduction](#introduction)
 - [API Overview](#api-overview)
-- [Blockchain Service](#blockchainservice)
-  - [Methods](#blockchainservice-methods)
-- [Go Handler](#gohandler)
-  - [Methods](#gohandler-methods)
+- [Blockchain Service](#blockchain-service)
+- [Go Handler](#go-handler)
 - [CLI Commands](#cli-commands)
 - [Socket API](#socket-api)
 
