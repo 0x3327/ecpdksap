@@ -36,10 +36,10 @@ class App {
     }
 
     async stop(): Promise<void> {
+        this.loggerService.logger.info('Service stopping');
         await this.api.stop();
         await this.blockchainService.stop();
-        await this.socketService.stop();
-        console.log('App stopped')
+        this.loggerService.logger.info('App stopped')
     }
 
     async start(): Promise<void> {
