@@ -110,16 +110,23 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                     ephemeral_key: sendInfo.pubKey,
                 })
 
-                app.loggerService.logger.info(`Sending ${amount} to stealth address: ${sendInfo.address}`);
+                const receiptSend = await app.db.models.sentTransactions.findAll({
+                    where: {
+                        transaction_hash: receipt.hash
+                    }
+                })
+                console.log("receiptSend", receiptSend);
 
+                app.loggerService.logger.info(`Sending ${amount} to stealth address: ${sendInfo.address}`);
+                
                 app.loggerService.logger.info(`Registering ephemeral key: ${sendInfo.pubKey}`);
 
-                sendResponseOK(res, 'Transfer simulated successfully', {
+                console.log(sendResponseOK(res, 'Transfer simulated successfully', {
                     stealthAddress: sendInfo.address,
                     ephemeralPubKey: sendInfo.pubKey,
                     viewTag: sendInfo.viewTag,
                     amount: amount
-                });
+                }));
             } catch (err) {
                 sendResponseBadRequest(res, `Transfer failed: ${(err as Error).message}`, null);
             }
