@@ -1,28 +1,36 @@
-import { Server } from 'socket.io';
+import { Server as SocketServer } from 'socket.io';
+import { createServer, Server } from 'http';
 import App from '../../app';
 import { SendFundsRequest } from '../api/request-types';
 import { Op } from 'sequelize';
 import { ReceiveScanInfo, SendInfo } from '../../types';
 
-class SocketsHandler {
-    private io: Server;
+class SocketsService {
+    private io: SocketServer;
     private app: App;
 
-    constructor(io: Server, app: App) {
-        this.io = io;
+    constructor(app: App) {
+        const httpServer = createServer();
+        this.io = new SocketServer(httpServer);
         this.app = app;
     }
 
-    public setupHandlers() {
-        this.io.on('connection', (socket) => {
-            console.log('Client connected:', socket.id);
+    public start() {
+        return new Promise((resolve, reject) => {
+            const { port } = this.app.config.socketConfig;
+            this.io.listen(port);
+            this.app.loggerService.logger.info(`Socket service listening on ${port}`)
 
-            socket.on('service-status', this.serviceStatus.bind(this, socket));
-            socket.on('register-address', this.registerAddress.bind(this, socket));
-            socket.on('send', this.sendFunds.bind(this, socket));
-            socket.on('check-received', this.checkReceived.bind(this, socket));
-            socket.on('transfer', this.transfer.bind(this, socket));
-        });
+            this.io.on('connection', (socket) => {
+                console.log('Client connected:', socket.id);
+                socket.on('service-status', this.serviceStatus.bind(this));
+                socket.on('register-address', this.registerAddress.bind(this));
+                socket.on('send', this.sendFunds.bind(this));
+                socket.on('check-received', this.checkReceived.bind(this));
+                socket.on('transfer', this.transfer.bind(this));
+                resolve(socket);
+            });
+        })
     }
 
     private serviceStatus(socket: any, callback: Function) {
@@ -154,7 +162,7 @@ class SocketsHandler {
 
     public stop(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.io!.close((err) => {
+            this.io.httpServer.close((err) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -165,4 +173,4 @@ class SocketsHandler {
     }
 }
 
-export default SocketsHandler;
+export default SocketsService;

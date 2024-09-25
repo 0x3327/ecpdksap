@@ -15,7 +15,7 @@ const sendResponseBadRequest = (message: string, data?: any) => {
     return sendResponse(400, message, data);
 };
 
-class CommandHandler {
+class CLIService {
     private app: App;
     private program: Command;
 
@@ -201,4 +201,4 @@ class CommandHandler {
     }
 }
 
-export { CommandHandler };
+export default CLIService;

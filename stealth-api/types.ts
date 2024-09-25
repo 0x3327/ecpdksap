@@ -1,6 +1,7 @@
 export type Config = {
     logging: boolean,
     apiConfig: ApiConfig;
+    socketConfig: SocketConfig;
     dbConfig: DbConfig;
     blockchainConfig: BlockchainConfig;
     stealthConfig: StealthConfig;
@@ -9,6 +10,10 @@ export type Config = {
 export type ApiConfig = {
     serverName: string;
     host: string;
+    port: number;
+}
+
+export type SocketConfig = {
     port: number;
 }
 

@@ -19,6 +19,7 @@ const configLoader = {
         const providerType = process.env.BLOCKCHAIN_PROVIDER_TYPE!;
         const announcer = process.env.BLOCKCHAIN_CONTRACT_ANNOUNCER!;
         const metaAddress = process.env.BLOCKCHAIN_CONTRACT_META_ADDRESS!;
+        const socketPort = process.env.SOCKET_PORT ? parseInt(process.env.SOCKET_PORT) : 3000;
 
         const logging = process.env.LOGGING === 'true';
         
@@ -32,6 +33,9 @@ const configLoader = {
                 serverName,
                 host,
                 port,
+            },
+            socketConfig: {
+                port: socketPort
             },
             dbConfig: {
                 host: dbHost,

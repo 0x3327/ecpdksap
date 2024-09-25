@@ -1,6 +1,4 @@
-import { Server as SocketServer } from 'socket.io';
 import { describe, expect, test } from '@jest/globals';
-import { createServer } from 'http';
 import App from '../src/app';
 import configLoader from '../utils/config-loader';
 import { deployContracts } from './ganache-deployment';
@@ -8,12 +6,9 @@ import { Server } from 'ganache';
 import { Config } from '../types';
 import { io } from 'socket.io-client';
 import { Info } from '../src/types';
-import SocketsHandler from '../src/services/sockets';
 
 // Application object
 let app: App;
-
-let socketsHandler: SocketsHandler;
 
 let ganacheServer: Server;
 
@@ -35,15 +30,6 @@ describe('Socket.IO functionalities test', () => {
         config.blockchainConfig.deployedContracts = deployedContracts;
 
         app = new App(config);
-
-        // Create HTTP server and Socket.IO server
-        const httpServer = createServer();
-        const socketServer = new SocketServer(httpServer);
-        socketsHandler = new SocketsHandler(socketServer, app);
-
-        httpServer.listen(3000); // Specify the port here
-
-        socketsHandler.setupHandlers();
 
         // Start application
         await app.start();

@@ -5,10 +5,8 @@ import DB from './services/db';
 import { Config } from '../types';
 import dotenv from 'dotenv';
 import LoggerService from './services/logger';
-import { CommandHandler } from './services/cli';
-import SocketHandler from './services/sockets';
-import { Server as SocketServer } from 'socket.io'
-import { createServer, Server } from 'http';
+import CLIService from './services/cli';
+import SocketService from './services/sockets';
 
 dotenv.config({ path: `.env.development` });
 
@@ -21,10 +19,8 @@ class App {
     public goHandler!: GoHandler;
     public db!: DB;
     public loggerService!: LoggerService;
-    public commandHandler!: CommandHandler;
-    public httpServer!: Server;
-    public socketServer!: SocketServer;
-    public socketHandler!: SocketHandler;
+    public cliService!: CLIService;
+    public socketService!: SocketService;
 
     constructor(config: Config) {
         this.config = config;
@@ -35,16 +31,14 @@ class App {
         this.api = new API(this);
         this.blockchainService = new BlockchainService(this);
         this.db = new DB(this.config.dbConfig);
-        this.commandHandler = new CommandHandler(this);
-        this.httpServer = createServer();
-        this.socketServer = new SocketServer(this.httpServer);
-        this.socketHandler = new SocketHandler(this.socketServer, this);
+        this.cliService = new CLIService(this);
+        this.socketService = new SocketService(this);
     }
 
     async stop(): Promise<void> {
         await this.api.stop();
         await this.blockchainService.stop();
-        await this.socketHandler.stop();
+        await this.socketService.stop();
         console.log('App stopped')
     }
 
@@ -57,7 +51,7 @@ class App {
         await this.api.start();
 
         // Start Sockets API
-        await this.socketHandler.setupHandlers();
+        await this.socketService.start();
     }
 }
 
