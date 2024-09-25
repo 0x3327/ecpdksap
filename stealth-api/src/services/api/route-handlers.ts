@@ -325,8 +325,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
 
             console.log("> Proof: ", proof);
             console.log("> Nullifier: ", publicSignals);
-            
-            console.log("Data to send to circom ", circomData);
+            const tx = await app.blockchainService.verify(proof, publicSignals);
 
             sendResponseOK(res, "Generated inclusion proof and nullifier");
         }

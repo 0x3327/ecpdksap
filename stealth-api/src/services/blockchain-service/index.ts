@@ -187,6 +187,21 @@ class BlockchainService {
         return balance;
     }
 
+    public async verify(proof: any, publicSignals: any) {
+        try {
+            const tx = await this.contracts.metaAddressRegistry.verifyProof(
+                [proof.pi_a[0], proof.pi_a[1]],
+                [proof.pi_b[0], proof.pi_b[1]],
+                [proof.pi_c[0], proof.pi_c[1]],
+                publicSignals
+            );
+            console.log("Recieved: ", tx);
+        }
+        catch {
+            console.log("Error verifying proof");
+        }
+    }
+
     public async stop() {
         await this.contracts.metaAddressRegistry.off('MetaAddressRegistered');
         await this.contracts.announcer.off('Announcement');
