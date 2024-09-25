@@ -1,3 +1,9 @@
+export type RegisterAddressRequest = {
+    id: string,
+    K: string,
+    V: string,
+}
+
 export type SendFundsRequest = {
     recipientIdType: 'id' | 'eth_ens' | 'address' | 'meta_address',
     id?: string,

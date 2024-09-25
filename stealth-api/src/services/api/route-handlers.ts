@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import App from '../../app';
-import { SendFundsRequest, TransferReceivedFundsRequest } from './request-types';
+import { CheckReceivedRequest, RegisterAddressRequest, SendFundsRequest, TransferReceivedFundsRequest } from './request-types';
 import { Op } from 'sequelize';
 import { ReceiveScanInfo, SendInfo } from '../../types';
 import dotenv from 'dotenv';
@@ -46,7 +46,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
         method: 'POST',
         path: '/register-address',
         handler: async (req: Request, res: Response) => {
-            const { id, K, V } = req.body;
+            const { id, K, V } = (req.body as RegisterAddressRequest);
             try {
                 await app.blockchainService.registerMetaAddress(id, K, V);
                 sendResponseOK(res, 'Meta address registered', { id });

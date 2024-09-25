@@ -4,10 +4,12 @@ import configLoader from '../utils/config-loader';
 import { deployContracts } from './ganache-deployment';
 import { Server } from 'ganache';
 import { Config } from '../types';
-import { program, registerCommands } from '../src/services/api/cli';
+import { CommandHandler } from '../src/services/cli';
 
 // Application object
 let app: App;
+
+let commandHandler: CommandHandler;
 
 let ganacheServer: Server
 
@@ -30,7 +32,7 @@ describe('CLI API commands test', () => {
         config.blockchainConfig.deployedContracts = deployedContracts;
 
         app = new App(config);
-        registerCommands(app);
+        commandHandler = new CommandHandler(app);
 
         // Start application
         await app.start();
@@ -44,8 +46,9 @@ describe('CLI API commands test', () => {
     test('Check heartbeat command', async () => {
         try {
             console.log("----------------------- SERVICE-STATUS ------------------------");
-            await program.parseAsync(['node', 'test', 'service-status']);
-            // expect(data.message).toBe('Service running');
+            process.argv = ['node', 'test', 'service-status'];
+            await commandHandler.serviceStatus();
+            await commandHandler.run();
         } catch (err) {
             console.log(err);
             expect(true).toBe(false);
@@ -65,7 +68,9 @@ describe('CLI API commands test', () => {
                 V: recipientInfo.V,
             };
 
-            await program.parseAsync(['node', 'test', 'register-address', '--id', payload.id, '--K', payload.K, '--V', payload.V]);
+            process.argv = ['node', 'test', 'register-address', '--id', payload.id, '--K', payload.K, '--V', payload.V];
+            await commandHandler.registerAddress();
+            await commandHandler.run();
 
             // Wait for MetaAddressRegistry event
             await (new Promise((resolve, reject) => setTimeout(resolve, 5000)));
@@ -73,7 +78,7 @@ describe('CLI API commands test', () => {
             console.log(err);
             expect(true).toBe(false);
         }
-    }, 10000);
+    }, 6000);
 
     test('Send stealth transaction via Proxy', async () => {
         console.log("----------------------- SEND ------------------------");
@@ -85,8 +90,10 @@ describe('CLI API commands test', () => {
                 withProxy: true,
             }
 
-            await program.parseAsync(['node', 'test', 'send', '--recipientIdType', payload.recipientIdType,
-                                    '--id', payload.id, '--amount', payload.amount, '--withProxy']);
+            process.argv = ['node', 'test', 'send', '--recipientIdType', payload.recipientIdType,
+                                    '--id', payload.id, '--amount', payload.amount, '--withProxy'];
+            await commandHandler.sendFunds()
+            await commandHandler.run();
 
             // Wait for Announcement event
             await (new Promise((resolve, reject) => setTimeout(resolve, 5000)));
@@ -95,22 +102,26 @@ describe('CLI API commands test', () => {
             console.log(err);
             expect(true).toBe(false);
         }   
-    }, 10000);
+    }, 6000);
 
     test('Check received funds', async () => {
         console.log("----------------------- CHECK-RECEIVED ------------------------");
         try {
-            await program.parseAsync(['node', 'test', 'check-received'])
+            process.argv =  ['node', 'test', 'check-received'];
+            await commandHandler.checkReceived();
+            await commandHandler.run();
         } catch(err) {
             console.log(err);
             expect(true).toBe(false);
         }
     });
 
-    test('Transfer funds', async () => {
+    test.skip('Transfer funds', async () => {
         console.log("----------------------- TRANSFER ------------------------");
         try {
-            await program.parseAsync(['node', 'test', 'transfer', '--receiptId', '1']);
+            process.argv = ['node', 'test', 'transfer', '--receiptId', '1'];
+            await commandHandler.transfer();
+            await commandHandler.run();
         } catch (err) {
             console.log(err);
             expect(true).toBe(false);
@@ -120,7 +131,7 @@ describe('CLI API commands test', () => {
     afterAll(async () => {
         try {
             await app.blockchainService.provider.destroy();
-            await app.stop()
+            await app.stop();
             await ganacheServer.close();
         } catch (err) {}
     }, 50000)

@@ -37,8 +37,8 @@ const registerCommands = (app: App) => {
         .command('register-address')
         .description('Register a meta address')
         .requiredOption('--id <string>', 'ID')
-        .requiredOption('--K <string>', 'K value')
-        .requiredOption('--V <string>', 'V value')
+        .requiredOption('--K <string>', 'Spending public key')
+        .requiredOption('--V <string>', 'Viewing public key')
         .action(async (opts) => {
             try {
                 const { id, K, V } = opts;

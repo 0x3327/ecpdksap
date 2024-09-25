@@ -7,14 +7,16 @@ import { deployContracts } from './ganache-deployment';
 import { Server } from 'ganache';
 import { Config } from '../types';
 import { io } from 'socket.io-client';
-import setupSocketHandlers from '../src/services/api/socket';
-import { error } from 'console';
 import { Info } from '../src/types';
+import SocketsHandler from '../src/services/sockets';
 
 // Application object
 let app: App;
-let socketServer: SocketServer;
+
+let socketsHandler: SocketsHandler;
+
 let ganacheServer: Server;
+
 let config: Config;
 
 describe('Socket.IO functionalities test', () => {
@@ -34,15 +36,17 @@ describe('Socket.IO functionalities test', () => {
 
         app = new App(config);
 
-        // Start application
-        await app.start();
-
         // Create HTTP server and Socket.IO server
         const httpServer = createServer();
-        socketServer = new SocketServer(httpServer);
-        setupSocketHandlers(socketServer, app);
+        const socketServer = new SocketServer(httpServer);
+        socketsHandler = new SocketsHandler(socketServer, app);
 
         httpServer.listen(3000); // Specify the port here
+
+        socketsHandler.setupHandlers();
+
+        // Start application
+        await app.start();
     }, 30000);
 
     test('Socket connection', (done) => {
@@ -60,6 +64,7 @@ describe('Socket.IO functionalities test', () => {
         const clientSocket = io('http://localhost:3000');
 
         clientSocket.emit('service-status', (response: any) => {
+            console.log("service-status res", response);
             expect(response.message).toBe('Service running');
             clientSocket.disconnect();
             done();
@@ -80,6 +85,7 @@ describe('Socket.IO functionalities test', () => {
             config.stealthConfig.v = recipientInfo.v;
 
             clientSocket.emit('register-address', payload, (response: any) => {
+                console.log("register-address res", response);
                 expect(response.message).toBe('Meta address registered');
                 clientSocket.disconnect();
                 done();
@@ -101,6 +107,7 @@ describe('Socket.IO functionalities test', () => {
         };
 
         clientSocket.emit('send', payload, (response: any) => {
+            console.log("send res", response);
             expect(response.message).toBe('Transfer simulated successfully');
             clientSocket.disconnect();
             done();
@@ -112,6 +119,7 @@ describe('Socket.IO functionalities test', () => {
         const clientSocket = io('http://localhost:3000');
 
         clientSocket.emit('check-received', {}, (response: any) => {
+            console.log("check-received res", response);
             expect(response.message).toBe('Success');
             clientSocket.disconnect();
             done();
@@ -127,17 +135,17 @@ describe('Socket.IO functionalities test', () => {
         };
 
         clientSocket.emit('transfer', transferData, (response: any) => {
+            console.log("transfer res", response);
             expect(response.message).toBe('Success');
             clientSocket.disconnect();
             done();
         });
-    });
+    }, 10000);
 
     afterAll(async () => {
         try {
             await app.stop();
             await ganacheServer.close();
-            socketServer.close();
         } catch (err) {
             console.error(err);
         }

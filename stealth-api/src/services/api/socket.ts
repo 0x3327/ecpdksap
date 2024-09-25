@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import App from '../../app';
-import { SendFundsRequest, TransferReceivedFundsRequest } from './request-types';
+import { SendFundsRequest } from './request-types';
 import { Op } from 'sequelize';
 import { ReceiveScanInfo, SendInfo } from '../../types';
 import dotenv from 'dotenv';
