@@ -118,7 +118,7 @@ describe('CLI API commands test', () => {
         }
     });
 
-    test.skip('Transfer funds', async () => {
+    test('Transfer funds', async () => {
         console.log("----------------------- TRANSFER ------------------------");
         try {
             process.argv = ['node', 'test', 'transfer', '--receiptId', '1'];

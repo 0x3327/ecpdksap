@@ -151,6 +151,18 @@ class SocketsHandler {
             callback({ error: `Transfer failed: ${(err as Error).message}` });
         }
     }
+
+    public stop(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.io!.close((err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        })
+    }
 }
 
 export default SocketsHandler;

@@ -180,11 +180,11 @@ The `CommandHandler` class is responsible for defining and managing the CLI comm
 #### 3. `check-received`
 - **Description**: Checks for any received transactions between specified block ranges.
 - **Options**:
-  - `fromBlock <number>`: The block number to start the query from (default: 0).
-  - `toBlock <number>`: The block number to end the query at (default: the latest block).
+  - `fromBlock <string>`: The block number to start the query from (default: 0).
+  - `toBlock <string>`: The block number to end the query at (default: the latest block).
 - **Usage**: 
   ```bash
-    npm run cli -- check-received --fromBlock fromBlock --toBlock toBlock
+    npm run cli -- check-received --fromBlock "fromBlock" --toBlock "toBlock"
   ```
 
 #### 4. `transfer`

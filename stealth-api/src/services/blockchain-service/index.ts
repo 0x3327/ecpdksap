@@ -209,6 +209,10 @@ class BlockchainService {
     public async stop() {
         await this.contracts.metaAddressRegistry.off('MetaAddressRegistered');
         await this.contracts.announcer.off('Announcement');
+
+        // Add a delay to ensure all pending operations are completed
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         try {
             this.provider.destroy();
         } catch (err) {}

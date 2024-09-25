@@ -44,6 +44,7 @@ class App {
     async stop(): Promise<void> {
         await this.api.stop();
         await this.blockchainService.stop();
+        await this.socketHandler.stop();
         console.log('App stopped')
     }
 
@@ -56,6 +57,7 @@ class App {
         await this.api.start();
 
         // Start Sockets API
+        await this.socketHandler.setupHandlers();
     }
 }
 
