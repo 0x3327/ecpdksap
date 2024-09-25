@@ -150,8 +150,7 @@ The `GoHandler` class is essential for integrating Go-based cryptography operati
 
 ## CLI Commands
 
-The `CLI` is designed to facilitate interaction with the API directly from the command line, making it easier to perform common operations. Below
-are the available commands along with their options:
+The `CommandHandler` class is responsible for defining and managing the CLI commands for interacting with the application's blockchain services, such as checking service status, registering addresses, sending funds, and checking received transactions. It uses the `commander` library to handle command-line inputs and actions. This class handle next commands:
 
 #### 1. `register-address`
 - **Description**: Register a new meta address on the contract.
@@ -201,9 +200,9 @@ are the available commands along with their options:
 
 ## Socket API
 
-This module defines WebSocket handlers for the Stealth API project. It uses the socket.io library to manage WebSocket connections and handle real-time communication between the server and clients. The module allows clients to interact with the blockchain. The main function, `setupSocketHandlers`, listens for specific WebSocket events and invokes the appropriate business logic in the application.
+The `SocketsHandler` class manages WebSocket events for a blockchain service. It is responsible for setting up socket listeners that handle various actions related to service status, meta address registration, sending funds, checking received transactions, and transferring funds.
 
-The `setupSocketHandlers` function sets up various WebSocket events for handling client requests. It takes two arguments:
+The `SocketHandlers` has constructor with two parameters:
 - `io: Server` - The socket.io server instance.
 - `app: App` - The main application instance, which contains the business logic and services for blockchain, database interactions, and logging.
 The main ecents of this functions are:

@@ -107,7 +107,9 @@ describe('CLI API commands test', () => {
     test('Check received funds', async () => {
         console.log("----------------------- CHECK-RECEIVED ------------------------");
         try {
-            process.argv =  ['node', 'test', 'check-received'];
+            const fromBlock = 0;
+            const toBlock = 5;
+            process.argv =  ['node', 'test', 'check-received'/*, '--fromBlock', fromBlock.toString(), '--toBlock', toBlock.toString()*/];
             await commandHandler.checkReceived();
             await commandHandler.run();
         } catch(err) {
@@ -130,7 +132,6 @@ describe('CLI API commands test', () => {
 
     afterAll(async () => {
         try {
-            await app.blockchainService.provider.destroy();
             await app.stop();
             await ganacheServer.close();
         } catch (err) {}

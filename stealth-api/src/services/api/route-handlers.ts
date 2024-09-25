@@ -108,14 +108,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                     recipient_v: recV,
                     recipient_stealth_address: sendInfo.address,
                     ephemeral_key: sendInfo.pubKey,
-                })
-
-                const receiptSend = await app.db.models.sentTransactions.findAll({
-                    where: {
-                        transaction_hash: receipt.hash
-                    }
-                })
-                console.log("receiptSend", receiptSend);
+                });
 
                 app.loggerService.logger.info(`Sending ${amount} to stealth address: ${sendInfo.address}`);
                 

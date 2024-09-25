@@ -17,19 +17,19 @@ class SocketsHandler {
         this.io.on('connection', (socket) => {
             console.log('Client connected:', socket.id);
 
-            socket.on('service-status', this.handleServiceStatus.bind(this, socket));
-            socket.on('register-address', this.handleRegisterAddress.bind(this, socket));
-            socket.on('send', this.handleSendFunds.bind(this, socket));
-            socket.on('check-received', this.handleCheckReceived.bind(this, socket));
-            socket.on('transfer', this.handleTransferFunds.bind(this, socket));
+            socket.on('service-status', this.serviceStatus.bind(this, socket));
+            socket.on('register-address', this.registerAddress.bind(this, socket));
+            socket.on('send', this.sendFunds.bind(this, socket));
+            socket.on('check-received', this.checkReceived.bind(this, socket));
+            socket.on('transfer', this.transfer.bind(this, socket));
         });
     }
 
-    private handleServiceStatus(socket: any, callback: Function) {
+    private serviceStatus(socket: any, callback: Function) {
         callback({ message: 'Service running', timestamp: Date.now() });
     }
 
-    private async handleRegisterAddress(socket: any, data: { id: string; K: string; V: string }, callback: Function) {
+    private async registerAddress(socket: any, data: { id: string; K: string; V: string }, callback: Function) {
         try {
             await this.app.blockchainService.registerMetaAddress(data.id, data.K, data.V);
             callback({ message: 'Meta address registered', id: data.id });
@@ -38,7 +38,7 @@ class SocketsHandler {
         }
     }
 
-    private async handleSendFunds(socket: any, data: SendFundsRequest, callback: Function) {
+    private async sendFunds(socket: any, data: SendFundsRequest, callback: Function) {
         const { recipientIdType, id, recipientK, recipientV, amount, withProxy } = data;
 
         if (typeof amount !== 'number' || (id != null && typeof id !== 'string')) {
@@ -83,6 +83,7 @@ class SocketsHandler {
             });
 
             this.app.loggerService.logger.info(`Sending ${amount} to stealth address: ${sendInfo.address}`);
+
             this.app.loggerService.logger.info(`Registering ephemeral key: ${sendInfo.pubKey}`);
 
             callback({
@@ -98,7 +99,7 @@ class SocketsHandler {
         }
     }
 
-    private async handleCheckReceived(socket: any, data: { fromBlock?: number; toBlock?: number }, callback: Function) {
+    private async checkReceived(socket: any, data: { fromBlock?: number; toBlock?: number }, callback: Function) {
         const { fromBlock, toBlock } = data;
 
         this.app.loggerService.logger.info({ fromBlock, toBlock });
@@ -125,7 +126,7 @@ class SocketsHandler {
         }
     }
 
-    private async handleTransferFunds(socket: any, data: { receiptId: number; address?: string; amount?: number }, callback: Function) {
+    private async transfer(socket: any, data: { receiptId: number; address?: string; amount?: number }, callback: Function) {
         const receiptId: number = data.receiptId;
         const { address, amount } = data;
 

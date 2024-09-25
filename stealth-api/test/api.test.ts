@@ -110,7 +110,7 @@ describe('API routes test', () => {
         }   
     }, 10000);
 
-    test.skip('Check received funds', async () => {
+    test('Check received funds', async () => {
         console.log("----------------------- CHECK-RECEIVED ------------------------");
         try {
             const res = await axiosInstance.get('/check-received');
@@ -121,7 +121,7 @@ describe('API routes test', () => {
         }
     });
 
-    test.skip('Transfer funds', async () => {
+    test('Transfer funds', async () => {
         console.log("----------------------- TRANSFER ------------------------");
         try {
             const res = await axiosInstance.get('/transfer/1');

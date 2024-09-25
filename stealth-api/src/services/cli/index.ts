@@ -24,7 +24,7 @@ class CommandHandler {
         this.program = new Command;
     }
 
-    public serviceStatus() {
+    public async serviceStatus() {
         this.program
             .command('service-status')
             .description('Check if the service is running')
@@ -34,7 +34,7 @@ class CommandHandler {
             });
     }
 
-    public registerAddress() {
+    public async registerAddress() {
         this.program
             .command('register-address')
             .description('Register a meta address')
@@ -54,7 +54,7 @@ class CommandHandler {
             });
     }
 
-    public sendFunds() {
+    public async sendFunds() {
         this.program
             .command('send')
             .description('Send funds')
@@ -130,12 +130,12 @@ class CommandHandler {
             });
     }
 
-    public checkReceived() {
+    public async checkReceived() {
         this.program
             .command('check-received')
             .description('Check received transactions')
-            .option('--fromBlock <number>', 'From block number')
-            .option('--toBlock <number>', 'To block number')
+            .option('--fromBlock <string>', 'From block number')
+            .option('--toBlock <string>', 'To block number')
             .action(async (opts) => {
                 const { fromBlock, toBlock } = opts;
 
@@ -162,7 +162,7 @@ class CommandHandler {
             });
     }
 
-    public transfer() {
+    public async transfer() {
         this.program
             .command('transfer')
             .description('Transfer received funds')
@@ -200,7 +200,5 @@ class CommandHandler {
         this.program.parse(process.argv);
     }
 }
-
-// Add this condition to prevent parsing when imported
 
 export { CommandHandler };
