@@ -4,12 +4,12 @@ import configLoader from '../utils/config-loader';
 import { deployContracts } from './ganache-deployment';
 import { Server } from 'ganache';
 import { Config } from '../types';
-import { CommandHandler } from '../src/services/cli';
+import CLIService from '../src/services/cli';
 
 // Application object
 let app: App;
 
-let commandHandler: CommandHandler;
+let cliService: CLIService;
 
 let ganacheServer: Server
 
@@ -32,7 +32,7 @@ describe('CLI API commands test', () => {
         config.blockchainConfig.deployedContracts = deployedContracts;
 
         app = new App(config);
-        commandHandler = new CommandHandler(app);
+        cliService = new CLIService(app);
 
         // Start application
         await app.start();
@@ -47,8 +47,8 @@ describe('CLI API commands test', () => {
         try {
             console.log("----------------------- SERVICE-STATUS ------------------------");
             process.argv = ['node', 'test', 'service-status'];
-            await commandHandler.serviceStatus();
-            await commandHandler.run();
+            await cliService.serviceStatus();
+            await cliService.run();
         } catch (err) {
             console.log(err);
             expect(true).toBe(false);
@@ -69,8 +69,8 @@ describe('CLI API commands test', () => {
             };
 
             process.argv = ['node', 'test', 'register-address', '--id', payload.id, '--K', payload.K, '--V', payload.V];
-            await commandHandler.registerAddress();
-            await commandHandler.run();
+            await cliService.registerAddress();
+            await cliService.run();
 
             // Wait for MetaAddressRegistry event
             await (new Promise((resolve, reject) => setTimeout(resolve, 5000)));
@@ -92,8 +92,8 @@ describe('CLI API commands test', () => {
 
             process.argv = ['node', 'test', 'send', '--recipientIdType', payload.recipientIdType,
                                     '--id', payload.id, '--amount', payload.amount, '--withProxy'];
-            await commandHandler.sendFunds()
-            await commandHandler.run();
+            await cliService.sendFunds()
+            await cliService.run();
 
             // Wait for Announcement event
             await (new Promise((resolve, reject) => setTimeout(resolve, 5000)));
@@ -110,8 +110,8 @@ describe('CLI API commands test', () => {
             const fromBlock = 0;
             const toBlock = 5;
             process.argv =  ['node', 'test', 'check-received'/*, '--fromBlock', fromBlock.toString(), '--toBlock', toBlock.toString()*/];
-            await commandHandler.checkReceived();
-            await commandHandler.run();
+            await cliService.checkReceived();
+            await cliService.run();
         } catch(err) {
             console.log(err);
             expect(true).toBe(false);
@@ -122,8 +122,8 @@ describe('CLI API commands test', () => {
         console.log("----------------------- TRANSFER ------------------------");
         try {
             process.argv = ['node', 'test', 'transfer', '--receiptId', '1'];
-            await commandHandler.transfer();
-            await commandHandler.run();
+            await cliService.transfer();
+            await cliService.run();
         } catch (err) {
             console.log(err);
             expect(true).toBe(false);
