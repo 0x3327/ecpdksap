@@ -9,7 +9,7 @@ import CLIService from '../src/services/cli';
 // Application object
 let app: App;
 
-let cliService : CLIService;
+let cliService: CLIService;
 
 let ganacheServer: Server
 

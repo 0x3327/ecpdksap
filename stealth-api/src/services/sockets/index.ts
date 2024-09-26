@@ -22,11 +22,11 @@ class SocketsService {
 
         this.io.on('connection', (socket) => {
             console.log('Client connected:', socket.id);
-            socket.on('service-status', this.serviceStatus.bind(this));
-            socket.on('register-address', this.registerAddress.bind(this));
-            socket.on('send', this.sendFunds.bind(this));
-            socket.on('check-received', this.checkReceived.bind(this));
-            socket.on('transfer', this.transfer.bind(this));
+            socket.on('service-status', (callback) => this.serviceStatus(socket, callback));
+            socket.on('register-address', (data, callback) => this.registerAddress(socket, data, callback));
+            socket.on('send', (data, callback) => this.sendFunds(socket, data, callback));
+            socket.on('check-received', (data, callback) => this.checkReceived(socket, data, callback));
+            socket.on('transfer', (data, callback) => this.transfer(socket, data, callback));
         });
     }
 
@@ -35,6 +35,7 @@ class SocketsService {
     }
 
     private async registerAddress(socket: any, data: { id: string; K: string; V: string }, callback: Function) {
+        console.log(data, callback);
         try {
             await this.app.blockchainService.registerMetaAddress(data.id, data.K, data.V);
             callback({ message: 'Meta address registered', id: data.id });
