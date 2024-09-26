@@ -43,7 +43,7 @@ describe('API routes test', () => {
         // Initialize axios instance
         axiosInstance = axios.create({
             baseURL: `http://${host}:${port}`
-          });
+        });
 
         // console.log(axiosInstance);
     }, 30000)

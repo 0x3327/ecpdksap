@@ -39,7 +39,8 @@ class App {
         this.loggerService.logger.info('Service stopping');
         await this.api.stop();
         await this.blockchainService.stop();
-        this.loggerService.logger.info('App stopped')
+        this.loggerService.logger.info('App stopped');
+        this.socketService.stop();
     }
 
     async start(): Promise<void> {
@@ -51,7 +52,7 @@ class App {
         await this.api.start();
 
         // Start Sockets API
-        await this.socketService.start();
+        this.socketService.start();
     }
 }
 

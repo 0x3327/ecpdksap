@@ -16,21 +16,18 @@ class SocketsService {
     }
 
     public start() {
-        return new Promise((resolve, reject) => {
-            const { port } = this.app.config.socketConfig;
-            this.io.listen(port);
-            this.app.loggerService.logger.info(`Socket service listening on ${port}`)
+        const { port } = this.app.config.socketConfig;
+        this.io.listen(port);
+        this.app.loggerService.logger.info(`Socket service listening on ${port}`)
 
-            this.io.on('connection', (socket) => {
-                console.log('Client connected:', socket.id);
-                socket.on('service-status', this.serviceStatus.bind(this));
-                socket.on('register-address', this.registerAddress.bind(this));
-                socket.on('send', this.sendFunds.bind(this));
-                socket.on('check-received', this.checkReceived.bind(this));
-                socket.on('transfer', this.transfer.bind(this));
-                resolve(socket);
-            });
-        })
+        this.io.on('connection', (socket) => {
+            console.log('Client connected:', socket.id);
+            socket.on('service-status', this.serviceStatus.bind(this));
+            socket.on('register-address', this.registerAddress.bind(this));
+            socket.on('send', this.sendFunds.bind(this));
+            socket.on('check-received', this.checkReceived.bind(this));
+            socket.on('transfer', this.transfer.bind(this));
+        });
     }
 
     private serviceStatus(socket: any, callback: Function) {
