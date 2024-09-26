@@ -7,8 +7,9 @@ interface IECPDKSAP_MetaAddressRegistry {
   /// @notice Registers an `_id` to the underlying meta address
   /// @param _id Identifier corresponding to the raw bytes `_metaAddress`
   /// @param _metaAddress Encoded Spending and Viewing public keys
+  /// @param _nullifier Nullifier for check
   /// @dev function is `payable` to the possibility of introducing registration fees in the future
-  function registerMetaAddress(string memory _id, bytes memory _metaAddress) external payable;
+  function registerMetaAddress(string memory _id, bytes memory _metaAddress, uint256 _nullifier) external payable;
 
   /// @notice Resolves an `_id` to the underlying meta address
   /// @param _id Identifier corresponding to the raw bytes `_metaAddress`
