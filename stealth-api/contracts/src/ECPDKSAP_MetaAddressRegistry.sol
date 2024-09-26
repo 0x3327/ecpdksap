@@ -13,11 +13,15 @@ contract ECPDKSAP_MetaAddressRegistry is IECPDKSAP_MetaAddressRegistry {
 
 
   /// @inheritdoc IECPDKSAP_MetaAddressRegistry
-  function registerMetaAddress(string memory _id, bytes memory _metaAddress, uint256 _nullifier) external payable {
+  function registerMetaAddress(string memory _id, bytes memory _metaAddress, uint256 _nullifier, 
+                              uint[2] calldata _pA, uint[2][2] calldata _pB, uint[2] calldata _pC, uint[3] calldata _pubSignals) external payable {
     
     require(!nullifiers[_nullifier], "Error: Nullifier already exists!");
     nullifiers[_nullifier] = true;
     emit NullifierRegistered(_nullifier);
+
+    Verifier verifier;
+    bool result = verifier.verifyProof(_pA, _pB, _pC, _pubSignals);
 
     bytes32 _accessKey = keccak256(abi.encode(_id, "string"));
 
