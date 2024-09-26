@@ -23,6 +23,10 @@ contract ECPDKSAP_MetaAddressRegistry is IECPDKSAP_MetaAddressRegistry {
     Verifier verifier;
     bool result = verifier.verifyProof(_pA, _pB, _pC, _pubSignals);
 
+    if (result == false){
+        return;
+    }
+
     bytes32 _accessKey = keccak256(abi.encode(_id, "string"));
 
     require(s_idToMetaAddress[_accessKey].length == 0, ErrorCodes.META_ID_ALREADY_REGISTERED);
