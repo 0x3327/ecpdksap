@@ -32,6 +32,18 @@ const sendResponseBadRequest = (res: Response, message: string, data?: any) => {
     sendResponse(res, 400, message, data);
 };
 
+// const sendResponse = (status: number, message: string, data?: any) => {
+//     return { status, message, data };
+// };
+
+// const sendResponseOK = (message: string, data?: any) => {
+//     return sendResponse(200, message, data);
+// };
+
+// const sendResponseBadRequest = (message: string, data?: any) => {
+//     return sendResponse(400, message, data);
+// };
+
 const config = configLoader.load('test');
 
 const routeHandlers = (app: App): RouteHandlerConfig[] => [
@@ -114,12 +126,12 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 
                 app.loggerService.logger.info(`Registering ephemeral key: ${sendInfo.pubKey}`);
 
-                console.log(sendResponseOK(res, 'Transfer simulated successfully', {
+                sendResponseOK(res, 'Transfer simulated successfully', {
                     stealthAddress: sendInfo.address,
                     ephemeralPubKey: sendInfo.pubKey,
                     viewTag: sendInfo.viewTag,
                     amount: amount
-                }));
+                });
             } catch (err) {
                 sendResponseBadRequest(res, `Transfer failed: ${(err as Error).message}`, null);
             }
@@ -184,9 +196,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 const transferAmount = amount || 0.001;
                 const tx = await app.blockchainService.transferEth(transferAddress, transferAmount.toString(), receiveScanInfo[0].privKey);
 
-                console.log("tx", tx);
-
-                sendResponseOK(res, 'Success')
+                sendResponseOK(res, 'Success', { tx });
             } catch (err) {
                 sendResponseBadRequest(res, `Transfer failed: ${(err as Error).message}`, null);
             }

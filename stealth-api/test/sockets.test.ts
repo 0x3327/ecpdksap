@@ -6,13 +6,9 @@ import { Server } from 'ganache';
 import { Config } from '../types';
 import { io } from 'socket.io-client';
 import { Info } from '../src/types';
-// import SocketsService from '../src/services/sockets';
-// import { createServer } from 'http';
 
 // Application object
 let app: App;
-
-// let socketService: SocketsService;
 
 let ganacheServer: Server;
 
@@ -54,14 +50,14 @@ describe('Socket.IO functionalities test', () => {
         const clientSocket = io('http://localhost:3000');
 
         clientSocket.emit('service-status', (response: any) => {
-            console.log("service-status res", response);
+            // console.log("service-status res", response);
             expect(response.message).toBe('Service running');
             clientSocket.disconnect();
             done();
         });
     }, 10000);
 
-    test.skip('Register address', (done) => {
+    test('Register address', (done) => {
         console.log("----------------------- REGISTER ------------------------");
         const clientSocket = io('http://localhost:3000');
         
@@ -75,7 +71,7 @@ describe('Socket.IO functionalities test', () => {
             config.stealthConfig.v = recipientInfo.v;
 
             clientSocket.emit('register-address', payload, (response: any) => {
-                console.log("register-address res", response);
+                // console.log("register-address res", response);
                 expect(response.message).toBe('Meta address registered');
                 clientSocket.disconnect();
                 done();
@@ -85,7 +81,7 @@ describe('Socket.IO functionalities test', () => {
         });
     });
 
-    test.skip('Send stealth transaction via Proxy', (done) => {
+    test('Send stealth transaction via Proxy', (done) => {
         console.log("----------------------- SEND ------------------------");
         const clientSocket = io('http://localhost:3000');
 
@@ -97,26 +93,26 @@ describe('Socket.IO functionalities test', () => {
         };
 
         clientSocket.emit('send', payload, (response: any) => {
-            console.log("send res", response);
+            // console.log("send res", response);
             expect(response.message).toBe('Transfer simulated successfully');
             clientSocket.disconnect();
             done();
         });
     });
 
-    test.skip('Check received funds', (done) => {
+    test('Check received funds', (done) => {
         console.log("----------------------- CHECK-RECEIVED ------------------------");
         const clientSocket = io('http://localhost:3000');
 
         clientSocket.emit('check-received', {}, (response: any) => {
-            console.log("check-received res", response);
+            // console.log("check-received res", response);
             expect(response.message).toBe('Success');
             clientSocket.disconnect();
             done();
         });
     });
 
-    test.skip('Transfer funds', (done) => {
+    test('Transfer funds', (done) => {
         console.log("----------------------- TRANSFER ------------------------");
         const clientSocket = io('http://localhost:3000');
 
@@ -125,7 +121,7 @@ describe('Socket.IO functionalities test', () => {
         };
 
         clientSocket.emit('transfer', transferData, (response: any) => {
-            console.log("transfer res", response);
+            // console.log("transfer res", response);
             expect(response.message).toBe('Success');
             clientSocket.disconnect();
             done();

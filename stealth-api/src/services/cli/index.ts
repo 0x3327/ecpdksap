@@ -46,10 +46,10 @@ class CLIService {
                     const { id, K, V } = opts;
                     await this.app.blockchainService.registerMetaAddress(id, K, V);
                     const response = sendResponseOK('Meta address registered', { id });
-                    console.log(response);
+                    // console.log(response);
                 } catch (err: any) {
                     const response = sendResponseBadRequest(err.message, { timestamp: Date.now() });
-                    console.log(response);
+                    // console.log(response);
                 }
             });
     }
@@ -118,12 +118,12 @@ class CLIService {
     
                     this.app.loggerService.logger.info(`Registering ephemeral key: ${sendInfo.pubKey}`);
 
-                    console.log(sendResponseOK('Transfer simulated successfully', {
+                    sendResponseOK('Transfer simulated successfully', {
                         stealthAddress: sendInfo.address,
                         ephemeralPubKey: sendInfo.pubKey,
                         viewTag: sendInfo.viewTag,
                         amount: amount
-                    }));
+                    });
                 } catch (err) {
                     console.log(sendResponseBadRequest(`Transfer failed: ${(err as Error).message}`, null));
                 }
@@ -155,9 +155,9 @@ class CLIService {
                             }
                         }
                     });
-                    console.log(sendResponseOK('Success', { receipts }));
+                    sendResponseOK('Success', { receipts });
                 } catch (err) {
-                    console.log(sendResponseBadRequest(`Request failed: ${(err as Error).message}`, null));
+                    sendResponseBadRequest(`Request failed: ${(err as Error).message}`, null);
                 }
             });
     }
@@ -189,9 +189,9 @@ class CLIService {
 
                     const tx = await this.app.blockchainService.transferEth(transferAddress, transferAmount.toString(), receiveScanInfo[0].privKey);
 
-                    console.log(sendResponseOK('Success', { tx }));
+                    sendResponseOK('Success', { tx });
                 } catch (err) {
-                    console.log(sendResponseBadRequest(`Transfer failed: ${(err as Error).message}`, null));
+                    sendResponseBadRequest(`Transfer failed: ${(err as Error).message}`, null);
                 }
             });
     }

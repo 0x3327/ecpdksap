@@ -45,7 +45,6 @@ describe('API routes test', () => {
             baseURL: `http://${host}:${port}`
         });
 
-        // console.log(axiosInstance);
     }, 30000)
 
     test('Starting application', () => {
