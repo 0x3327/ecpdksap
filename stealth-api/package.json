@@ -5,7 +5,7 @@
   "scripts": {
     "start": "ts-node-dev src/index.ts",
     "test": "hardhat compile && jest --detectOpenHandles",
-    "ganache": "ganache --wallet.seed 42",
+    "ganache": "ganache --wallet.seed 42 -l 0xaa87bee538000",
     "hardhat:compile": "hardhat compile"
   },
   "keywords": [],

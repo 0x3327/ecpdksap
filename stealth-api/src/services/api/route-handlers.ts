@@ -11,6 +11,7 @@ import { sha256 } from 'js-sha256';
 import configLoader from '../../../utils/config-loader';
 import { mulPointEscalar, Base8, Point } from '@zk-kit/baby-jubjub'; 
 import { groth16 } from 'snarkjs';
+import { readFileSync } from 'fs';
 
  
 const generateKeys = (): { privateKey: bigint, publicKey: Point<bigint> } => { 
@@ -301,10 +302,10 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             // console.log("Account: ", account);
             
             let pathElements: string[] = [];
-            let pathIndex: number[] = [];
+            let pathIndex: string[] = [];
             for (let i = 0; i < hashes.length; i++) {
                 pathElements.push(hashes[i].hash);
-                pathIndex.push(hashes[i].index);
+                pathIndex.push(hashes[i].index.toString());
             }
 
             const circomData = {
@@ -313,9 +314,11 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 privKey: privKey,
                 path_elements: pathElements,
                 path_index: pathIndex,
-                publicVar: 10000,
+                publicVar: '10000',
                 root: root
             }
+
+            //console.log("> Circom data: ", circomData);
             
             const { proof, publicSignals } = await groth16.fullProve(
                 circomData,
@@ -323,9 +326,31 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 "/home/blin/Documents/3327internship/ecpdksap/stealth-api/circuit/build/main_final.zkey"
             );
 
-            console.log("> Proof: ", proof);
-            console.log("> Nullifier: ", publicSignals);
-            const tx = await app.blockchainService.verify(proof, publicSignals);
+            const vKey = JSON.parse(readFileSync("./src/services/api/verification_key.json").toString());
+
+            let result = await groth16.verify(vKey, publicSignals, proof);
+            console.log("> Result: ", result);
+
+            //console.log("> Proof: ", proof);
+            //console.log("> Nullifier: ", publicSignals);
+
+            const calldata = await groth16.exportSolidityCallData(proof, publicSignals);
+            //console.log("> Raw calldata: ", calldata);
+
+            const args = calldata
+                .replace(/["[\]\s]/g, "")
+                .split(",");
+
+            const formatedProof = {
+                'pi_a': [args[0], args[1]],
+                'pi_b': [[args[2], args[3]], [args[4], args[5]]],
+                'pi_c': [args[6], args[7]]
+            };
+            const formatedPubSignals = args.slice(8);
+
+            console.log("> Formated: ", formatedProof, " ", formatedPubSignals);
+
+            const tx = await app.blockchainService.verify(formatedProof, formatedPubSignals);
 
             sendResponseOK(res, "Generated inclusion proof and nullifier");
         }

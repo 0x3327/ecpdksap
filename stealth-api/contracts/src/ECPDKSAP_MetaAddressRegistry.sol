@@ -3,37 +3,39 @@ pragma solidity ^0.8.20;
 
 import { IECPDKSAP_MetaAddressRegistry } from "./interface/IECPDKSAP_MetaAddressRegistry.sol";
 import { ErrorCodes } from "./Utils.sol";
-import { Verifier } from "./Verifier.sol";
+import { Groth16Verifier } from "./Verifier.sol";
 
 contract ECPDKSAP_MetaAddressRegistry is IECPDKSAP_MetaAddressRegistry {
     
     mapping(uint256 => bool) private nullifiers;
     
+    event ProofVerified(bool indexed result);
     event NullifierRegistered(uint256 nullifier);
-
+    event DebugProof(uint[2] _pA, uint[2][2]  _pB, uint[2] _pC, uint[3] _pubSignals);
 
   /// @inheritdoc IECPDKSAP_MetaAddressRegistry
-  function registerMetaAddress(string memory _id, bytes memory _metaAddress, uint256 _nullifier, 
-                              uint[2] calldata _pA, uint[2][2] calldata _pB, uint[2] calldata _pC, uint[3] calldata _pubSignals) external payable {
+  function registerMetaAddress(string memory _id, bytes memory _metaAddress, 
+                              uint[2] calldata _pA, uint[2][2] calldata _pB, uint[2] calldata _pC, uint[3] calldata _pubSignals) public payable {
+
+    emit DebugProof(_pA, _pB, _pC, _pubSignals);
+    uint256 nullifier = _pubSignals[0];
     
-    require(!nullifiers[_nullifier], "Error: Nullifier already exists!");
-    nullifiers[_nullifier] = true;
-    emit NullifierRegistered(_nullifier);
-
-    Verifier verifier;
+    //require(!nullifiers[nullifier], "Error: Nullifier already exists!");
+    nullifiers[nullifier] = true;
+    emit NullifierRegistered(nullifier);
+    
+    Groth16Verifier verifier = new Groth16Verifier();
     bool result = verifier.verifyProof(_pA, _pB, _pC, _pubSignals);
+    emit ProofVerified(result);
+    //require(result, "Error: proof verification failed");
 
-    if (result == false){
-        return;
-    }
-
-    bytes32 _accessKey = keccak256(abi.encode(_id, "string"));
-
-    require(s_idToMetaAddress[_accessKey].length == 0, ErrorCodes.META_ID_ALREADY_REGISTERED);
-
-    s_idToMetaAddress[_accessKey] = _metaAddress;
-
-    emit MetaAddressRegistered(_id, _metaAddress);
+    // bytes32 _accessKey = keccak256(abi.encode(_id, "string"));
+    // 
+    // require(s_idToMetaAddress[_accessKey].length == 0, ErrorCodes.META_ID_ALREADY_REGISTERED);
+    // 
+    // s_idToMetaAddress[_accessKey] = _metaAddress;
+    // 
+    // emit MetaAddressRegistered(_id, _metaAddress);
   }
 
   /// @inheritdoc IECPDKSAP_MetaAddressRegistry
