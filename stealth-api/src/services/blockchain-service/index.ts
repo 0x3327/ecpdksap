@@ -178,36 +178,6 @@ class BlockchainService {
         this.logger.info('Listening for Announcement event...');
     }
 
-    // public listenDebugProofEvent() {
-    //     this.contracts.metaAddressRegistry.on("DebugProof", (_pA, _pB, _pC, _pubSignals, event) => {
-    //         console.log("------------------------------");
-    //         console.log("DebugProof event");
-    //         console.log("pA: ", _pA);
-    //         console.log("pB: ", _pB);
-    //         console.log("pC: ", _pC);
-    //         console.log("pubSignals: ", _pubSignals);
-    //         console.log("Event: ", event);
-    //     })
-    // }
-    // 
-    // public listenVerifiedEvent() {
-    //     this.contracts.metaAddressRegistry.on("ProofVerified", (result, event) => {
-    //         console.log("--------------------------");
-    //         console.log("Recieved ProofVerified event");
-    //         console.log("Result: ", result);
-    //         console.log("Event: ", event);
-    //     });
-    // }
-    // 
-    // public listenNullifierEvent() {
-    //     this.contracts.metaAddressRegistry.on("NullifierRegistered", (nullifier, event) => {
-    //         console.log("--------------------------");
-    //         console.log("Recieved NullifierRegistered event");
-    //         console.log("Nullifier: ", nullifier);
-    //         console.log("Event: ", event);
-    //     });
-    // }
-
     public async transferEth(address: string, amount: string, privKey: string) {
         const signer = new ethers.Wallet(privKey, this.provider);
         try {
@@ -231,17 +201,6 @@ class BlockchainService {
 
     public async verify(proof: any, publicSignals: any) {
         try {
-            console.log("----------------------------");
-            console.log("Data sending to contract");
-            console.log(proof.pi_a);
-            console.log(proof.pi_b);
-            console.log(proof.pi_c);
-            console.log(publicSignals);
-
-            // const vKey = JSON.parse(fs.readFileSync("./verification_key.json").toString());
-            // const result = await groth16.verify(vKey, publicSignals, proof);
-            // console.log("Result: ", result);
-
             const tx = await this.contracts.verifier.verifyProof(
                 proof.pi_a,
                 proof.pi_b,

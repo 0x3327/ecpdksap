@@ -283,24 +283,10 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
         method: 'POST',
         path: '/register-meta-address',
         handler: async (req: Request, res: Response) => {
-            // TODO:
-            //  - take hashes from regulator
-            //  - verify root signature
-            //  - generate inclusion proof on circom
-            //  - generate nullifier on circom
-            //  - generate meta address (K, V)
-            //  - send meta address with inclusion proof and nullifier to smart contract
-
-            // data needed for inclusion proof is provided in the request
+            // getting the data needed for inclusion proof from the request
             const { name, pid, privKey, hashes, root, signedRoot, id, metaAddress } = req.body;
-
-            // extracting user from database
-            // const account = await app.db.models.registerAccount.findOne({
-            //     where: {pid: parseInt(pid)},
-            //     attributes: ['privateKey']
-            // });
-            // console.log("Account: ", account);
             
+            // extracting data needed for proof generation
             let pathElements: string[] = [];
             let pathIndex: string[] = [];
             for (let i = 0; i < hashes.length; i++) {
@@ -308,6 +294,8 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 pathIndex.push(hashes[i].index.toString());
             }
 
+            // formatting data into format that circom 
+            // expects on input
             const circomData = {
                 hashName: BigInt('0x' + sha256(name)).toString(),
                 pid: pid,
@@ -318,29 +306,20 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 root: root
             }
 
-            //console.log("> Circom data: ", circomData);
-            
+            // generating ZK proof
             const { proof, publicSignals } = await groth16.fullProve(
                 circomData,
                 "/home/blin/Documents/3327internship/ecpdksap/stealth-api/circuit/build/main_js/main.wasm",
                 "/home/blin/Documents/3327internship/ecpdksap/stealth-api/circuit/build/main_final.zkey"
             );
 
-            // const vKey = JSON.parse(readFileSync("./src/services/api/verification_key.json").toString());
-            // 
-            // let result = await groth16.verify(vKey, publicSignals, proof);
-            // console.log("> Result: ", result);
-
-            //console.log("> Proof: ", proof);
-            //console.log("> Nullifier: ", publicSignals);
-
+            // converting proof into solidity calldata
             const calldata = await groth16.exportSolidityCallData(proof, publicSignals);
-            //console.log("> Raw calldata: ", calldata);
 
+            // parsing and formatting the calldata
             const args = calldata
                 .replace(/["[\]\s]/g, "")
                 .split(",");
-
             const formattedProof = {
                 'pi_a': [args[0], args[1]],
                 'pi_b': [[args[2], args[3]], [args[4], args[5]]],
@@ -348,16 +327,15 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             };
             const formattedPubSignals = args.slice(8);
 
-            console.log("> Formatted: ", formattedProof, " ", formattedPubSignals);
-
+            // verifying the proof
             let tx = await app.blockchainService.verify(formattedProof, formattedPubSignals);
 
-            if (!tx) {
-                sendResponseBadRequest(res, "Error: recieved proof isn't valid");
-            }
-            else {
+            if (tx) {  // valid proof
                 await app.blockchainService.registerMetaAddress(id, metaAddress);
                 sendResponseOK(res, "Meta Address registered", {id});
+            }
+            else {  // invalid proof
+                sendResponseBadRequest(res, "Error: recieved proof isn't valid");
             }
         }
     }
