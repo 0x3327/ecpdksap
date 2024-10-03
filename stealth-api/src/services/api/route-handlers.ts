@@ -292,7 +292,7 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             //  - send meta address with inclusion proof and nullifier to smart contract
 
             // data needed for inclusion proof is provided in the request
-            const {name, pid, privKey, hashes, root, signedRoot } = req.body;
+            const { name, pid, privKey, hashes, root, signedRoot, id, metaAddress } = req.body;
 
             // extracting user from database
             // const account = await app.db.models.registerAccount.findOne({
@@ -326,10 +326,10 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 "/home/blin/Documents/3327internship/ecpdksap/stealth-api/circuit/build/main_final.zkey"
             );
 
-            const vKey = JSON.parse(readFileSync("./src/services/api/verification_key.json").toString());
-
-            let result = await groth16.verify(vKey, publicSignals, proof);
-            console.log("> Result: ", result);
+            // const vKey = JSON.parse(readFileSync("./src/services/api/verification_key.json").toString());
+            // 
+            // let result = await groth16.verify(vKey, publicSignals, proof);
+            // console.log("> Result: ", result);
 
             //console.log("> Proof: ", proof);
             //console.log("> Nullifier: ", publicSignals);
@@ -341,18 +341,25 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
                 .replace(/["[\]\s]/g, "")
                 .split(",");
 
-            const formatedProof = {
+            const formattedProof = {
                 'pi_a': [args[0], args[1]],
                 'pi_b': [[args[2], args[3]], [args[4], args[5]]],
                 'pi_c': [args[6], args[7]]
             };
-            const formatedPubSignals = args.slice(8);
+            const formattedPubSignals = args.slice(8);
 
-            console.log("> Formated: ", formatedProof, " ", formatedPubSignals);
+            console.log("> Formatted: ", formattedProof, " ", formattedPubSignals);
 
-            const tx = await app.blockchainService.verify(formatedProof, formatedPubSignals);
+            let tx = await app.blockchainService.verify(formattedProof, formattedPubSignals);
+            console.log("Nije ovvvvvde puko");
 
-            sendResponseOK(res, "Generated inclusion proof and nullifier");
+            if (!tx) {
+                sendResponseBadRequest(res, "Error: recieved proof isn't valid");
+            }
+            else {
+                await app.blockchainService.registerMetaAddress(id, metaAddress);
+                sendResponseOK(res, "Meta Address registered", {id});
+            }
         }
     }
 ];

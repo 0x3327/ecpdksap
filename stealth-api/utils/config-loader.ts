@@ -19,6 +19,7 @@ const configLoader = {
         const providerType = process.env.BLOCKCHAIN_PROVIDER_TYPE!;
         const announcer = process.env.BLOCKCHAIN_CONTRACT_ANNOUNCER!;
         const metaAddress = process.env.BLOCKCHAIN_CONTRACT_META_ADDRESS!;
+        const verifier = process.env.BLOCKCHAIN_CONTRACT_VERIFIER!;
 
         const logging = process.env.LOGGING === 'true';
         
@@ -52,6 +53,7 @@ const configLoader = {
                 deployedContracts: {
                     announcer,
                     metaAddress,
+                    verifier
                 }
             },
             stealthConfig:  {

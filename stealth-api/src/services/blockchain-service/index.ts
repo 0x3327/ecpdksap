@@ -2,6 +2,7 @@ import { Contract, ethers, Provider, Wallet } from 'ethers';
 import App from '../../app';
 import metaAddressArtifacts from '../../../artifacts/contracts/src/ECPDKSAP_MetaAddressRegistry.sol/ECPDKSAP_MetaAddressRegistry.json';
 import announcerArtifacts from '../../../artifacts/contracts/src/ECPDKSAP_Announcer.sol/ECPDKSAP_Announcer.json';
+import verifierArtifacts from '../../../artifacts/contracts/src/Verifier.sol/Groth16Verifier.json';
 import winston from 'winston';
 import { groth16 } from 'snarkjs';
 import fs from 'fs';
@@ -9,6 +10,7 @@ import fs from 'fs';
 type Contracts = {
     metaAddressRegistry: Contract,
     announcer: Contract,
+    verifier: Contract
 };
 
 class BlockchainService {
@@ -38,11 +40,18 @@ class BlockchainService {
         // Create wallet
         this.wallet = new ethers.Wallet(privateKey, this.provider);
 
+        const tempAbi = [
+            "function verifyProof(uint[2] calldata _pA, uint[2][2] calldata _pB, uint[2] calldata _pC, uint[3] calldata _pubSignals) public view returns (bool)"
+        ];
+
         // Connect contracts
         this.contracts = {
             metaAddressRegistry: new ethers.Contract(deployedContracts.metaAddress, metaAddressArtifacts.abi, this.wallet),
             announcer: new ethers.Contract(deployedContracts.announcer, announcerArtifacts.abi, this.wallet),
+            verifier: new ethers.Contract(deployedContracts.verifier, verifierArtifacts.abi, this.wallet)
         }
+
+        console.log(`[TEST] Connected to verifier contract at address: ${deployedContracts.verifier}`);
 
         this.listenMetaAddressRegistredEvent();
         this.listenAnnouncementEvent();
@@ -235,28 +244,17 @@ class BlockchainService {
             // const result = await groth16.verify(vKey, publicSignals, proof);
             // console.log("Result: ", result);
 
-            //const tx = await this.contracts.metaAddressRegistry.registerMetaAddress(
-            //    "test",
-            //    Buffer.from("testing", "utf-8"),
-            //    proof.pi_a,
-            //    proof.pi_b,
-            //    proof.pi_c,
-            //    publicSignals
-            //);
-            const tx = await this.contracts.metaAddressRegistry.registerMetaAddress(
-                "test",
-                "0x00",
-                ["0x2ce9dbb039ca2f1b38fcc95bd7631da9b8c4fde817e58ed661534c7bf2c24e88", "0x1f9c665b466007b4fa0efbe867c2e1d92b9e7837a8f1adb9410fcbd6308b9d72"],
-                [["0x0000e83316989c1eb35e034561f42046b7cb241b6455d9beade186a9380c8182", "0x28c923af57bdd02ddaafd797fbf87580648bcc8e999dc3a6dc0aaee6a9a12174"], ["0x170ae699f6ca720187f453f04d2783cfbf1efd466ec419eaa8bf1bfb8b4be81a", "0x058335ce5a3d511c86cd5dfb5265ef27a4995fe081bb3dc3db3617b16b4e19b3"]],
-                ["0x101ab59c806005062464e7505715954fa0256620ae955443e04196fa6d0322da", "0x08ae2e25081369624765eac4f609768efb7e87937b1ab680122bf418c8670904"],
-                ["0x12056cc40bb6e94c4264ba1ae08913ccc8ad0dfcaa6b7ec921be9c98305fac28", "0x0000000000000000000000000000000000000000000000000000000000002710", "0x25626f51857aecdb452fac9aec230ed0ee4c3cc077f9faa8a437079bd5a564ac"]
+            const tx = await this.contracts.verifier.verifyProof(
+                proof.pi_a,
+                proof.pi_b,
+                proof.pi_c,
+                publicSignals
             );
-            const recepit = await tx.wait();
-            //console.log("Transaction: ", tx);
-            //console.log("Receipt: ", recepit);
+            return tx;
         }
         catch (error) {
             console.log("Error verifying proof: ", error);
+            return false;
         }
     }
 

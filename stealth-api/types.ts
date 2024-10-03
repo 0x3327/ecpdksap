@@ -26,6 +26,7 @@ export type BlockchainConfig = {
     deployedContracts: {
         announcer: string,
         metaAddress: string,
+        verifier: string
     }, 
     infuraApiKey?: string
 }
