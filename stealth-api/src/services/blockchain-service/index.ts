@@ -51,13 +51,8 @@ class BlockchainService {
             verifier: new ethers.Contract(deployedContracts.verifier, verifierArtifacts.abi, this.wallet)
         }
 
-        console.log(`[TEST] Connected to verifier contract at address: ${deployedContracts.verifier}`);
-
         this.listenMetaAddressRegistredEvent();
         this.listenAnnouncementEvent();
-        // this.listenVerifiedEvent();
-        // this.listenNullifierEvent();
-        // this.listenDebugProofEvent();
     }
 
     public async getCurrentBlockNumber() {
