@@ -351,7 +351,6 @@ const routeHandlers = (app: App): RouteHandlerConfig[] => [
             console.log("> Formatted: ", formattedProof, " ", formattedPubSignals);
 
             let tx = await app.blockchainService.verify(formattedProof, formattedPubSignals);
-            console.log("Nije ovvvvvde puko");
 
             if (!tx) {
                 sendResponseBadRequest(res, "Error: recieved proof isn't valid");

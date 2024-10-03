@@ -55,9 +55,9 @@ class BlockchainService {
 
         this.listenMetaAddressRegistredEvent();
         this.listenAnnouncementEvent();
-        this.listenVerifiedEvent();
-        this.listenNullifierEvent();
-        this.listenDebugProofEvent();
+        // this.listenVerifiedEvent();
+        // this.listenNullifierEvent();
+        // this.listenDebugProofEvent();
     }
 
     public async getCurrentBlockNumber() {
@@ -82,9 +82,7 @@ class BlockchainService {
         try {
             const metaAddressBytes = ethers.toUtf8Bytes(metaAddress);
 
-            const tx = await this.contracts.metaAddressRegistry.registerMetaAddress(id, metaAddressBytes, {
-                value: ethers.parseEther('0.00001')
-            });
+            const tx = await this.contracts.metaAddressRegistry.registerMetaAddress(id, metaAddressBytes);
             this.logger.info('Meta address registration, transaction sent:', tx.hash);
             const receipt = await tx.wait();
 
@@ -180,35 +178,35 @@ class BlockchainService {
         this.logger.info('Listening for Announcement event...');
     }
 
-    public listenDebugProofEvent() {
-        this.contracts.metaAddressRegistry.on("DebugProof", (_pA, _pB, _pC, _pubSignals, event) => {
-            console.log("------------------------------");
-            console.log("DebugProof event");
-            console.log("pA: ", _pA);
-            console.log("pB: ", _pB);
-            console.log("pC: ", _pC);
-            console.log("pubSignals: ", _pubSignals);
-            console.log("Event: ", event);
-        })
-    }
-
-    public listenVerifiedEvent() {
-        this.contracts.metaAddressRegistry.on("ProofVerified", (result, event) => {
-            console.log("--------------------------");
-            console.log("Recieved ProofVerified event");
-            console.log("Result: ", result);
-            console.log("Event: ", event);
-        });
-    }
-
-    public listenNullifierEvent() {
-        this.contracts.metaAddressRegistry.on("NullifierRegistered", (nullifier, event) => {
-            console.log("--------------------------");
-            console.log("Recieved NullifierRegistered event");
-            console.log("Nullifier: ", nullifier);
-            console.log("Event: ", event);
-        });
-    }
+    // public listenDebugProofEvent() {
+    //     this.contracts.metaAddressRegistry.on("DebugProof", (_pA, _pB, _pC, _pubSignals, event) => {
+    //         console.log("------------------------------");
+    //         console.log("DebugProof event");
+    //         console.log("pA: ", _pA);
+    //         console.log("pB: ", _pB);
+    //         console.log("pC: ", _pC);
+    //         console.log("pubSignals: ", _pubSignals);
+    //         console.log("Event: ", event);
+    //     })
+    // }
+    // 
+    // public listenVerifiedEvent() {
+    //     this.contracts.metaAddressRegistry.on("ProofVerified", (result, event) => {
+    //         console.log("--------------------------");
+    //         console.log("Recieved ProofVerified event");
+    //         console.log("Result: ", result);
+    //         console.log("Event: ", event);
+    //     });
+    // }
+    // 
+    // public listenNullifierEvent() {
+    //     this.contracts.metaAddressRegistry.on("NullifierRegistered", (nullifier, event) => {
+    //         console.log("--------------------------");
+    //         console.log("Recieved NullifierRegistered event");
+    //         console.log("Nullifier: ", nullifier);
+    //         console.log("Event: ", event);
+    //     });
+    // }
 
     public async transferEth(address: string, amount: string, privKey: string) {
         const signer = new ethers.Wallet(privKey, this.provider);
