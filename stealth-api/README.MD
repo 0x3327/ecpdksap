@@ -6,18 +6,24 @@ The Stealth Address Regulator is an innovative system designed to enable enhance
 ```mermaid
 sequenceDiagram
     participant User
-    participant Regulatory Body
-    participant ZK
-    participant Smart Contract
+    participant Backend (API)
+    participant Regulator
+    participant Verifier Contract
+    participant Meta Address Registry Contract
 
 
     Note right of User: Name and PID
-    User-->>Regulatory Body: Register meta address request
-    Regulatory Body->>ZK: Check and forward request
-    ZK-->>Regulatory Body: Proof and Public Signals
-    Regulatory Body-->>Smart Contract: Verify and nullifier check
-    Smart Contract-->>Regulatory Body: Meta address
-    Regulatory Body-->>User: Success!
+    User-->>Backend (API): User registration request
+    Backend (API)->>Regulator: Forward the request
+    Regulator-->>Backend (API): Response
+    Backend (API)-->>User: Forward the response
+
+    User-->>Backend (API): Meta Address registration request
+    Backend (API)->>Verifier Contract: Inclusion proof and nullifier verification
+    Verifier Contract-->>Backend (API): Verification outcome
+    Backend (API)->>Meta Address Registry Contract: Meta Address registration
+    Meta Address Registry Contract-->>Backend (API): Registration outcome
+    Backend (API)-->>User: Registration outcome8
 ```
 
 
