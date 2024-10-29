@@ -1,3 +1,9 @@
+# Curvy Stealth Address Protocol (formerly ECPDKSAP)
+
+![](./docs/assets/demo-banner.png)
+
+Website with DEMO available at: https://0xcurvy.io
+
 ## Overview
 
 The repository contains implementation code for all [ECPDKSAP protocol versions](./docs).
@@ -10,12 +16,19 @@ Smart contracts are developed using Foundry framework and follow the [EIP-5564](
 
 ## Project structure
 
+Each of the following sub-directories contain their own documentation specifications.
+
 The project's dir. structure is as following:
 
+- `./docs`:  General documentation, with detailed results
+
 - `./impl`: Off-chain protocol code (used by sender and recipient to generate/scan data)
-- `./sc`: On-chain contracts (used for sender - recipient "communication")
-- `./backend`: Event indexers, API modules, ...
+- `./stealth-api`: On-chain contracts (used for sender - recipient "communication")
+- `./ft`: front-end, client - oriented
 
 ## Additional resources
 
-Original paper: https://arxiv.org/abs/2312.12131
+
+
+ **Elliptic Curve Pairing Stealth Address Protocols**
+Marija Mikic, Mihajlo Srbakoski https://arxiv.org/abs/2312.12131
