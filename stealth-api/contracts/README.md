@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-## ECPDKSAP Contracts
-
-TBD
-=======
 ## ECPDKSAP Contracts: Overview
 
 There exist two main contracts:
@@ -79,4 +74,3 @@ Existing singleton [ERC5564Announcer](https://sepolia.etherscan.io/address/0x556
 - ```
   0x55649E01B5Df198D18D95b5cc5051630cfD45564
   ```
->>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28

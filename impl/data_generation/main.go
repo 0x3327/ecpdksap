@@ -9,38 +9,24 @@ import (
 	"ecpdksap-go/utils"
 )
 
-<<<<<<< HEAD
-func GenerateSenderInfo(version string, viewTagVersion string) (string) {
-=======
-
-func GenerateSenderInfo() (string) {
->>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28
+func GenerateSenderInfo() string {
 
 	r, R, _ := utils.BN254_GenG1KeyPair()
 
 	R_asString := R.X.String() + "." + R.Y.String()
 
 	sendMeta := MetaDbg{
-		PK_r: hex.EncodeToString(r.Marshal()),
-		R: R_asString,
-<<<<<<< HEAD
-		ViewTagVersion: viewTagVersion,
-		Version:        version,
-=======
+		PK_r:           hex.EncodeToString(r.Marshal()),
+		R:              R_asString,
 		ViewTagVersion: "n/a",
 		Version:        "n/a",
->>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28
 	}
 
 	text, _ := json.MarshalIndent(sendMeta, "", " ")
 	return string(text)
 }
 
-<<<<<<< HEAD
-func GenerateRecipientInfo(version string, viewTagVersion string) (string) {
-=======
-func GenerateRecipientInfo(version string) (string) {
->>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28
+func GenerateRecipientInfo(version string) string {
 
 	v, V, _ := utils.BN254_GenG1KeyPair()
 
@@ -68,11 +54,7 @@ func GenerateRecipientInfo(version string) (string) {
 		K: K_asString,
 		V: V_asString,
 
-<<<<<<< HEAD
-		Version:        version,
-=======
 		Version: version,
->>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28
 	}
 
 	text, _ := json.MarshalIndent(recipientMeta, "", " ")
@@ -133,7 +115,7 @@ func GenerateExample(version string, viewTagVersion string, sampleSizeStr string
 	}
 
 	sampleSize, _ := strconv.Atoi(sampleSizeStr)
-	Rs, viewTags := utils.GenRandomRsAndViewTags(sampleSize - 1, viewTagVersion)
+	Rs, viewTags := utils.GenRandomRsAndViewTags(sampleSize-1, viewTagVersion)
 	Rs = append(Rs, metaInfo.R)
 	viewTags = append(viewTags, metaInfo.ViewTag)
 

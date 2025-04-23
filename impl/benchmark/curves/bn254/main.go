@@ -42,7 +42,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 		neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix := EC.PrecomputationForFixedScalarMultiplication(v_asBigIntPtr)
 		var table [15]EC.G1Jac
 		var a_El, b_El *EC_fp.Element
-		b_asBigInt := new (big.Int)
+		b_asBigInt := new(big.Int)
 
 		//random data generation: Rj
 		var Rs []EC.G1Jac
@@ -95,8 +95,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 
 		hasher := sha256.New()
 
-<<<<<<< HEAD
-=======
 		//protocol: V0 and viewTag: none
 		if !justViewTags {
 
@@ -112,7 +110,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 			durations["v0.none"] += b.Elapsed()
 		}
 
->>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28
 		//protocol: V0 and viewTag: V0-1byte
 		b.ResetTimer()
 
@@ -148,7 +145,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 
 			hash := hasher.Sum(compressed[:])
 
-			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte{
+			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte {
 				continue
 			}
 
@@ -167,7 +164,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
 
 			a_El, b_El = vR_asAff.FromJacobianCoordX(&vR)
-	
+
 			if vR_asAff.X.Bytes()[0] != cm.ViewTagSingleByte {
 				continue
 			}
@@ -221,7 +218,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 
 			hash := hasher.Sum(compressed[:])
 
-			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte{
+			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte {
 				continue
 			}
 
@@ -239,7 +236,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
 
 			a_El, b_El = vR_asAff.FromJacobianCoordX(&vR)
-	
+
 			if vR_asAff.X.Bytes()[0] != cm.ViewTagSingleByte {
 				continue
 			}
@@ -261,13 +258,10 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 
 		var Pv2_asJac SECP256K1.G1Jac
 
-
 		K_SECP256k1_JacPtr := &K_SECP256k1_Jac
 
 		K_SECP256k1_AffPtr := new(SECP256K1.G1Affine)
 		K_SECP256k1_AffPtr.FromJacobian(K_SECP256k1_JacPtr)
-<<<<<<< HEAD
-=======
 
 		//protocol: V2 and viewTag: none
 		if !justViewTags {
@@ -283,7 +277,6 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 
 			durations["v2.none"] += b.Elapsed()
 		}
->>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28
 
 		//protocol: V2 and viewTag: v0-1byte
 		b.ResetTimer()
@@ -325,7 +318,7 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 
 			hash := hasher.Sum(compressed[:])
 
-			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte{
+			if hash[0] != cm.ViewTagSingleByte || hash[1] != cm.ViewTagSecondByte {
 				continue
 			}
 
@@ -344,18 +337,13 @@ func Run(b *testing.B, sampleSize int, nRepetitions int, justViewTags bool, rand
 			vR.FixedScalarMultiplication(cm.Rj, &table, neg, k1, k2, tableElementNeeded, hiWordIndex, useMatrix)
 
 			a_El, b_El = vR_asAff.FromJacobianCoordX(&vR)
-	
+
 			if vR_asAff.X.Bytes()[0] != cm.ViewTagSingleByte {
 				continue
 			}
 
 			vR_asAff.FromJacobianCoordY(a_El, b_El, &vR)
 
-<<<<<<< HEAD
-			S, _ := EC.Pair([]EC.G1Affine{vR_asAff}, g2Aff_asArray)
-
-=======
->>>>>>> 2148bedb7d8057781bb079e4c09aa2b638954b28
 			Pv2_asJac.ScalarMultiplication(K_SECP256k1_JacPtr, S.C0.B0.A0.BigInt(b_asBigInt))
 		}
 
